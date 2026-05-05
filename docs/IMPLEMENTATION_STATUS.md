@@ -67,10 +67,11 @@
 ### 완료
 - ✅ CSV / XLSX 입력 어댑터 — 클라이언트 파싱(SheetJS/CSV) + 컬럼 자동 매핑(카드/계좌 헤더 감지) + 미리보기 + `/api/import/commit` + 학습/중복/마스킹 통합. `docs/IMPORT_CSV_XLSX.md` 참고.
 - ✅ 예산 기능 — 카테고리별/전체 월 예산 + 진행률 + 대시보드 위젯. `docs/BUDGETS.md` 참고. 마이그레이션 `0003_budgets.sql` 추가 적용 필요.
+- ✅ E2E (Playwright) — smoke 12케이스(보호 라우트 9 + 루트 + 로그인 + 404) + responsive 3카테고리, 6개 뷰포트(360/390/768/1024/1280/1440) 자동 점검. 인증 시나리오는 env 있을 때만. CI에 `mobile-390 + desktop-1280` smoke 통합. `docs/E2E_GUIDE.md` 참고.
+- ✅ 가족 공유 (1차) — `households` / `household_members` / `household_invites` + 5개 공유 대상 테이블에 `household_id` 추가, RLS를 select 한정 멤버 공유 + write는 본인 소유로 제한. 초대 코드 발급/합류, owner의 멤버 관리. 마이그레이션 `0004_households.sql` 추가 적용 필요. `docs/HOUSEHOLDS.md` 참고. (거래/예산 추가 시 공유 토글 UI는 다음 응답)
 
 ### 다음 후보 (우선순위 순)
-- E2E (Playwright) 시나리오 + 6개 뷰포트 반응형 점검
-- 가족 공유(`households` + 멤버십 + RLS 변경)
+- 거래/예산 등록 시 활성 가족 공유 토글 + 거래내역에 만든이 표시
 - PDF 입력 (Vercel Hobby 함수 시간 한계 있어 별도 워커 검토)
 - PaddleOCR / Clova OCR 어댑터
 - 소비 패턴 자동 인사이트

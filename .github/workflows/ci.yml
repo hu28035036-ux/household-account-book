@@ -48,3 +48,25 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  e2e-smoke:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install
+        run: npm ci || npm install
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: E2E (smoke + responsive, no auth)
+        run: npx playwright test --project=mobile-390 --project=desktop-1280 e2e/smoke.spec.ts e2e/responsive.spec.ts
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
