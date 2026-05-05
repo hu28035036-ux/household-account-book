@@ -1,0 +1,66 @@
+[
+  {
+    "id": "single-receipt-01",
+    "description": "단일 영수증, 가맹점/금액/날짜 모두 명확",
+    "inputMaskedOcr": "스타벅스 강남점\n2026-05-05 14:23\n아메리카노 5,800원\n총 5,800원\n승인번호: ***",
+    "expected": {
+      "documentType": "receipt",
+      "transactionsCount": 1,
+      "fields": { "amountIsNotNull": true, "merchantIsNotNull": true, "dateIsNotNull": true }
+    }
+  },
+  {
+    "id": "card-capture-01",
+    "description": "카드 결제내역 캡처, 여러 거래",
+    "inputMaskedOcr": "신한카드\n2026-05-04 GS25 강남\n3,500원\n2026-05-05 스타벅스\n5,800원\n2026-05-05 지하철\n1,500원",
+    "expected": { "documentType": "card_capture", "transactionsCount": 3 }
+  },
+  {
+    "id": "bank-capture-01",
+    "description": "계좌 이체 내역",
+    "inputMaskedOcr": "농협 입출금\n2026-05-01 월급 (주)회사 +3,000,000\n2026-05-03 송금 홍길동 -200,000",
+    "expected": { "documentType": "bank_capture", "transactionsCount": 2 }
+  },
+  {
+    "id": "uncertain-date",
+    "description": "날짜가 불명확하면 null + warning",
+    "inputMaskedOcr": "이마트\n????-??-??\n총액 23,400원",
+    "expected": { "transactionsCount": 1, "warnings": ["date_uncertain"] }
+  },
+  {
+    "id": "uncertain-amount",
+    "description": "금액이 흐려 인식 못함",
+    "inputMaskedOcr": "투썸 플레이스\n2026-05-02\n총액 ?,?00원",
+    "expected": { "warnings": ["amount_uncertain"] }
+  },
+  {
+    "id": "duplicate-candidate",
+    "description": "이미 등록된 거래와 동일",
+    "inputMaskedOcr": "스타벅스\n2026-05-05\n5,800원",
+    "expected": { "shouldFlagDuplicate": true }
+  },
+  {
+    "id": "ocr-noisy",
+    "description": "OCR 오인식이 섞인 텍스트",
+    "inputMaskedOcr": "스타벅쓰  강남점\n5,80O원",
+    "expected": { "transactionsCount": 1 }
+  },
+  {
+    "id": "sensitive-info-masked",
+    "description": "민감정보 포함 — 마스킹된 채로 들어옴",
+    "inputMaskedOcr": "신한카드 ****-****-****-1234\n2026-05-05 스타벅스 5,800원\n승인번호: ***\n주민 ******-*******",
+    "expected": { "noSensitiveLeak": true }
+  },
+  {
+    "id": "recurring-merchant",
+    "description": "반복 가맹점 학습 케이스 (테스트는 사전 매칭 적용 여부 확인)",
+    "inputMaskedOcr": "스타벅스\n2026-05-05\n5,800원",
+    "expected": { "merchantLearningHit": true }
+  },
+  {
+    "id": "user-isolation",
+    "description": "다른 사용자 학습이 본인 결과에 영향을 주지 않아야 함 (DB 레벨에서 검증)",
+    "inputMaskedOcr": "투썸 6,500원 2026-05-05",
+    "expected": { "isolatedFromOtherUsers": true }
+  }
+]

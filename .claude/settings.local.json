@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($items = Get-ChildItem -Force -ErrorAction SilentlyContinue; if \\($items\\) { $items | ForEach-Object { $_.Name } } else { \"EMPTY\" }; if \\(Test-Path \"docs\"\\) { \"DOCS_EXISTS\" } else { \"DOCS_MISSING\" })"
+    ]
+  }
+}
