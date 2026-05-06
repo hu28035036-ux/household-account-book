@@ -199,14 +199,14 @@ export async function GET() {
   }
 
   const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
-  const u8 = new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
+  const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
   const today = new Date().toISOString().slice(0, 10);
-  return new Response(u8, {
+  return new Response(ab, {
     status: 200,
     headers: {
       'content-type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'content-disposition': `attachment; filename="ledger-export-${today}.xlsx"`,
-      'content-length': String(u8.byteLength),
+      'content-length': String(ab.byteLength),
     },
   });
 }
