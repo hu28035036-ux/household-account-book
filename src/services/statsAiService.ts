@@ -148,3 +148,93 @@ ${lines.join('\n')}
     generated_at: new Date().toISOString(),
   };
 }
+
+/**
+ * 분석 결과를 ai_stats_analyses 테이블에 저장.
+ * 모임 컨텍스트면 household_id 도 함께 저장 → 모임 멤버 전체가 select 가능.
+ */
+export async function saveStatsAiAnalysis(
+  supabase: SupabaseClient,
+  userId: string,
+  householdContext: string | null,
+  result: StatsAiResult,
+): Promise<{ id: string }> {
+  const { data, error } = await supabase
+    .from('ai_stats_analyses')
+    .insert({
+      user_id: userId,
+      household_id: householdContext,
+      range_from: result.range.from,
+      range_to: result.range.to,
+      totals: result.totals as any,
+      transaction_count: result.transaction_count,
+      summary: result.summary,
+      tips: result.tips as any,
+      model: result.model,
+      input_tokens: result.cost.input_tokens,
+      output_tokens: result.cost.output_tokens,
+      cost_usd: result.cost.usd,
+      cost_krw: result.cost.krw,
+    })
+    .select('id')
+    .single();
+  if (error) throw error;
+  return { id: data.id as string };
+}
+
+export type StatsAiHistoryRow = StatsAiResult & {
+  id: string;
+  created_at: string;
+  household_id: string | null;
+};
+
+export async function listStatsAiHistory(
+  supabase: SupabaseClient,
+  userId: string,
+  householdContext: string | null,
+  limit = 20,
+): Promise<StatsAiHistoryRow[]> {
+  let q = supabase
+    .from('ai_stats_analyses')
+    .select(
+      'id, user_id, household_id, range_from, range_to, totals, transaction_count, summary, tips, model, input_tokens, output_tokens, cost_usd, cost_krw, created_at',
+    );
+  if (householdContext) {
+    q = q.eq('household_id', householdContext);
+  } else {
+    q = q.eq('user_id', userId).is('household_id', null);
+  }
+  const { data, error } = await q.order('created_at', { ascending: false }).limit(limit);
+  if (error) throw error;
+  return (data ?? []).map((r: any) => ({
+    id: r.id,
+    range: { from: r.range_from, to: r.range_to },
+    totals: r.totals,
+    transaction_count: r.transaction_count,
+    summary: r.summary,
+    tips: r.tips,
+    model: r.model,
+    cost: {
+      input_tokens: r.input_tokens,
+      output_tokens: r.output_tokens,
+      usd: Number(r.cost_usd),
+      krw: Number(r.cost_krw),
+    },
+    generated_at: r.created_at,
+    created_at: r.created_at,
+    household_id: r.household_id,
+  }));
+}
+
+export async function deleteStatsAiHistory(
+  supabase: SupabaseClient,
+  userId: string,
+  id: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from('ai_stats_analyses')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId);
+  if (error) throw error;
+}
