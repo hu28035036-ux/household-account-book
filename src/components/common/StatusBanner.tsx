@@ -29,8 +29,16 @@ export function StatusBanner({ tone = 'info', children, className }: Props) {
   );
 }
 
+type ProviderInfo = { provider: 'openai' | 'ollama'; ok: boolean; model: string; reason?: string };
+type AiStatus = { ok: boolean; providers: ProviderInfo[]; reason?: string };
+
+const PROVIDER_LABEL: Record<ProviderInfo['provider'], string> = {
+  openai: 'OpenAI',
+  ollama: 'Ollama',
+};
+
 export function AiServerStatus() {
-  const [state, setState] = useState<'unknown' | 'ok' | 'down'>('unknown');
+  const [data, setData] = useState<AiStatus | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,22 +46,55 @@ export function AiServerStatus() {
       .then((r) => r.json())
       .then((j) => {
         if (cancelled) return;
-        setState(j?.data?.ok ? 'ok' : 'down');
+        setData((j?.data as AiStatus) ?? { ok: false, providers: [], reason: 'unknown' });
       })
       .catch(() => {
-        if (!cancelled) setState('down');
+        if (!cancelled) setData({ ok: false, providers: [], reason: 'unreachable' });
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  if (state === 'unknown') return null;
-  return state === 'ok' ? (
-    <StatusBanner tone="success">AI 서버 연결됨 (Ollama)</StatusBanner>
-  ) : (
+  if (!data) return null;
+
+  const active = data.providers.find((p) => p.ok);
+  if (data.ok && active) {
+    const others = data.providers.filter((p) => p !== active);
+    return (
+      <StatusBanner tone="success">
+        AI 서버 연결됨 — {PROVIDER_LABEL[active.provider]}{' '}
+        <span className="font-mono text-xs">{active.model}</span>
+        {others.length > 0 && (
+          <span className="ml-1 text-xs opacity-80">
+            (백업:{' '}
+            {others
+              .map((p) => `${PROVIDER_LABEL[p.provider]} ${p.ok ? '✓' : '✗'}`)
+              .join(', ')}
+            )
+          </span>
+        )}
+      </StatusBanner>
+    );
+  }
+
+  if (data.providers.length === 0) {
+    return (
+      <StatusBanner tone="warning">
+        AI 공급자가 설정되어 있지 않아요. Vercel 환경변수에 <span className="font-mono">OPENAI_API_KEY</span> 또는{' '}
+        <span className="font-mono">OLLAMA_API_BASE_URL</span>을 등록해 주세요.
+        <br />
+        OCR 텍스트로 수동 입력은 정상 동작합니다.
+      </StatusBanner>
+    );
+  }
+
+  return (
     <StatusBanner tone="warning">
-      AI 서버에 연결할 수 없어요. 로컬 Ollama가 켜져 있는지, OLLAMA_API_BASE_URL이 올바른지 확인해 주세요.
+      AI 서버에 연결할 수 없어요.{' '}
+      <span className="text-xs">
+        ({data.providers.map((p) => `${PROVIDER_LABEL[p.provider]} ${p.reason ?? 'down'}`).join(' · ')})
+      </span>
       <br />
       OCR 텍스트로 수동 입력은 정상 동작합니다.
     </StatusBanner>

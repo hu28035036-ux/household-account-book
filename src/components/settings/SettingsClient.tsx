@@ -9,11 +9,17 @@ import { formatDateKST } from '@/lib/formatting/date';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 type Me = { id: string; email: string | null; created_at: string; display_name: string | null };
+type AiProvider = { provider: 'openai' | 'ollama'; ok: boolean; model: string; reason?: string };
+const PROVIDER_LABEL: Record<AiProvider['provider'], string> = {
+  openai: 'OpenAI',
+  ollama: 'Ollama',
+};
 
 export function SettingsClient() {
   const [me, setMe] = useState<Me | null>(null);
   const [aiOk, setAiOk] = useState<'unknown' | 'ok' | 'down'>('unknown');
   const [aiReason, setAiReason] = useState<string | null>(null);
+  const [aiProviders, setAiProviders] = useState<AiProvider[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   const [pending, setPending] = useState(false);
@@ -24,6 +30,7 @@ export function SettingsClient() {
     fetch('/api/ai-status').then((r) => r.json()).then((j) => {
       const ok = j?.data?.ok;
       setAiOk(ok ? 'ok' : 'down');
+      setAiProviders((j?.data?.providers as AiProvider[]) ?? []);
       if (!ok) setAiReason(j?.data?.reason ?? null);
     });
   }, []);
@@ -95,9 +102,33 @@ export function SettingsClient() {
             {aiOk === 'ok' && <Badge tone="success">연결됨</Badge>}
             {aiOk === 'down' && <Badge tone="warning">연결 안 됨</Badge>}
           </div>
-          <CardSubtle className="mt-1">
-            Ollama gemma4:e4b — 별도 머신에서 실행되어야 합니다. (Vercel 내부 실행 X)
-          </CardSubtle>
+          {aiProviders.length === 0 ? (
+            <CardSubtle className="mt-1">
+              AI 공급자가 설정되어 있지 않습니다. 환경변수 OPENAI_API_KEY 또는 OLLAMA_API_BASE_URL을
+              등록해 주세요.
+            </CardSubtle>
+          ) : (
+            <ul className="mt-2 text-sm space-y-1">
+              {aiProviders.map((p) => (
+                <li key={p.provider} className="flex items-center justify-between gap-3">
+                  <span>
+                    <span className="text-textPrimary">{PROVIDER_LABEL[p.provider]}</span>{' '}
+                    <span className="font-mono text-xs text-textSecondary">{p.model}</span>
+                  </span>
+                  {p.ok ? (
+                    <Badge tone="success">정상</Badge>
+                  ) : (
+                    <Badge tone="warning">{p.reason ?? '연결 실패'}</Badge>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+          {aiProviders.length > 1 && (
+            <CardSubtle className="mt-2">
+              상위에 적힌 공급자가 1순위로 호출되고, 실패 시 다음 공급자로 자동 전환됩니다.
+            </CardSubtle>
+          )}
           {aiOk === 'down' && aiReason && (
             <p className="mt-2 text-xs rounded-md bg-warningSoft text-warning px-3 py-2">{aiReason}</p>
           )}

@@ -2,7 +2,12 @@ import { ok } from '@/lib/http/response';
 
 export const runtime = 'nodejs';
 
-type ProviderCheck = { provider: 'openai' | 'ollama'; ok: boolean; reason?: string };
+type ProviderCheck = {
+  provider: 'openai' | 'ollama';
+  ok: boolean;
+  model: string;
+  reason?: string;
+};
 
 /**
  * AI 공급자 가용성 체크. OpenAI 키 / Ollama URL 중 설정된 모든 공급자를 점검.
@@ -11,6 +16,7 @@ type ProviderCheck = { provider: 'openai' | 'ollama'; ok: boolean; reason?: stri
 export async function GET() {
   const checks: ProviderCheck[] = [];
 
+  const openaiModel = process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
   if (process.env.OPENAI_API_KEY) {
     try {
       const ctrl = new AbortController();
@@ -24,17 +30,20 @@ export async function GET() {
       checks.push({
         provider: 'openai',
         ok: res.ok,
+        model: openaiModel,
         reason: res.ok ? undefined : `HTTP ${res.status}`,
       });
     } catch (e) {
       checks.push({
         provider: 'openai',
         ok: false,
+        model: openaiModel,
         reason: e instanceof Error ? e.message : 'unreachable',
       });
     }
   }
 
+  const ollamaModel = process.env.OLLAMA_MODEL ?? 'gemma4:e4b';
   if (process.env.OLLAMA_API_BASE_URL) {
     try {
       const ctrl = new AbortController();
@@ -47,12 +56,14 @@ export async function GET() {
       checks.push({
         provider: 'ollama',
         ok: res.ok,
+        model: ollamaModel,
         reason: res.ok ? undefined : `HTTP ${res.status}`,
       });
     } catch (e) {
       checks.push({
         provider: 'ollama',
         ok: false,
+        model: ollamaModel,
         reason: e instanceof Error ? e.message : 'unreachable',
       });
     }
