@@ -63,13 +63,14 @@ export async function GET() {
   XLSX.utils.book_append_sheet(wb, ws, '거래내역');
 
   const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
+  const u8 = new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
   const today = new Date().toISOString().slice(0, 10);
-  return new Response(buf, {
+  return new Response(u8, {
     status: 200,
     headers: {
       'content-type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'content-disposition': `attachment; filename="transactions-${today}.xlsx"`,
-      'content-length': String(buf.length),
+      'content-length': String(u8.byteLength),
     },
   });
 }
