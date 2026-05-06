@@ -116,43 +116,47 @@ export function MfaCard() {
   }
 
   return (
-    <Card>
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-textPinkStrong" strokeWidth={1.75} />
-          <CardTitle>2단계 인증 (MFA)</CardTitle>
+    <Card className="!p-3">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <ShieldCheck className="h-4 w-4 text-textPinkStrong shrink-0" strokeWidth={1.75} />
+          <span className="text-sm font-semibold text-textPrimary truncate">2단계 인증 (MFA)</span>
         </div>
-        {status === 'verified' && <Badge tone="success">활성됨</Badge>}
-        {status === 'pending' && <Badge tone="warning">등록 미완료</Badge>}
+        {status === 'verified' && <Badge tone="success">활성</Badge>}
+        {status === 'pending' && <Badge tone="warning">미완료</Badge>}
         {status === 'none' && <Badge tone="muted">비활성</Badge>}
       </div>
 
-      <CardSubtle className="mt-2">
-        Google Authenticator·Microsoft Authenticator·Authy 같은 OTP 앱이 보여주는 6자리 코드를 비밀번호와 함께 요구합니다.
-        비밀번호가 노출돼도 폰 없이는 로그인할 수 없어요. 운영자(개발자) 계정에 권장합니다.
-      </CardSubtle>
+      <p className="mt-1 text-xs text-textMuted leading-snug">
+        OTP 앱의 6자리 코드를 비밀번호와 함께 요구. 운영자 계정 권장.
+      </p>
 
-      {status === 'loading' && <CardSubtle className="mt-3">불러오는 중…</CardSubtle>}
+      {status === 'loading' && <p className="mt-2 text-xs text-textMuted">불러오는 중…</p>}
 
       {(status === 'none' || status === 'pending') && (
-        <div className="mt-3">
-          <Button onClick={startEnroll} disabled={pending}>
+        <div className="mt-2">
+          <Button size="sm" onClick={startEnroll} disabled={pending} className="!h-8 !px-2 !text-xs">
             {status === 'pending' ? '등록 다시 시작' : '등록 시작'}
           </Button>
         </div>
       )}
 
       {status === 'verified' && (
-        <div className="mt-3 flex items-center gap-2">
-          <Button variant="ghost" onClick={disableMfa} disabled={pending}>
+        <div className="mt-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={disableMfa}
+            disabled={pending}
+            className="!h-8 !px-2 !text-xs"
+          >
             해제
           </Button>
-          <span className="text-xs text-textMuted">다음 로그인부터 6자리 코드 미요구</span>
         </div>
       )}
 
       {error && !enrollOpen && (
-        <p className="mt-2 text-xs rounded-md bg-dangerSoft text-danger px-3 py-2">{error}</p>
+        <p className="mt-2 text-xs rounded-md bg-dangerSoft text-danger px-2 py-1.5">{error}</p>
       )}
 
       <Modal open={enrollOpen} onClose={() => setEnrollOpen(false)} title="2단계 인증 등록">

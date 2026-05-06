@@ -46,9 +46,8 @@ export function DonateCard() {
         <CardTitle>운영 후원</CardTitle>
       </div>
       <CardSubtle className="mt-1">
-        이 앱은 개인이 운영하며, AI API 비용·호스팅 등에 매월 약 1,000~3,000원 정도가 들어가요.
-        후원은 <b>전혀 강제가 아니고</b>, 영수증·세무 처리는 발급하지 않습니다.
-        한 번의 커피값도 큰 힘이 됩니다 ☕
+        이 앱은 개인이 운영합니다. 후원은 <b>전혀 강제가 아니고</b>, 영수증·세무 처리는
+        발급하지 않습니다. 한 번의 커피값도 큰 힘이 됩니다 ☕
       </CardSubtle>
 
       <div className="mt-3 space-y-2">
@@ -130,8 +129,8 @@ export function DonateCard() {
       <div className="mt-4 rounded-md bg-softPinkBackground/70 px-3 py-2.5 text-xs text-textPrimary leading-relaxed">
         <div className="font-medium">💌 후원해주신 분들께</div>
         <p className="mt-1 text-textSecondary">
-          이 앱은 광고도, 결제도 없이 운영됩니다. 한 분 한 분의 후원이 다음 달 운영비를
-          채워주는 가장 큰 힘이에요. 가계부가 도움이 됐다면 따뜻한 응원 한 잔 보내주세요 ☕
+          이 앱은 광고도, 결제도 없이 운영됩니다. 한 분 한 분의 응원이 큰 힘이 되어요.
+          가계부가 도움이 됐다면 따뜻한 응원 한 잔 보내주세요 ☕
         </p>
         <p className="mt-2 text-textPinkStrong font-medium">진심으로 감사합니다 🙏</p>
       </div>

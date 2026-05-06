@@ -20,7 +20,9 @@ const PROVIDER_LABEL: Record<AiProvider['provider'], string> = {
   ollama: 'Ollama',
 };
 
-export function SettingsClient() {
+type Props = { isAdmin?: boolean };
+
+export function SettingsClient({ isAdmin = false }: Props) {
   const [me, setMe] = useState<Me | null>(null);
   const [aiOk, setAiOk] = useState<'unknown' | 'ok' | 'down'>('unknown');
   const [aiReason, setAiReason] = useState<string | null>(null);
@@ -103,7 +105,7 @@ export function SettingsClient() {
 
         <ProfileCard />
 
-        <MfaCard />
+        {isAdmin && <MfaCard />}
 
         <Card>
           <div className="flex items-center justify-between gap-3">
