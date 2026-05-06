@@ -61,6 +61,9 @@ export async function middleware(req: NextRequest) {
   }
 
   if (user && PUBLIC_ONLY.some((p) => path === p || path.startsWith(p + '/'))) {
+    // /login/mfa 는 비번 통과(aal1) 후 OTP 챌린지를 받기 위한 페이지이므로
+    // user 가 있어도 그대로 통과시켜야 함.
+    if (path === '/login/mfa' || path.startsWith('/login/mfa/')) return res;
     const url = req.nextUrl.clone();
     url.pathname = '/dashboard';
     return NextResponse.redirect(url);

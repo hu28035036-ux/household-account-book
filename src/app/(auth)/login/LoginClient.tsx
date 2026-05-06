@@ -57,6 +57,13 @@ export default function LoginClient() {
         throw error;
       }
 
+      // 2단계 인증(MFA) 체크 — 등록된 factor가 있으면 OTP 챌린지로
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aal?.nextLevel === 'aal2' && aal?.currentLevel !== 'aal2') {
+        router.replace(`/login/mfa?redirect=${encodeURIComponent(redirect)}`);
+        return;
+      }
+
       router.replace(redirect);
       router.refresh();
     } catch (e) {

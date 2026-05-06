@@ -7,6 +7,7 @@ import { Badge } from '@/components/common/Badge';
 import { Modal } from '@/components/common/Modal';
 import { formatDateKST } from '@/lib/formatting/date';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { MfaCard } from './MfaCard';
 
 type Me = { id: string; email: string | null; created_at: string; display_name: string | null };
 type AiProvider = { provider: 'openai' | 'ollama'; ok: boolean; model: string; reason?: string };
@@ -95,6 +96,8 @@ export function SettingsClient() {
             </Button>
           </div>
         </Card>
+
+        <MfaCard />
 
         <Card>
           <div className="flex items-center justify-between gap-3">
