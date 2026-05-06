@@ -12,6 +12,7 @@ const PROTECTED_PREFIXES = [
   '/categories',
   '/payment-methods',
   '/households',
+  '/notifications',
   '/settings',
   '/files',
 ];

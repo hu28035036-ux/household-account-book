@@ -2,9 +2,22 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Receipt, Upload, ListChecks, Tags, CreditCard, Files, Settings, PiggyBank } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Receipt,
+  Upload,
+  ListChecks,
+  Tags,
+  CreditCard,
+  Files,
+  Settings,
+  PiggyBank,
+  Users,
+  Bell,
+} from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
+// PITFALLS §1.3: 새 보호 라우트는 middleware/Sidebar/(BottomNav)/e2e 4곳을 모두 갱신
 const NAV = [
   { href: '/dashboard', label: '대시보드', icon: LayoutDashboard },
   { href: '/transactions', label: '거래내역', icon: Receipt },
@@ -13,6 +26,8 @@ const NAV = [
   { href: '/budgets', label: '예산', icon: PiggyBank },
   { href: '/categories', label: '카테고리', icon: Tags },
   { href: '/payment-methods', label: '결제수단', icon: CreditCard },
+  { href: '/households', label: '가족 공유', icon: Users },
+  { href: '/notifications', label: '알림', icon: Bell },
   { href: '/files', label: '원본 파일', icon: Files },
   { href: '/settings', label: '설정', icon: Settings },
 ];

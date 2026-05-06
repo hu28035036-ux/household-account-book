@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { recordMerchantLearning, logCorrection } from './learningService';
+import { checkBudgetAlertsForUser } from '@/lib/budgets/alertCheck';
 
 export async function listCandidates(
   supabase: SupabaseClient,
@@ -131,6 +132,14 @@ export async function approveCandidate(
     await recordMerchantLearning(supabase, userId, c.merchant_name, categoryId, paymentMethodId);
   }
   await logCorrection(supabase, userId, id, 'user_action', 'pending', 'approved', 'approve');
+
+  if (c.type === 'expense' && c.transaction_date) {
+    try {
+      await checkBudgetAlertsForUser(supabase, userId, (c.transaction_date as string).slice(0, 7));
+    } catch {
+      // ignore
+    }
+  }
   return tx;
 }
 

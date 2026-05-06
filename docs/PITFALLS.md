@@ -286,6 +286,12 @@
 - **권고**: (app) 그룹 내 page들은 자체 `redirect('/login')`을 호출하지 말 것. middleware + (app)/layout.tsx 두 단계가 이미 보호하며, page에서 추가 redirect가 일어나면 query 보존이 깨질 수 있음.
 - **대신**: `if (!u.user) return null;`로 안전 종료하고 라우팅은 상위 layer에 위임.
 
+### 12.5 e2e 실행 후 dev server 잔존 → 다음 실행 timeout
+- **증상**: 두 번째 e2e 실행이 `Port 3000 is in use, trying 3001 instead.` 후 `Error: Timed out waiting 120000ms from config.webServer.`로 fail.
+- **원인**: 이전 e2e가 띄운 `npm run dev` 프로세스가 SIGINT 무시하고 포트 3000을 잡고 있음. webServer는 3001로 fallback 시도지만 `BASE_URL`은 3000을 가리킴.
+- **해결**: e2e 사이클 사이에 `taskkill /F /IM node.exe` (Windows) 또는 `pkill -f next-server` (Unix). 또는 `reuseExistingServer: !process.env.CI`로 명시(이미 적용). 동일 dev server 재사용이면 port 충돌 없음.
+- **검증**: `netstat -ano | findstr :3000` 비어있음 → e2e 안전.
+
 ---
 
 ## 추가 발견 시 갱신 규칙

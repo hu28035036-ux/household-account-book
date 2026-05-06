@@ -4,6 +4,7 @@ import { LogOut } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { HouseholdSwitcher } from './HouseholdSwitcher';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 type Props = { title?: string; userEmail?: string | null };
 
@@ -19,6 +20,7 @@ export function Header({ title, userEmail }: Props) {
       <div className="flex items-center justify-between px-4 sm:px-6 h-14 gap-3">
         <h1 className="text-base sm:text-lg font-semibold text-textPrimary truncate min-w-0">{title ?? ''}</h1>
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <NotificationBell />
           <HouseholdSwitcher />
           {userEmail && (
             <span className="hidden md:inline text-xs text-textSecondary truncate max-w-[200px]">

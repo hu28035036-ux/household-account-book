@@ -4,6 +4,7 @@ import type {
   UpdateTransactionInput,
   TransactionListQuery,
 } from '@/lib/validators/common';
+import { checkBudgetAlertsForUser } from '@/lib/budgets/alertCheck';
 
 export async function listTransactions(
   supabase: SupabaseClient,
@@ -55,6 +56,14 @@ export async function createTransaction(
     .select('*')
     .single();
   if (error) throw error;
+
+  if (input.type === 'expense') {
+    try {
+      await checkBudgetAlertsForUser(supabase, userId, (input.transaction_date as string).slice(0, 7));
+    } catch {
+      // ignore: 알림 실패가 거래 등록을 막지 않게
+    }
+  }
   return data;
 }
 

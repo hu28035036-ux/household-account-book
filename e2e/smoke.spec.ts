@@ -16,6 +16,7 @@ const PROTECTED_PATHS = [
   '/categories',
   '/payment-methods',
   '/households',
+  '/notifications',
   '/files',
   '/settings',
 ];
