@@ -22,8 +22,10 @@ export async function POST(req: NextRequest) {
       if (f.size > MAX_BYTES) {
         return fail('BAD_REQUEST', `파일이 너무 큽니다(>${MAX_BYTES / 1024 / 1024}MB): ${f.name}`);
       }
-      if (!/^image\//.test(f.type) && !f.name.match(/\.(jpe?g|png|webp|heic|heif)$/i)) {
-        return fail('BAD_REQUEST', `이미지 파일만 허용합니다: ${f.name}`);
+      const isImage = /^image\//.test(f.type) || /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name);
+      const isPdf = f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
+      if (!isImage && !isPdf) {
+        return fail('BAD_REQUEST', `이미지 또는 PDF만 허용합니다: ${f.name}`);
       }
       const row = await uploadFile(supabase, u.user.id, f);
       created.push(row);

@@ -4,9 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Badge } from '@/components/common/Badge';
+import { FileText } from 'lucide-react';
 import { Dropzone } from './Dropzone';
 import { OcrPreview } from './OcrPreview';
 import { recognizeImage } from '@/lib/ocr/tesseract';
+import { extractPdfText } from '@/lib/pdf/extract';
 import { maskAll } from '@/lib/security/masking';
 import { AiServerStatus } from '@/components/common/StatusBanner';
 
@@ -58,14 +60,29 @@ export function UploadClient() {
     if (!item.uploadedFileId) return;
     patch(item.localId, { status: 'ocr_running', ocrProgress: 0 });
     try {
-      const { text, confidence } = await recognizeImage(item.file, (p) =>
-        patch(item.localId, { ocrProgress: p }),
-      );
+      const isPdf = item.file.type === 'application/pdf' || /\.pdf$/i.test(item.file.name);
+      let text = '';
+      let confidence = 0;
+      let engine: 'tesseract_js' | 'manual' | 'other' = 'tesseract_js';
+
+      if (isPdf) {
+        const r = await extractPdfText(item.file, (p) => patch(item.localId, { ocrProgress: p }));
+        text = r.text;
+        // 텍스트가 거의 안 나오면 영수증 사진 PDF일 가능성 → 사용자 안내
+        confidence = r.text.replace(/\s/g, '').length > 20 ? 0.85 : 0.2;
+        engine = 'other';
+      } else {
+        const r = await recognizeImage(item.file, (p) => patch(item.localId, { ocrProgress: p }));
+        text = r.text;
+        confidence = r.confidence;
+        engine = 'tesseract_js';
+      }
+
       const masked = maskAll(text);
       const res = await fetch(`/api/ocr/${item.uploadedFileId}`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ rawText: text, maskedText: masked, confidence, engine: 'tesseract_js' }),
+        body: JSON.stringify({ rawText: text || '(텍스트 없음)', maskedText: masked, confidence, engine }),
       });
       if (!res.ok) {
         const j = await res.json();
@@ -129,11 +146,18 @@ export function UploadClient() {
         {items.map((it) => (
           <Card key={it.localId} className="space-y-3">
             <div className="flex gap-3">
-              <img
-                src={it.previewUrl}
-                alt={it.file.name}
-                className="h-24 w-24 sm:h-32 sm:w-32 object-cover rounded-lg border border-borderDefault shrink-0"
-              />
+              {it.file.type === 'application/pdf' || /\.pdf$/i.test(it.file.name) ? (
+                <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-lg border border-borderDefault bg-sectionBackground inline-flex items-center justify-center shrink-0 text-textPinkStrong">
+                  <FileText className="h-8 w-8" strokeWidth={1.5} />
+                </div>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={it.previewUrl}
+                  alt={it.file.name}
+                  className="h-24 w-24 sm:h-32 sm:w-32 object-cover rounded-lg border border-borderDefault shrink-0"
+                />
+              )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div className="font-medium text-textPrimary truncate">{it.file.name}</div>

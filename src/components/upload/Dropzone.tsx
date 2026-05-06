@@ -43,8 +43,8 @@ export function Dropzone({ onFiles, disabled }: Props) {
         <div className="h-12 w-12 rounded-xl bg-primaryPinkSoft text-textPinkStrong inline-flex items-center justify-center">
           <UploadIcon className="h-6 w-6" strokeWidth={1.75} />
         </div>
-        <div className="text-base font-semibold text-textPrimary">영수증/캡처 이미지를 올려주세요</div>
-        <div className="text-xs text-textSecondary">JPG / PNG / WebP · 최대 8MB · 여러 장 동시 가능</div>
+        <div className="text-base font-semibold text-textPrimary">영수증·캡처 이미지 또는 PDF를 올려주세요</div>
+        <div className="text-xs text-textSecondary">JPG / PNG / WebP / PDF · 최대 8MB · 여러 개 동시 가능</div>
         <div className="mt-2 flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <button
             type="button"
@@ -67,7 +67,7 @@ export function Dropzone({ onFiles, disabled }: Props) {
         <input
           ref={inputRef}
           type="file"
-          accept="image/*"
+          accept="image/*,application/pdf,.pdf"
           multiple
           className="hidden"
           onChange={(e) => handle(e.target.files)}
