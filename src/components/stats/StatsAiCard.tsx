@@ -1,12 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Sparkles, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
+import Link from 'next/link';
+import { Sparkles } from 'lucide-react';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
 import { formatKRW } from '@/lib/formatting/money';
-import { formatDateKST } from '@/lib/formatting/date';
+import { AiHistoryRow, type AiHistoryItem } from './AiHistoryRow';
 import { cn } from '@/lib/utils/cn';
 
 type AiResult = {
@@ -20,7 +21,7 @@ type AiResult = {
   generated_at: string;
 };
 
-type HistoryRow = AiResult & { id: string; created_at: string };
+type HistoryRow = AiHistoryItem;
 
 type Preset = 'this' | '1m' | '3m' | '6m' | 'custom';
 
@@ -100,11 +101,11 @@ export function StatsAiCard() {
   const [error, setError] = useState<string | null>(null);
   const [current, setCurrent] = useState<AiResult | null>(null);
   const [history, setHistory] = useState<HistoryRow[]>([]);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const loadHistory = useCallback(async () => {
     try {
-      const res = await fetch('/api/stats/ai-analysis?limit=20');
+      // 카드엔 최근 3건만 노출. 전체는 /ai-history 페이지에서.
+      const res = await fetch('/api/stats/ai-analysis?limit=3');
       const j = await res.json();
       setHistory(((j?.data ?? []) as HistoryRow[]) ?? []);
     } catch {
@@ -142,7 +143,6 @@ export function StatsAiCard() {
     const res = await fetch(`/api/stats/ai-analysis/${id}`, { method: 'DELETE' });
     if (res.ok) {
       setHistory((prev) => prev.filter((h) => h.id !== id));
-      if (expandedId === id) setExpandedId(null);
       if (current?.id === id) setCurrent(null);
     }
   }
@@ -214,57 +214,22 @@ export function StatsAiCard() {
         </div>
       )}
 
-      {/* 이전 분석 이력 */}
+      {/* 최근 분석 — 최대 3건만 미리보기. 전체 보기는 /ai-history. */}
       {history.length > 0 && (
         <div className="mt-5 border-t border-borderSoft pt-3">
           <div className="flex items-center justify-between gap-2">
-            <CardSubtle className="m-0">이전 분석 기록</CardSubtle>
-            <span className="text-xs text-textMuted">{history.length}건</span>
+            <CardSubtle className="m-0">최근 분석 기록</CardSubtle>
+            <Link
+              href="/ai-history"
+              className="text-xs text-textPinkStrong hover:underline whitespace-nowrap"
+            >
+              전체 보기 →
+            </Link>
           </div>
           <ul className="mt-2 space-y-1">
-            {history.map((h) => {
-              const open = expandedId === h.id;
-              return (
-                <li key={h.id} className="rounded-md border border-borderSoft">
-                  <div className="flex items-center gap-2 px-3 py-2">
-                    <button
-                      type="button"
-                      onClick={() => setExpandedId(open ? null : h.id)}
-                      className="flex-1 flex items-center gap-2 text-left min-w-0"
-                    >
-                      {open ? (
-                        <ChevronUp className="h-4 w-4 shrink-0 text-textMuted" strokeWidth={1.75} />
-                      ) : (
-                        <ChevronDown className="h-4 w-4 shrink-0 text-textMuted" strokeWidth={1.75} />
-                      )}
-                      <span className="text-sm text-textPrimary truncate">
-                        {h.range.from} ~ {h.range.to}
-                      </span>
-                      <span className="text-xs text-textMuted truncate hidden sm:inline">
-                        지출 {formatKRW(h.totals.expense)} · 거래 {h.transaction_count}건
-                      </span>
-                      <span className="ml-auto text-xs text-textMuted whitespace-nowrap">
-                        {formatDateKST(h.created_at)}
-                      </span>
-                    </button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => removeHistory(h.id)}
-                      aria-label="삭제"
-                      className="!h-8 !px-2"
-                    >
-                      <Trash2 className="h-4 w-4 text-danger" strokeWidth={1.75} />
-                    </Button>
-                  </div>
-                  {open && (
-                    <div className="px-3 pb-3">
-                      <ResultBlock r={h} />
-                    </div>
-                  )}
-                </li>
-              );
-            })}
+            {history.map((h) => (
+              <AiHistoryRow key={h.id} item={h} onDelete={removeHistory} />
+            ))}
           </ul>
         </div>
       )}

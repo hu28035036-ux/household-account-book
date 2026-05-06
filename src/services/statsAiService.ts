@@ -192,8 +192,9 @@ export async function listStatsAiHistory(
   supabase: SupabaseClient,
   userId: string,
   householdContext: string | null,
-  limit = 20,
+  options: { limit?: number; createdFrom?: string; createdTo?: string } = {},
 ): Promise<StatsAiHistoryRow[]> {
+  const limit = options.limit ?? 20;
   let q = supabase
     .from('ai_stats_analyses')
     .select(
@@ -204,6 +205,8 @@ export async function listStatsAiHistory(
   } else {
     q = q.eq('user_id', userId).is('household_id', null);
   }
+  if (options.createdFrom) q = q.gte('created_at', options.createdFrom);
+  if (options.createdTo) q = q.lte('created_at', options.createdTo);
   const { data, error } = await q.order('created_at', { ascending: false }).limit(limit);
   if (error) throw error;
   return (data ?? []).map((r: any) => ({

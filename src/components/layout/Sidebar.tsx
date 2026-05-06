@@ -15,6 +15,7 @@ import {
   PiggyBank,
   Users,
   Bell,
+  History,
   ShieldAlert,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
@@ -26,6 +27,7 @@ const NAV = [
   { href: '/upload', label: 'AI 업로드', icon: Upload },
   { href: '/candidates', label: '분석 후보', icon: ListChecks },
   { href: '/stats', label: '통계', icon: BarChart3 },
+  { href: '/ai-history', label: 'AI 기록', icon: History },
   { href: '/budgets', label: '예산', icon: PiggyBank },
   { href: '/categories', label: '카테고리', icon: Tags },
   { href: '/payment-methods', label: '결제수단', icon: CreditCard },

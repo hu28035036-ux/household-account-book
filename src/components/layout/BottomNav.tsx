@@ -17,6 +17,7 @@ import {
   Bell,
   Files,
   Settings,
+  History,
   ShieldAlert,
   X,
 } from 'lucide-react';
@@ -33,6 +34,7 @@ const PRIMARY = [
 // "더보기" 시트에 노출할 항목. 사이드바와 1:1 동일한 9개.
 const MORE = [
   { href: '/candidates', label: '분석 후보', icon: ListChecks },
+  { href: '/ai-history', label: 'AI 기록', icon: History },
   { href: '/budgets', label: '예산', icon: PiggyBank },
   { href: '/categories', label: '카테고리', icon: Tags },
   { href: '/payment-methods', label: '결제수단', icon: CreditCard },
