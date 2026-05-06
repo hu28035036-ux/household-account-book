@@ -33,7 +33,38 @@
    - 코드 만료 시간은 Authentication → Settings에서 조정.
 5. 첫 로그인: `/login`에서 이메일 입력 → 6자리 코드 받기 → 같은 화면에 입력 → `/admin` 메뉴가 보이면 OK.
 
-> **세션 자동 유지**: 한 번 인증하면 Supabase 브라우저 클라이언트가 refresh token으로 세션을 자동 갱신합니다. 같은 브라우저에서 다시 방문하면 `/login` 페이지가 자동으로 `/dashboard`로 이동합니다(매번 인증 X).
+## 세션 영구 유지 정책
+
+본 서비스는 **한 번 OTP 인증한 브라우저는 영구 자동 로그인**되도록 설정되어 있습니다.
+
+### 코드 측 (자동)
+`src/lib/supabase/client.ts`에서 `persistSession: true` / `autoRefreshToken: true`를 명시. localStorage에 토큰 저장, access token 만료 직전 자동 갱신.
+
+### Supabase Dashboard 권장 설정 (1회)
+**Authentication → Settings**에서 아래 값을 확인/조정하면 영구 세션이 안정적으로 동작합니다.
+
+| 항목 | 권장값 | 의미 |
+|---|---|---|
+| JWT expiry (access token) | 3600 (1시간, 기본) | 자주 갱신되는 짧은 토큰. 보안상 짧게 유지하고 refresh로 영구화. |
+| Refresh Token Rotation | **ON** | 사용 시마다 토큰 회전 → 토큰 탈취 위험 감소. |
+| Refresh Token Reuse Interval | 10초 (기본) | rotation 직후 짧은 grace window. |
+| Inactivity Timeout | (선택) **비활성화** 또는 매우 길게 | 켜두면 N일 동안 미사용 시 강제 로그아웃. 영구 정책이면 OFF. |
+
+> Inactivity Timeout이 OFF이고 사용자가 명시적 로그아웃 / storage 삭제를 하지 않으면 **사실상 무기한** 자동 로그인됩니다.
+
+### 다시 인증이 필요한 경우 (예외)
+- 다른 기기/브라우저에서 첫 접속 → 그 기기에서 1회 OTP
+- 시크릿/InPrivate 창 (storage 비휘발성이 아니므로 닫으면 사라짐)
+- 사용자가 로그아웃 버튼 클릭
+- 브라우저 storage/쿠키 직접 비움
+- 관리자가 `/admin`에서 **차단** → 토큰 무효화 (해제하면 재인증 필요)
+
+### 모든 기기에서 강제 로그아웃 (보안 사고 시)
+Supabase Dashboard → Authentication → Users → 해당 사용자 → "Sign out user" 또는 SQL로:
+```sql
+update auth.users set raw_app_meta_data = raw_app_meta_data || '{"force_logout_at": "..."}'::jsonb where id = '...';
+```
+(또는 `/admin`의 "차단" → "해제"로 토큰 회전)
 
 ## 일상 운영
 ### 새 사용자 초대
