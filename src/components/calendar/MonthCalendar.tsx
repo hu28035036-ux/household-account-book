@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { cn } from '@/lib/utils/cn';
-import { formatKRW, compactKRW } from '@/lib/formatting/money';
+import { formatKRW } from '@/lib/formatting/money';
 
 type DailyBucket = {
   date: string;
@@ -187,9 +187,9 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
           {cells.map((c, idx) => {
-            if (!c.date) return <div key={idx} className="h-20 sm:h-24" />;
+            if (!c.date) return <div key={idx} className="h-20 sm:h-24 md:h-28" />;
             const bucket = dailyMap[c.date];
             const isToday = c.date === today;
             const isSelected = c.date === selected;
@@ -200,7 +200,8 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
                 type="button"
                 onClick={() => setSelected((s) => (s === c.date ? null : c.date!))}
                 className={cn(
-                  'h-20 sm:h-24 p-1 sm:p-1.5 rounded-md border text-left flex flex-col gap-0.5 transition-colors overflow-hidden',
+                  // 반응형 3단계 — 모바일 / 태블릿(sm) / 데스크톱(md)
+                  'h-20 sm:h-24 md:h-28 p-0.5 sm:p-1 md:p-1.5 rounded-md border text-left flex flex-col gap-0.5 transition-colors overflow-hidden',
                   isSelected
                     ? 'border-primaryPink bg-primaryPinkSoft'
                     : isToday
@@ -212,7 +213,7 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
                 <div className="flex items-center justify-between">
                   <span
                     className={cn(
-                      'text-xs font-semibold',
+                      'text-[11px] sm:text-xs font-semibold',
                       dow === 0 ? 'text-danger' : dow === 6 ? 'text-info' : 'text-textPrimary',
                       isToday && 'text-textPinkStrong',
                     )}
@@ -220,17 +221,19 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
                     {c.day}
                   </span>
                   {bucket && bucket.count > 0 && (
-                    <span className="text-[10px] tabular text-textMuted">{bucket.count}</span>
+                    <span className="text-[9px] sm:text-[10px] tabular text-textMuted">
+                      {bucket.count}
+                    </span>
                   )}
                 </div>
                 {bucket && bucket.expense > 0 && (
-                  <div className="text-[10px] sm:text-[11px] tabular text-expense whitespace-nowrap leading-tight">
-                    -{compactKRW(bucket.expense)}
+                  <div className="text-[9px] sm:text-[10px] md:text-[11px] tabular text-expense whitespace-nowrap leading-tight">
+                    -{bucket.expense.toLocaleString('ko-KR')}
                   </div>
                 )}
                 {bucket && bucket.income > 0 && (
-                  <div className="text-[10px] sm:text-[11px] tabular text-income whitespace-nowrap leading-tight">
-                    +{compactKRW(bucket.income)}
+                  <div className="text-[9px] sm:text-[10px] md:text-[11px] tabular text-income whitespace-nowrap leading-tight">
+                    +{bucket.income.toLocaleString('ko-KR')}
                   </div>
                 )}
               </button>
