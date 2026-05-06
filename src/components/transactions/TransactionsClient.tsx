@@ -158,6 +158,7 @@ export function TransactionsClient() {
             </Button>
             <div className="ml-auto">
               <Button
+                size="sm"
                 onClick={bulkDelete}
                 disabled={bulkPending || selected.size === 0}
                 variant="danger"

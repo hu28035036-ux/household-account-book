@@ -98,7 +98,7 @@ export function CandidatesClient() {
             선택 해제 ({selected.size})
           </Button>
           <div className="ml-auto">
-            <Button onClick={bulkApprove} disabled={pending || selected.size === 0}>
+            <Button size="sm" onClick={bulkApprove} disabled={pending || selected.size === 0}>
               {selected.size > 0 ? `선택 ${selected.size}건 일괄 승인` : '일괄 승인 (선택 필요)'}
             </Button>
           </div>
@@ -136,7 +136,7 @@ export function CandidatesClient() {
           className="md:hidden fixed inset-x-0 bottom-[56px] z-20 bg-pageBackground/95 backdrop-blur border-t border-borderDefault px-4 py-3"
           style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.75rem)' }}
         >
-          <Button onClick={bulkApprove} disabled={pending || selected.size === 0} fullWidth size="lg">
+          <Button onClick={bulkApprove} disabled={pending || selected.size === 0} fullWidth size="sm">
             선택 {selected.size}건 일괄 승인
           </Button>
         </div>
