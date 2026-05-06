@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardTitle, CardSubtle } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { localizeAuthError } from '@/lib/auth/errorMessages';
 
 type Step = 'email' | 'otp';
 
@@ -58,17 +59,12 @@ export default function LoginClient() {
         email: email.trim(),
         options: { shouldCreateUser: true },
       });
-      if (error) {
-        const m = error.message || '';
-        if (/EMAIL_NOT_ALLOWED|not allowed|invite list/i.test(m)) {
-          throw new Error('초대 명단에 없는 이메일입니다. 관리자에게 등록을 요청하세요.');
-        }
-        throw error;
-      }
+      if (error) throw error;
       setStep('otp');
       setMessage('메일함에서 6자리 인증 코드를 확인해 입력해 주세요.');
     } catch (e) {
-      setError(e instanceof Error ? e.message : '코드 전송 실패');
+      const raw = e instanceof Error ? e.message : '';
+      setError(localizeAuthError(raw, '코드 전송 실패'));
     } finally {
       setPending(false);
     }
@@ -87,21 +83,13 @@ export default function LoginClient() {
         token,
         type: 'email',
       });
-      if (error) {
-        const m = error.message || '';
-        if (/EMAIL_NOT_ALLOWED|not allowed|invite list/i.test(m)) {
-          throw new Error('초대 명단에 없는 이메일입니다. 관리자에게 등록을 요청하세요.');
-        }
-        if (/expired|invalid/i.test(m)) {
-          throw new Error('코드가 만료되었거나 일치하지 않습니다. 코드 다시 받기를 시도해 주세요.');
-        }
-        throw error;
-      }
+      if (error) throw error;
       // 세션이 브라우저에 영구 저장됨(persistSession=true 기본). 곧장 이동.
       router.replace(redirect);
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : '인증 실패');
+      const raw = e instanceof Error ? e.message : '';
+      setError(localizeAuthError(raw, '인증 실패'));
     } finally {
       setPending(false);
     }

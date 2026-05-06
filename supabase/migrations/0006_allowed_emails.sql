@@ -39,8 +39,9 @@ begin
     select 1 from public.allowed_emails where lower(email) = email_lower
   ) into allowed;
   if not allowed then
-    raise exception 'EMAIL_NOT_ALLOWED: % is not on the invite list', email_lower
-      using errcode = 'P0001';
+    raise exception '초대 명단에 등록되지 않은 이메일입니다 (EMAIL_NOT_ALLOWED): %', email_lower
+      using errcode = 'P0001',
+            hint = '운영자에게 allowed_emails 등록을 요청하세요.';
   end if;
 
   -- 2) profile + 기본 시드
