@@ -19,6 +19,7 @@ const PROTECTED_PATHS = [
   '/notifications',
   '/files',
   '/settings',
+  '/admin',
 ];
 
 test('루트 → /login 자동 리다이렉트', async ({ page }) => {

@@ -14,6 +14,7 @@ import {
   PiggyBank,
   Users,
   Bell,
+  ShieldAlert,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
@@ -32,8 +33,11 @@ const NAV = [
   { href: '/settings', label: '설정', icon: Settings },
 ];
 
-export function Sidebar() {
+const ADMIN_ITEM = { href: '/admin', label: '관리자', icon: ShieldAlert };
+
+export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
+  const items = isAdmin ? [...NAV, ADMIN_ITEM] : NAV;
   return (
     <aside className="hidden md:flex w-60 shrink-0 flex-col border-r border-borderDefault bg-pageBackground">
       <div className="px-5 py-5 border-b border-borderDefault">
@@ -43,7 +47,7 @@ export function Sidebar() {
         </Link>
       </div>
       <nav className="flex-1 px-3 py-4 space-y-1">
-        {NAV.map(({ href, label, icon: Icon }) => {
+        {items.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + '/');
           return (
             <Link

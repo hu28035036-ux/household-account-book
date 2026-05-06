@@ -4,13 +4,18 @@ import { BottomNav } from './BottomNav';
 import { Header } from './Header';
 import { ActiveHouseholdProvider } from '@/lib/active-household';
 
-type Props = { title?: string; userEmail?: string | null; children: ReactNode };
+type Props = {
+  title?: string;
+  userEmail?: string | null;
+  isAdmin?: boolean;
+  children: ReactNode;
+};
 
-export function AppShell({ title, userEmail, children }: Props) {
+export function AppShell({ title, userEmail, isAdmin = false, children }: Props) {
   return (
     <ActiveHouseholdProvider>
       <div className="min-h-screen flex bg-appBackground">
-        <Sidebar />
+        <Sidebar isAdmin={isAdmin} />
         <div className="flex-1 flex flex-col min-w-0">
           <Header title={title} userEmail={userEmail} />
           <main className="flex-1 px-4 sm:px-6 py-5 pb-24 md:pb-8">

@@ -27,8 +27,15 @@ export default function LoginClient() {
           emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
         },
       });
-      if (error) throw error;
-      setMessage('메일함에서 로그인 링크를 확인하세요.');
+      if (error) {
+        // 화이트리스트 미등록 등 가입 트리거가 거부한 경우의 사용자 메시지
+        const m = error.message || '';
+        if (/EMAIL_NOT_ALLOWED|not allowed|invite list/i.test(m)) {
+          throw new Error('초대 명단에 없는 이메일입니다. 관리자에게 등록을 요청하세요.');
+        }
+        throw error;
+      }
+      setMessage('메일함에서 로그인 링크를 확인하세요. (초대 명단에 없는 이메일은 첫 가입이 거부됩니다)');
     } catch (e) {
       setError(e instanceof Error ? e.message : '로그인 메일 전송 실패');
     } finally {
@@ -76,7 +83,8 @@ export default function LoginClient() {
         </Card>
 
         <p className="mt-4 text-center text-xs text-textMuted">
-          가입 시 기본 카테고리/결제수단이 자동 생성됩니다.
+          본 서비스는 결제 없이 운영되며, 초대받은 이메일만 가입할 수 있습니다.
+          <br />가입 시 기본 카테고리/결제수단이 자동 생성됩니다.
         </p>
       </div>
     </div>

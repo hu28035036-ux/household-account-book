@@ -78,6 +78,13 @@ const PROTECTED: Endpoint[] = [
   { method: 'POST', path: '/api/households/00000000-0000-0000-0000-000000000000/invites' },
   { method: 'DELETE', path: '/api/households/00000000-0000-0000-0000-000000000000/invites/00000000-0000-0000-0000-000000000000' },
   { method: 'POST', path: '/api/households/join', body: { code: 'TEST123' } },
+  // admin (관리자만 접근. 미인증은 401, 일반 사용자는 403이지만 본 sweep은 401 가드만 검증)
+  { method: 'GET', path: '/api/admin/users' },
+  { method: 'PATCH', path: '/api/admin/users/00000000-0000-0000-0000-000000000000', body: { action: 'ban' } },
+  { method: 'DELETE', path: '/api/admin/users/00000000-0000-0000-0000-000000000000' },
+  { method: 'GET', path: '/api/admin/allowed-emails' },
+  { method: 'POST', path: '/api/admin/allowed-emails', body: { email: 'x@example.com' } },
+  { method: 'DELETE', path: '/api/admin/allowed-emails/00000000-0000-0000-0000-000000000000' },
   // export / account / import
   { method: 'GET', path: '/api/export' },
   { method: 'GET', path: '/api/export/transactions' },
