@@ -20,7 +20,14 @@ export default function LoginClient() {
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0); // 클라이언트 측 카운트다운(초)
   const otpInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
 
   // 이미 로그인된 세션이 있으면 곧장 redirect — 새 창 없이 자동 접속.
   useEffect(() => {
@@ -48,20 +55,24 @@ export default function LoginClient() {
 
   async function sendCode(e: React.FormEvent) {
     e.preventDefault();
+    if (cooldown > 0) return;
     setPending(true);
     setMessage(null);
     setError(null);
     try {
-      const supabase = createSupabaseBrowserClient();
-      // emailRedirectTo를 비우면 매직링크 대신 OTP 코드 흐름이 우선.
-      // (메일 템플릿에 매직링크가 같이 발송될 수 있으나 사용자는 코드만 입력)
-      const { error } = await supabase.auth.signInWithOtp({
-        email: email.trim(),
-        options: { shouldCreateUser: true },
+      // 서버 라우트 경유: 백엔드에서 3초 throttle + Supabase signInWithOtp
+      const res = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
       });
-      if (error) throw error;
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json?.error?.message ?? '코드 전송 실패');
+      }
       setStep('otp');
       setMessage('메일함에서 6자리 인증 코드를 확인해 입력해 주세요.');
+      setCooldown(3); // 클라이언트 카운트다운 (서버는 3000ms 보장)
     } catch (e) {
       const raw = e instanceof Error ? e.message : '';
       setError(localizeAuthError(raw, '코드 전송 실패'));
@@ -130,8 +141,17 @@ export default function LoginClient() {
                     className="mt-1 w-full h-11 px-3 rounded-lg bg-white border border-borderDefault text-textPrimary placeholder:text-textMuted focus:outline-none focus:ring-2 focus:ring-primaryPinkBorder"
                   />
                 </label>
-                <Button type="submit" disabled={pending || !email.trim()} fullWidth size="lg">
-                  {pending ? '전송 중…' : '인증 코드 받기'}
+                <Button
+                  type="submit"
+                  disabled={pending || !email.trim() || cooldown > 0}
+                  fullWidth
+                  size="lg"
+                >
+                  {pending
+                    ? '전송 중…'
+                    : cooldown > 0
+                    ? `${cooldown}초 후 다시 시도`
+                    : '인증 코드 받기'}
                 </Button>
               </form>
             </>

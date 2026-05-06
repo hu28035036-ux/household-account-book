@@ -87,6 +87,7 @@ const PROTECTED: Endpoint[] = [
   { method: 'DELETE', path: '/api/admin/allowed-emails/00000000-0000-0000-0000-000000000000' },
   // export / account / import
   { method: 'GET', path: '/api/export' },
+  // /api/auth/send-otp 는 인증 없이 호출 가능 (login 자체 라우트). 401 가드 대상 아님.
   { method: 'GET', path: '/api/export/transactions' },
   { method: 'DELETE', path: '/api/account' },
   { method: 'POST', path: '/api/import/commit', body: { candidates: [] } },
