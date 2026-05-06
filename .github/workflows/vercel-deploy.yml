@@ -1,0 +1,56 @@
+name: Vercel Production Deployment
+
+# 옵션 B 사용 시: main push → 빌드 + Vercel Production 배포
+# 사용 전 GitHub Secrets에 다음 3개 등록 필요:
+#   VERCEL_TOKEN       - https://vercel.com/account/tokens 에서 발급
+#   VERCEL_ORG_ID      - vercel link 후 .vercel/project.json
+#   VERCEL_PROJECT_ID  - 같은 파일
+# Secret이 없으면 본 워크플로는 자동으로 skip됩니다(if 가드).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy-production:
+    if: ${{ github.repository_owner != '' && secrets.VERCEL_TOKEN != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment (production)
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build with Vercel
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy prebuilt artifact
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+  # dev 또는 feature/* push에 대해 Preview 배포
+  deploy-preview:
+    if: ${{ github.ref != 'refs/heads/main' && secrets.VERCEL_TOKEN != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm install --global vercel@latest
+      - run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
