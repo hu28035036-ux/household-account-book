@@ -11,6 +11,7 @@ import { MfaCard } from './MfaCard';
 import { ProfileCard } from './ProfileCard';
 import { PcUrlCard } from './PcUrlCard';
 import { DonateCard } from './DonateCard';
+import { SupportCard } from './SupportCard';
 
 type Me = { id: string; email: string | null; created_at: string; display_name: string | null };
 type AiProvider = { provider: 'openai' | 'ollama'; ok: boolean; model: string; reason?: string };
@@ -197,6 +198,8 @@ export function SettingsClient() {
             </ul>
           </div>
         </Card>
+
+        <SupportCard />
 
         <DonateCard />
 
