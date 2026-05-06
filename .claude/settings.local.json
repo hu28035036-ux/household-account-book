@@ -11,7 +11,11 @@
       "Bash(npm.cmd test *)",
       "Bash(NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy SUPABASE_SERVICE_ROLE_KEY=dummy OPENAI_API_KEY=sk-dummy OPENAI_MODEL=gpt-4o-mini npm.cmd run build)",
       "Bash(curl.exe -s --max-time 15 https://household-account-book-seven-phi.vercel.app/api/ai-status)",
-      "Bash(vercel.cmd env *)"
+      "Bash(vercel.cmd env *)",
+      "Bash(node -e \"try{require\\('sharp'\\);console.log\\('sharp ok'\\)}catch\\(e\\){console.log\\('sharp not installed'\\)}\")",
+      "Bash(mkdir -p public)",
+      "Bash(npm.cmd install *)",
+      "Bash(node scripts/generate-pwa-icons.mjs)"
     ]
   }
 }
