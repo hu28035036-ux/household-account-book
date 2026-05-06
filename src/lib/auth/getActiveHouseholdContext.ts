@@ -8,7 +8,7 @@ const COOKIE_KEY = 'active_household_id';
  *
  * 반환값:
  *   - null  → "개인 모드"  (개인 가계부)
- *   - 'X'   → "모임 X 모드" (모임비)
+ *   - 'X'   → "모임 X 모드"
  */
 export function getActiveHouseholdContext(): string | null {
   const v = cookies().get(COOKIE_KEY)?.value;
