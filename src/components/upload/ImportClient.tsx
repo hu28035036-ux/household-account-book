@@ -6,7 +6,13 @@ import { Upload as UploadIcon } from 'lucide-react';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
-import { parseClientFile, type SheetData } from '@/lib/import/parsers';
+import {
+  parseClientFile,
+  EncryptedFileError,
+  WrongPasswordError,
+  type SheetData,
+} from '@/lib/import/parsers';
+import { Modal } from '@/components/common/Modal';
 import {
   autoDetectMapping,
   FIELD_LABELS,
@@ -26,22 +32,62 @@ export function ImportClient() {
   const [data, setData] = useState<SheetData | null>(null);
   const [mapping, setMapping] = useState<ColumnMapping>({});
 
+  // 비번 보호 파일 흐름
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordPending, setPasswordPending] = useState(false);
+
+  async function tryParse(file: File, pwd?: string) {
+    const sheet = await parseClientFile(file, pwd);
+    if (sheet.rows.length === 0) {
+      throw new Error('데이터가 비어 있습니다. 헤더 행이 첫 줄에 있는지 확인해 주세요.');
+    }
+    setData(sheet);
+    setMapping(autoDetectMapping(sheet.headers));
+    setPhase('mapping');
+  }
+
   async function pick(file: File) {
     setError(null);
     setPhase('parsing');
     try {
-      const sheet = await parseClientFile(file);
-      if (sheet.rows.length === 0) {
-        setPhase('error');
-        setError('데이터가 비어 있습니다. 헤더 행이 첫 줄에 있는지 확인해 주세요.');
+      await tryParse(file);
+    } catch (e) {
+      if (e instanceof EncryptedFileError) {
+        // 비번 입력 모달 띄우고 phase 는 idle 로 되돌림
+        setPendingFile(file);
+        setPassword('');
+        setPasswordError(null);
+        setPasswordOpen(true);
+        setPhase('idle');
         return;
       }
-      setData(sheet);
-      setMapping(autoDetectMapping(sheet.headers));
-      setPhase('mapping');
-    } catch (e) {
       setPhase('error');
       setError(e instanceof Error ? e.message : '파일 파싱 실패');
+    }
+  }
+
+  async function submitPassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (!pendingFile || !password) return;
+    setPasswordError(null);
+    setPasswordPending(true);
+    try {
+      await tryParse(pendingFile, password);
+      // 성공 — 모달 닫음
+      setPasswordOpen(false);
+      setPendingFile(null);
+      setPassword('');
+    } catch (err) {
+      if (err instanceof WrongPasswordError) {
+        setPasswordError('비밀번호가 올바르지 않습니다. 다시 입력해 주세요.');
+      } else {
+        setPasswordError(err instanceof Error ? err.message : '파일 파싱 실패');
+      }
+    } finally {
+      setPasswordPending(false);
     }
   }
 
@@ -95,6 +141,14 @@ export function ImportClient() {
               }}
             />
           </label>
+          <div className="mt-4 rounded-md bg-softPinkBackground/60 px-3 py-2.5 text-xs text-textSecondary">
+            <div className="font-medium text-textPrimary mb-1">🔒 비밀번호가 걸린 파일이라면</div>
+            그대로 올리세요. 자동으로 비밀번호 입력창이 뜹니다.<br />
+            은행/카드사가 보낸 안내 이메일이나 다운로드 화면에 비밀번호 형식이 적혀 있어요.
+            <span className="block mt-1 text-textMuted">
+              예) 주민번호 앞 6자리(생년월일) · 카드번호 뒤 4자리 · 본인 설정 비밀번호 등
+            </span>
+          </div>
         </Card>
       )}
 
@@ -236,6 +290,64 @@ export function ImportClient() {
           </div>
         </Card>
       )}
+
+      <Modal
+        open={passwordOpen}
+        onClose={() => {
+          setPasswordOpen(false);
+          setPendingFile(null);
+          setPassword('');
+          setPasswordError(null);
+        }}
+        title="비밀번호 입력"
+      >
+        <form onSubmit={submitPassword} className="space-y-3">
+          <p className="text-sm text-textSecondary">
+            <b className="text-textPrimary">{pendingFile?.name}</b> 파일이 비밀번호로 보호되어
+            있습니다.
+          </p>
+          <div className="rounded-md bg-softPinkBackground/60 px-3 py-2.5 text-xs text-textSecondary">
+            <div className="font-medium text-textPrimary mb-1">📧 비밀번호 형식 안내</div>
+            은행/카드사가 보낸 안내 이메일이나 파일 다운로드 화면에서 비밀번호 형식을 확인하세요.
+            <ul className="mt-1 list-disc pl-4 space-y-0.5">
+              <li>주민등록번호 앞 6자리 (생년월일 YYMMDD)</li>
+              <li>카드번호 뒤 4자리</li>
+              <li>본인이 설정한 비밀번호</li>
+            </ul>
+          </div>
+          <input
+            type="password"
+            autoFocus
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="비밀번호"
+            className="w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+          />
+          {passwordError && (
+            <p className="text-sm rounded-md bg-dangerSoft text-danger px-3 py-2">
+              {passwordError}
+            </p>
+          )}
+          <div className="flex justify-end gap-2 pt-1">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                setPasswordOpen(false);
+                setPendingFile(null);
+                setPassword('');
+                setPasswordError(null);
+              }}
+              disabled={passwordPending}
+            >
+              취소
+            </Button>
+            <Button type="submit" disabled={passwordPending || !password}>
+              {passwordPending ? '확인 중…' : '확인'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

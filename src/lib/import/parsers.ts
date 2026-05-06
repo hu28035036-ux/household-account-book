@@ -7,7 +7,25 @@
 export type SheetRow = Record<string, string>;
 export type SheetData = { headers: string[]; rows: SheetRow[] };
 
-export async function parseClientFile(file: File): Promise<SheetData> {
+/**
+ * 호출 측에서 빈 비번이면 평범하게 파싱 시도, 비번이 걸려있으면
+ * EncryptedFileError 를 throw. UI 가 그걸 잡아서 비번 입력 모달을 띄우고,
+ * 다시 password 인자와 함께 호출해 풀어서 파싱한다.
+ */
+export class EncryptedFileError extends Error {
+  constructor() {
+    super('이 파일은 비밀번호가 걸려 있습니다.');
+    this.name = 'EncryptedFileError';
+  }
+}
+export class WrongPasswordError extends Error {
+  constructor() {
+    super('비밀번호가 올바르지 않습니다.');
+    this.name = 'WrongPasswordError';
+  }
+}
+
+export async function parseClientFile(file: File, password?: string): Promise<SheetData> {
   const name = file.name.toLowerCase();
   if (name.endsWith('.csv') || file.type === 'text/csv') {
     const text = await readAsText(file);
@@ -16,7 +34,38 @@ export async function parseClientFile(file: File): Promise<SheetData> {
   if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
     const XLSX = await import('xlsx');
     const ab = await file.arrayBuffer();
-    const wb = XLSX.read(ab, { type: 'array' });
+
+    // 1) 비밀번호 보호된 OOXML 파일인지 검사
+    let buffer: ArrayBuffer = ab;
+    try {
+      const officeCrypto = (await import('officecrypto-tool')).default ?? (await import('officecrypto-tool'));
+      const inputBuf = (globalThis as any).Buffer
+        ? (globalThis as any).Buffer.from(ab)
+        : ab;
+      const encrypted = (officeCrypto as any).isEncrypted(inputBuf);
+      if (encrypted) {
+        if (!password) throw new EncryptedFileError();
+        try {
+          const decrypted = await (officeCrypto as any).decrypt(inputBuf, { password });
+          // Buffer → ArrayBuffer
+          if (decrypted instanceof ArrayBuffer) {
+            buffer = decrypted;
+          } else {
+            const u8 = decrypted as Uint8Array;
+            const ab2 = new ArrayBuffer(u8.byteLength);
+            new Uint8Array(ab2).set(u8);
+            buffer = ab2;
+          }
+        } catch {
+          throw new WrongPasswordError();
+        }
+      }
+    } catch (e) {
+      // 라이브러리 자체 로드 실패는 무시하고 평소 흐름
+      if (e instanceof EncryptedFileError || e instanceof WrongPasswordError) throw e;
+    }
+
+    const wb = XLSX.read(buffer, { type: 'array' });
     const ws = wb.Sheets[wb.SheetNames[0]];
     if (!ws) throw new Error('워크시트가 비어 있습니다.');
     const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: '', raw: false });

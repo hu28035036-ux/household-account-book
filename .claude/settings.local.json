@@ -16,7 +16,9 @@
       "Bash(mkdir -p public)",
       "Bash(npm.cmd install *)",
       "Bash(node scripts/generate-pwa-icons.mjs)",
-      "Bash(NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy SUPABASE_SERVICE_ROLE_KEY=dummy OPENAI_API_KEY=sk-dummy OPENAI_MODEL=gpt-4o-mini CRON_TOKEN=dummy npm.cmd run build)"
+      "Bash(NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy SUPABASE_SERVICE_ROLE_KEY=dummy OPENAI_API_KEY=sk-dummy OPENAI_MODEL=gpt-4o-mini CRON_TOKEN=dummy npm.cmd run build)",
+      "Bash(npm.cmd search *)",
+      "Bash(npm.cmd view *)"
     ]
   }
 }
