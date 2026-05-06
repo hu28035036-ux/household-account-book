@@ -286,6 +286,19 @@
 - **권고**: (app) 그룹 내 page들은 자체 `redirect('/login')`을 호출하지 말 것. middleware + (app)/layout.tsx 두 단계가 이미 보호하며, page에서 추가 redirect가 일어나면 query 보존이 깨질 수 있음.
 - **대신**: `if (!u.user) return null;`로 안전 종료하고 라우팅은 상위 layer에 위임.
 
+### 12.7 RLS 정책 안에서 같은 테이블을 다시 select → 무한재귀 (42P17)
+- **증상**: `infinite recursion detected in policy for relation "household_members"` (Postgres 42P17)
+- **원인**: `household_members.select` 정책 안에서 `select user_id from public.household_members where household_id = ...`을 그대로 호출 → 그 select에 다시 같은 정책이 적용 → 재귀.
+- **해결**: 멤버십 검사를 `SECURITY DEFINER` 함수로 캡슐화하고 정책에서 호출. 함수 내부는 RLS를 우회하므로 재귀 없음.
+  ```sql
+  create or replace function public.is_household_member(p_household uuid, p_user uuid)
+  returns boolean language sql security definer set search_path = public stable as $$
+    select exists (select 1 from public.household_members
+                   where household_id = p_household and user_id = p_user);
+  $$;
+  ```
+- **회귀 테스트**: 같은 정책 패턴(자기 테이블 self-select)이 RLS에 들어갈 때마다 동일한 SECURITY DEFINER 함수 패턴 사용. 마이그레이션 0010 참고.
+
 ### 12.6 `create trigger`는 `if not exists`가 없어 두 번 실행 시 충돌
 - **증상**: `ERROR: 42710: trigger "trg_profiles_updated_at" for relation "profiles" already exists`
 - **원인**: PostgreSQL의 `create trigger`는 `create table if not exists`처럼 멱등 옵션이 표준화돼 있지 않음. 두 번째 실행에서 충돌.
