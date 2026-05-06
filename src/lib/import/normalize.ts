@@ -61,7 +61,17 @@ export function normalizeRow(row: SheetRow, mapping: ColumnMapping): NormalizedC
   let amount: number | null = null;
   let type: 'income' | 'expense' | 'transfer' = 'expense';
 
+  // 1) 입출금 구분 컬럼이 있으면 그것이 type 의 1차 진실 (카카오뱅크 "구분", KB "종류")
+  let typeFromColumn: 'income' | 'expense' | 'transfer' | null = null;
+  if (mapping.type_column) {
+    const v = (row[mapping.type_column] ?? '').trim();
+    if (/이체/.test(v)) typeFromColumn = 'transfer';
+    else if (/입금|수입|받음/.test(v)) typeFromColumn = 'income';
+    else if (/출금|지출|보냄/.test(v)) typeFromColumn = 'expense';
+  }
+
   if (mapping.amount_in && mapping.amount_out) {
+    // 2) 입/출금 두 컬럼이 분리된 경우 (KB·신한·NH·우리 계좌 명세서)
     const inAmt = parseAmount(row[mapping.amount_in] ?? '');
     const outAmt = parseAmount(row[mapping.amount_out] ?? '');
     if (inAmt && inAmt > 0) {
@@ -72,13 +82,30 @@ export function normalizeRow(row: SheetRow, mapping: ColumnMapping): NormalizedC
       type = 'expense';
     }
   } else if (mapping.amount) {
+    // 3) 단일 amount 컬럼 (카카오뱅크 "거래금액", 카드사 "이용금액")
     const a = parseAmount(row[mapping.amount] ?? '');
     if (a !== null) {
       amount = Math.abs(a);
-      type = a < 0 ? 'expense' : 'income';
-      // 가맹점이 있으면 expense일 가능성이 더 높음 — 보수적으로 양수도 대부분 카드 사용내역에서는 expense
-      if (a > 0 && merchant) type = 'expense';
+      // 우선순위: type_column > 부호 > "이용*" 헤더면 expense (카드 사용내역 휴리스틱)
+      if (typeFromColumn) {
+        type = typeFromColumn;
+      } else if (a < 0) {
+        type = 'expense';
+      } else {
+        // 양수일 때: 매핑된 amount 컬럼이 "이용금액/승인금액"이면 카드 명세서 → expense
+        const amtHeader = mapping.amount;
+        if (/이용\s*금액|승인\s*금액/.test(amtHeader)) {
+          type = 'expense';
+        } else {
+          // 그 외(거래금액·금액)에서 양수면 입금으로 추정
+          type = 'income';
+        }
+      }
     }
+  }
+  // type_column 만 있고 amount 미지정인 경우에도 type 은 그대로 적용
+  if (typeFromColumn && (mapping.amount_in || mapping.amount_out || mapping.amount)) {
+    type = typeFromColumn;
   }
   if (amount === null) warnings.push('amount_uncertain');
 

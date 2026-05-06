@@ -68,17 +68,65 @@ export async function parseClientFile(file: File, password?: string): Promise<Sh
     const wb = XLSX.read(buffer, { type: 'array' });
     const ws = wb.Sheets[wb.SheetNames[0]];
     if (!ws) throw new Error('워크시트가 비어 있습니다.');
-    const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: '', raw: false });
-    if (json.length === 0) return { headers: [], rows: [] };
-    const headers = Object.keys(json[0] ?? {});
-    const rows: SheetRow[] = json.map((r) => {
-      const out: SheetRow = {};
-      for (const h of headers) out[h] = String(r[h] ?? '').trim();
-      return out;
+    // 한국 은행 파일은 1행에 메타정보(성명/계좌번호/조회기간 등)가 있고,
+    // 5~15행 어디쯤에 진짜 헤더 행이 있다. 헤더 행을 휴리스틱으로 탐지.
+    const aoa = XLSX.utils.sheet_to_json<unknown[]>(ws, {
+      header: 1,
+      defval: '',
+      raw: false,
     });
+    if (aoa.length === 0) return { headers: [], rows: [] };
+    const headerRowIdx = findHeaderRow(aoa);
+    const rawHeaders = (aoa[headerRowIdx] ?? []).map((c) => String(c ?? '').trim());
+    // 빈 헤더 셀은 col_N 으로 채워서 사용자가 매핑 드롭다운에서 골라낼 수 있게.
+    const headers: string[] = rawHeaders.map((h, i) => h || `col_${i + 1}`);
+    const rows: SheetRow[] = aoa
+      .slice(headerRowIdx + 1)
+      .filter((r) => r.some((c) => String(c ?? '').trim().length > 0))
+      .map((r) => {
+        const out: SheetRow = {};
+        for (let i = 0; i < headers.length; i++) {
+          out[headers[i]] = String(r[i] ?? '').trim();
+        }
+        return out;
+      });
     return { headers, rows };
   }
   throw new Error('CSV 또는 XLSX 파일만 지원합니다.');
+}
+
+// 한국 은행/카드사 거래내역 헤더 키워드. 하나라도 매칭되면 후보 점수 +1.
+const HEADER_HINTS: RegExp[] = [
+  /거래\s*일/, /이용\s*일/, /승인\s*일/, /^일자$/, /^일시$/, /^날짜$/,
+  /입금/, /출금/, /거래\s*금액/, /이용\s*금액/, /^금액$/,
+  /^적요$/, /거래\s*내용/, /^내용$/, /가맹점/, /이용\s*처/,
+  /^메모$/, /거래\s*메모/, /^비고$/,
+  /^구분$/, /거래\s*구분/, /^종류$/,
+  /^잔액$/, /거래\s*후\s*잔액/,
+];
+
+/**
+ * 시트의 처음 30행을 검사해 가장 헤더 키워드 매칭 점수가 높은 행 인덱스를 반환.
+ * 매칭이 약하면(점수 < 3) 그냥 첫 행을 헤더로 가정 (단순 CSV/엑셀 케이스).
+ */
+function findHeaderRow(aoa: unknown[][]): number {
+  let bestRow = 0;
+  let bestScore = 0;
+  const limit = Math.min(30, aoa.length);
+  for (let i = 0; i < limit; i++) {
+    const row = aoa[i] ?? [];
+    let score = 0;
+    for (const cell of row) {
+      const s = String(cell ?? '').trim();
+      if (!s) continue;
+      if (HEADER_HINTS.some((p) => p.test(s))) score++;
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      bestRow = i;
+    }
+  }
+  return bestScore >= 3 ? bestRow : 0;
 }
 
 async function readAsText(file: File): Promise<string> {
