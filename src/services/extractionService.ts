@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { maskAll } from '@/lib/security/masking';
 import { getLatestOcrResult } from './ocrService';
 import { getFile, setFileStatus } from './fileService';
-import { ollamaGenerate, OllamaUnavailableError } from '@/lib/ollama/client';
+import { llmGenerate, LLMUnavailableError } from '@/lib/ai/llmRouter';
 import { buildExtractionPrompt } from '@/lib/ai/prompt';
 import { parseExtractionLoose, type ExtractionResult } from '@/lib/ai/extractionSchema';
 import { checkDuplicate } from '@/lib/duplicate/check';
@@ -32,7 +32,9 @@ export async function runExtractionForFile(
 
   let extraction: ExtractionResult;
   let hitCache = false;
-  let modelName = process.env.OLLAMA_MODEL ?? 'gemma4:e4b';
+  let modelName = process.env.OPENAI_API_KEY
+    ? process.env.OPENAI_MODEL ?? 'gpt-4o-mini'
+    : process.env.OLLAMA_MODEL ?? 'gemma4:e4b';
 
   // 1) 캐시 적중 시 Ollama 호출 생략
   const cached = await getCachedExtraction(supabase, userId, hash);
@@ -61,12 +63,14 @@ export async function runExtractionForFile(
     try {
       let raw: string;
       try {
-        raw = await ollamaGenerate({ prompt, format: 'json', temperature: 0.1 });
+        const r = await llmGenerate({ prompt, temperature: 0.1 });
+        raw = r.content;
+        modelName = r.model;
       } catch (e) {
-        if (e instanceof OllamaUnavailableError) {
+        if (e instanceof LLMUnavailableError) {
           await supabase
             .from('ai_extraction_jobs')
-            .update({ status: 'failed', error_message: e.message })
+            .update({ status: 'failed', error_message: e.message, model_name: modelName })
             .eq('id', jobRow!.id);
           await setFileStatus(supabase, userId, uploadedFileId, 'failed');
           throw e;
@@ -78,13 +82,14 @@ export async function runExtractionForFile(
         extraction = parseExtractionLoose(raw);
       } catch {
         // 1회 재시도 (temperature 0)
-        const raw2 = await ollamaGenerate({ prompt, format: 'json', temperature: 0 });
-        extraction = parseExtractionLoose(raw2);
+        const r2 = await llmGenerate({ prompt, temperature: 0 });
+        extraction = parseExtractionLoose(r2.content);
+        modelName = r2.model;
       }
 
       await supabase
         .from('ai_extraction_jobs')
-        .update({ status: 'success', extracted_json: extraction as any })
+        .update({ status: 'success', extracted_json: extraction as any, model_name: modelName })
         .eq('id', jobRow!.id);
     } catch (e) {
       await supabase

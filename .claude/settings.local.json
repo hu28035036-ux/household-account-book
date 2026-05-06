@@ -7,7 +7,9 @@
       "Bash(npm.cmd run *)",
       "Bash(NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy SUPABASE_SERVICE_ROLE_KEY=dummy OLLAMA_API_BASE_URL=http://localhost:11434 OLLAMA_MODEL=gemma4:e4b npm.cmd run build)",
       "Bash(node scripts/generate-test-data.mjs)",
-      "Bash(node scripts/verify-test-data.mjs)"
+      "Bash(node scripts/verify-test-data.mjs)",
+      "Bash(npm.cmd test *)",
+      "Bash(NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy SUPABASE_SERVICE_ROLE_KEY=dummy OPENAI_API_KEY=sk-dummy OPENAI_MODEL=gpt-4o-mini npm.cmd run build)"
     ]
   }
 }

@@ -15,6 +15,8 @@ const PATTERNS = {
   approvalNum: /(승인\s*번호\s*[:#]?\s*)\d{4,}/g,
   // 길게 이어진 숫자(추정 계좌). 단어 경계 사이 8자리 이상 연속 숫자.
   longDigits: /\b\d{8,}\b/g,
+  // 이메일 — OpenAI 등 외부 LLM에 전달되기 전에 마스킹.
+  email: /\b[A-Za-z0-9._+-]+@[A-Za-z0-9-]+\.[A-Za-z0-9.-]+\b/g,
 };
 
 function keepLast(str: string, keep: number, pad = '*'): string {
@@ -58,6 +60,15 @@ export function maskLongDigits(text: string): string {
   return text.replace(PATTERNS.longDigits, (m) => keepLast(m, 4));
 }
 
+export function maskEmail(text: string): string {
+  return text.replace(PATTERNS.email, (m) => {
+    const [user, domain] = m.split('@');
+    if (!domain) return m;
+    const head = user.length <= 2 ? user[0] + '*' : user.slice(0, 2) + '***';
+    return `${head}@${domain}`;
+  });
+}
+
 /**
  * 모든 마스킹을 순서대로 적용. 적용 순서가 중요(전화 vs 길게 이어진 숫자 충돌 방지).
  */
@@ -69,6 +80,7 @@ export function maskAll(text: string): string {
   out = maskBrn(out);
   out = maskApprovalNumber(out);
   out = maskPhone(out);
+  out = maskEmail(out);
   out = maskLongDigits(out);
   return out;
 }
