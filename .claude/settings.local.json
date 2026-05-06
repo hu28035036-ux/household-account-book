@@ -20,7 +20,8 @@
       "Bash(npm.cmd search *)",
       "Bash(npm.cmd view *)",
       "Bash(node scripts/analyze-bank-file.mjs \"C:/Users/user/Downloads/카카오뱅크_거래내역_N2702306496_2026050623444348.xlsx\" \"960712\")",
-      "Bash(node scripts/verify-bank-mapping.mjs \"C:/Users/user/Downloads/카카오뱅크_거래내역_N2702306496_2026050623444348.xlsx\" \"960712\")"
+      "Bash(node scripts/verify-bank-mapping.mjs \"C:/Users/user/Downloads/카카오뱅크_거래내역_N2702306496_2026050623444348.xlsx\" \"960712\")",
+      "Bash(node scripts/test-bank-detection.mjs)"
     ]
   }
 }
