@@ -22,6 +22,11 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
+  // 삼성 인터넷 / Edge / Chrome / Vivaldi 등 비-Safari 계열 브라우저가
+  // PWA 설치 가능성을 인지하도록 추가 신호.
+  other: {
+    'mobile-web-app-capable': 'yes',
+  },
 };
 
 export const viewport: Viewport = {
