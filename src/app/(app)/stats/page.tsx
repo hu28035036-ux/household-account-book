@@ -5,7 +5,6 @@ import { getDashboardSummary } from '@/services/dashboardService';
 import { getActiveHouseholdContext } from '@/lib/auth/getActiveHouseholdContext';
 import { getActiveHouseholdName } from '@/lib/auth/getActiveHouseholdName';
 import {
-  getAiAnalyticsSummary,
   getInsights,
   getMonthlySeries,
   getRecurringCandidates,
@@ -31,18 +30,14 @@ export default async function StatsPage() {
   const householdName = householdContext
     ? await getActiveHouseholdName(supabase, householdContext)
     : null;
-  const [summary, series, recurring, ai, budgets, insights, cardUsage] = await Promise.all([
+  const [summary, series, recurring, budgets, insights, cardUsage] = await Promise.all([
     getDashboardSummary(supabase, u.user.id, undefined, householdContext),
     getMonthlySeries(supabase, u.user.id, 6),
     getRecurringCandidates(supabase, u.user.id, 3),
-    getAiAnalyticsSummary(supabase, u.user.id),
     getBudgetProgress(supabase, u.user.id),
     getInsights(supabase, u.user.id),
     getCardUsageReport(supabase, u.user.id, undefined, householdContext),
   ]);
-
-  const approvalRate =
-    ai.totalCandidates > 0 ? Math.round((ai.approvedCandidates / ai.totalCandidates) * 100) : 0;
 
   return (
     <div className="space-y-5">
@@ -214,28 +209,6 @@ export default async function StatsPage() {
         totalLast={insights.total_last}
       />
 
-      {/* AI 통계 */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardSubtle>30일 AI 후보</CardSubtle>
-          <div className="mt-2 text-2xl font-semibold tabular text-textPrimary">{ai.totalCandidates}건</div>
-        </Card>
-        <Card>
-          <CardSubtle>승인율</CardSubtle>
-          <div className="mt-2 text-2xl font-semibold tabular text-textPinkStrong">{approvalRate}%</div>
-          <CardSubtle className="mt-1">
-            승인 {ai.approvedCandidates} · 제외 {ai.rejectedCandidates}
-          </CardSubtle>
-        </Card>
-        <Card>
-          <CardSubtle>분석 성공</CardSubtle>
-          <div className="mt-2 text-2xl font-semibold tabular text-success">{ai.successJobs}</div>
-        </Card>
-        <Card>
-          <CardSubtle>분석 실패</CardSubtle>
-          <div className="mt-2 text-2xl font-semibold tabular text-danger">{ai.failedJobs}</div>
-        </Card>
-      </section>
     </div>
   );
 }
