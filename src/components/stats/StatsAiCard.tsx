@@ -172,7 +172,6 @@ export function StatsAiCard() {
           <Sparkles className="h-5 w-5 text-textPinkStrong" strokeWidth={1.75} />
           <CardTitle>AI 분석</CardTitle>
         </div>
-        {current && <Badge tone="muted">{current.model}</Badge>}
       </div>
       <CardSubtle className="mt-1">
         선택한 기간의 지출 패턴을 요약하고, 절약 포인트 3~5개를 제안합니다.

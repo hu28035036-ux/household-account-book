@@ -160,7 +160,7 @@ export function UploadClient() {
             <ol className="list-decimal pl-5 space-y-0.5">
               <li>업로드 → 본인 브라우저에서 <b>OCR</b>(텍스트 추출, 약 5~15초)</li>
               <li>민감정보 자동 <b>마스킹</b>(카드/주민/전화/계좌번호)</li>
-              <li><b>OpenAI gpt-4o-mini</b> 가 가맹점·금액·카테고리 추정 (1~3초)</li>
+              <li><b>AI</b> 가 가맹점·금액·카테고리 추정 (1~3초)</li>
               <li>‘분석 후보’ 페이지에 등록 → 검토 후 승인 → 거래내역에 반영</li>
             </ol>
           </div>
@@ -172,8 +172,7 @@ export function UploadClient() {
           </div>
 
           <div className="rounded-md border border-borderSoft px-3 py-2 text-xs text-textMuted">
-            💡 비용: 영수증 1장당 약 <b className="text-textSecondary">0.3원</b> 정도 (gpt-4o-mini).
-            같은 영수증을 다시 올리면 캐시로 LLM 호출이 생략되어 비용이 더 줄어듭니다.
+            💡 같은 영수증을 다시 올리면 캐시로 AI 호출이 생략되어 자원이 절약됩니다.
           </div>
         </div>
       </Card>

@@ -60,22 +60,7 @@ export function AiServerStatus() {
 
   const active = data.providers.find((p) => p.ok);
   if (data.ok && active) {
-    const others = data.providers.filter((p) => p !== active);
-    return (
-      <StatusBanner tone="success">
-        AI 서버 연결됨 — {PROVIDER_LABEL[active.provider]}{' '}
-        <span className="font-mono text-xs">{active.model}</span>
-        {others.length > 0 && (
-          <span className="ml-1 text-xs opacity-80">
-            (백업:{' '}
-            {others
-              .map((p) => `${PROVIDER_LABEL[p.provider]} ${p.ok ? '✓' : '✗'}`)
-              .join(', ')}
-            )
-          </span>
-        )}
-      </StatusBanner>
-    );
+    return <StatusBanner tone="success">AI 서버 연결됨</StatusBanner>;
   }
 
   if (data.providers.length === 0) {
@@ -91,10 +76,7 @@ export function AiServerStatus() {
 
   return (
     <StatusBanner tone="warning">
-      AI 서버에 연결할 수 없어요.{' '}
-      <span className="text-xs">
-        ({data.providers.map((p) => `${PROVIDER_LABEL[p.provider]} ${p.reason ?? 'down'}`).join(' · ')})
-      </span>
+      AI 서버에 연결할 수 없어요.
       <br />
       OCR 텍스트로 수동 입력은 정상 동작합니다.
     </StatusBanner>
