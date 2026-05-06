@@ -39,8 +39,18 @@ export async function middleware(req: NextRequest) {
     },
   );
 
-  const { data } = await supabase.auth.getUser();
-  const user = data.user;
+  // Supabase 일시 장애 / 손상된 토큰으로 getUser()가 throw하면
+  // 미들웨어 전체가 죽어 MIDDLEWARE_INVOCATION_FAILED(500) 가 사용자에게 노출된다.
+  // 이를 막기 위해 호출을 감싸고, 실패 시 미인증 사용자처럼 흐름을 이어간다.
+  // 보호 라우트는 어차피 page 단에서 한 번 더 검증되므로 보안 영향 없음.
+  let user: { id: string } | null = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (e) {
+    console.warn('[middleware] supabase.auth.getUser failed', e);
+    user = null;
+  }
   const path = req.nextUrl.pathname;
 
   if (!user && PROTECTED_PREFIXES.some((p) => path === p || path.startsWith(p + '/'))) {
