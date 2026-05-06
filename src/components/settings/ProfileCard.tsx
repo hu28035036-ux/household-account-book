@@ -163,7 +163,7 @@ export function ProfileCard() {
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               maxLength={40}
-              placeholder="예: ⭐달려라봉봉⭐ / 안재훈♥ / dev_kim 등"
+              placeholder="예: 달려라봉봉 / 재훈 / dev_kim"
               className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
             />
             <span className="block mt-1 text-xs text-textMuted">
