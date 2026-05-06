@@ -14,7 +14,6 @@ import {
   Tags,
   CreditCard,
   Users,
-  Bell,
   Files,
   Settings,
   History,
@@ -32,16 +31,17 @@ const PRIMARY = [
   { href: '/stats', label: '통계', icon: BarChart3, prominent: false },
 ] as const;
 
-// "더보기" 시트에 노출할 항목. 사이드바와 1:1 동일한 9개.
+// "더보기" 시트 항목. 사용자 지정 순서: 예산 → 카테고리 → 결제수단 →
+// 고정 거래 → 모임 → 분석 후보 → AI 기록 → 원본 파일 → 설정 → 관리자.
+// 알림은 헤더 우상단의 NotificationBell 로 접근하므로 시트에서 제외.
 const MORE = [
-  { href: '/candidates', label: '분석 후보', icon: ListChecks },
-  { href: '/ai-history', label: 'AI 기록', icon: History },
-  { href: '/recurring', label: '고정 거래', icon: Repeat },
   { href: '/budgets', label: '예산', icon: PiggyBank },
   { href: '/categories', label: '카테고리', icon: Tags },
   { href: '/payment-methods', label: '결제수단', icon: CreditCard },
+  { href: '/recurring', label: '고정 거래', icon: Repeat },
   { href: '/households', label: '모임', icon: Users },
-  { href: '/notifications', label: '알림', icon: Bell },
+  { href: '/candidates', label: '분석 후보', icon: ListChecks },
+  { href: '/ai-history', label: 'AI 기록', icon: History },
   { href: '/files', label: '원본 파일', icon: Files },
   { href: '/settings', label: '설정', icon: Settings },
 ];
