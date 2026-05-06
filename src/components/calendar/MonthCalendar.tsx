@@ -242,7 +242,38 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
         </div>
       </Card>
 
-      {/* ③ 최근 거래내역 한 줄 리스트 */}
+      {/* ③ 이번 달 수입/지출/잔액 합계 */}
+      <Card>
+        <CardSubtle className="m-0">이번 달 합계</CardSubtle>
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          <div>
+            <div className="text-xs text-textSecondary">수입</div>
+            <div className="mt-0.5 text-base sm:text-lg font-semibold tabular text-income whitespace-nowrap">
+              +{formatKRW(totals.income)}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-textSecondary">지출</div>
+            <div className="mt-0.5 text-base sm:text-lg font-semibold tabular text-expense whitespace-nowrap">
+              -{formatKRW(totals.expense)}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-textSecondary">잔액</div>
+            <div
+              className={cn(
+                'mt-0.5 text-base sm:text-lg font-semibold tabular whitespace-nowrap',
+                totals.balance < 0 ? 'text-danger' : 'text-textPinkStrong',
+              )}
+            >
+              {totals.balance < 0 ? '-' : '+'}
+              {formatKRW(Math.abs(totals.balance))}
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* ④ 최근 거래내역 한 줄 리스트 */}
       <Card>
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <CardTitle>
