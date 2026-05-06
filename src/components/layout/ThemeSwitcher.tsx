@@ -78,7 +78,10 @@ export function ThemeSwitcher() {
         <div
           role="listbox"
           aria-label="테마 선택"
-          className="absolute right-0 mt-2 w-48 max-w-[calc(100vw-1.5rem)] z-40 rounded-modal bg-pageBackground border border-borderDefault shadow-card overflow-hidden"
+          // ThemeSwitcher 가 헤더 우측 그룹의 좌측 끝에 위치해서 absolute right-0
+          // 으로 펼치면 viewport 좌측으로 192px 밀려 잘리는 경우가 있었다.
+          // viewport 우상단 기준 fixed 로 고정해 어느 폭에서도 화면 안에 들어오도록.
+          className="fixed top-[3.75rem] right-3 w-48 max-w-[calc(100vw-1.5rem)] z-50 rounded-modal bg-pageBackground border border-borderDefault shadow-card overflow-hidden"
         >
           {THEMES.map((t) => (
             <button
