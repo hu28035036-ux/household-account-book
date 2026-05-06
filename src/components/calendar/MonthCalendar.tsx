@@ -4,10 +4,9 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
-import { Badge } from '@/components/common/Badge';
+import { Button } from '@/components/common/Button';
 import { cn } from '@/lib/utils/cn';
 import { formatKRW } from '@/lib/formatting/money';
-import { formatDateKST } from '@/lib/formatting/date';
 
 type DailyBucket = {
   date: string;
@@ -54,7 +53,7 @@ function todayKSTYMD(): string {
 
 export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }: Props) {
   const today = todayKSTYMD();
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(null); // 한 줄 리스트 필터용
 
   const dailyMap = useMemo(() => {
     const m: Record<string, DailyBucket> = {};
@@ -64,28 +63,40 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
 
   const cells = useMemo(() => {
     const [y, mm] = yearMonth.split('-').map(Number);
-    const firstDow = new Date(Date.UTC(y, mm - 1, 1)).getUTCDay(); // 0=일
+    const firstDow = new Date(Date.UTC(y, mm - 1, 1)).getUTCDay();
     const daysInMonth = new Date(Date.UTC(y, mm, 0)).getUTCDate();
     const arr: { date: string | null; day: number | null }[] = [];
-    // 앞 빈 칸 (일요일 시작)
     for (let i = 0; i < firstDow; i++) arr.push({ date: null, day: null });
     for (let d = 1; d <= daysInMonth; d++) {
       arr.push({ date: `${yearMonth}-${pad2(d)}`, day: d });
     }
-    // 6주 그리드 채우기
     while (arr.length % 7 !== 0) arr.push({ date: null, day: null });
     return arr;
   }, [yearMonth]);
 
+  // 이번 달 모든 거래를 한 줄 리스트로 (최신 날짜 → 오래된 날짜)
+  const flatRecent = useMemo(() => {
+    const dates = Object.keys(recentByDate).sort((a, b) => (a < b ? 1 : -1));
+    const rows: Array<Tx & { date: string }> = [];
+    for (const d of dates) {
+      for (const t of recentByDate[d]) rows.push({ ...t, date: d });
+    }
+    return rows;
+  }, [recentByDate]);
+
+  const visibleRows = useMemo(() => {
+    if (!selected) return flatRecent.slice(0, 50);
+    return flatRecent.filter((r) => r.date === selected);
+  }, [flatRecent, selected]);
+
   const prevYM = ymOffset(yearMonth, -1);
   const nextYM = ymOffset(yearMonth, 1);
   const overBudget = budget.remaining < 0;
-
-  const selectedTxs = selected ? recentByDate[selected] ?? [] : [];
+  const usedPct = Math.min(100, budget.usedPct);
 
   return (
     <div className="space-y-4">
-      {/* 헤더: 월 네비게이션 + KPI */}
+      {/* ① 최상단: 남은 예산 강조 */}
       <Card>
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
@@ -105,37 +116,62 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
               <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
             </Link>
           </div>
-          {budget.total > 0 ? (
-            <Badge tone={overBudget ? 'danger' : budget.usedPct >= 80 ? 'warning' : 'success'}>
-              예산 {budget.usedPct}% 사용 · {overBudget ? '초과' : '잔여'} {formatKRW(Math.abs(budget.remaining))}
-            </Badge>
-          ) : (
-            <Badge tone="muted">예산 미설정</Badge>
-          )}
         </div>
 
-        <section className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-3">
-          <Kpi label="지출" value={formatKRW(totals.expense)} className="text-expense" />
-          <Kpi label="수입" value={formatKRW(totals.income)} className="text-income" />
-          <Kpi
-            label="잔액"
-            value={formatKRW(totals.balance)}
-            className={totals.balance < 0 ? 'text-danger' : 'text-textPrimary'}
-          />
-          <Kpi
-            label="예산"
-            value={budget.total > 0 ? formatKRW(budget.total) : '미설정'}
-            className="text-textPrimary"
-          />
-          <Kpi
-            label={overBudget ? '초과' : '남은 예산'}
-            value={budget.total > 0 ? formatKRW(Math.abs(budget.remaining)) : '-'}
-            className={overBudget ? 'text-danger' : 'text-textPinkStrong'}
-          />
-        </section>
+        {budget.total > 0 ? (
+          <div className="mt-4">
+            <div className="flex items-end justify-between gap-3 flex-wrap">
+              <div>
+                <CardSubtle>{overBudget ? '예산 초과' : '남은 예산'}</CardSubtle>
+                <div
+                  className={cn(
+                    'mt-1 text-3xl sm:text-4xl font-semibold tabular',
+                    overBudget ? 'text-danger' : 'text-textPinkStrong',
+                  )}
+                >
+                  {overBudget ? '-' : ''}
+                  {formatKRW(Math.abs(budget.remaining))}
+                </div>
+              </div>
+              <div className="text-right">
+                <CardSubtle>이번 달 지출 / 예산</CardSubtle>
+                <div className="mt-1 text-sm text-textSecondary tabular">
+                  <span className="text-expense">{formatKRW(totals.expense)}</span>
+                  <span className="mx-1 text-textMuted">/</span>
+                  <span className="text-textPrimary">{formatKRW(budget.total)}</span>
+                </div>
+                <div
+                  className={cn(
+                    'mt-0.5 text-xs tabular',
+                    overBudget ? 'text-danger' : usedPct >= 80 ? 'text-warning' : 'text-success',
+                  )}
+                >
+                  {budget.usedPct}% 사용
+                </div>
+              </div>
+            </div>
+            {/* 진행 바 */}
+            <div className="mt-3 h-2.5 rounded-full bg-borderSoft overflow-hidden">
+              <div
+                className={cn(
+                  'h-full transition-[width]',
+                  overBudget ? 'bg-danger' : usedPct >= 80 ? 'bg-warning' : 'bg-primaryPink',
+                )}
+                style={{ width: `${overBudget ? 100 : usedPct}%` }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4">
+            <CardSubtle>이번 달 예산이 설정되지 않았습니다.</CardSubtle>
+            <Link href="/budgets" className="mt-2 inline-block text-sm text-textPinkStrong hover:underline">
+              예산 설정하기 →
+            </Link>
+          </div>
+        )}
       </Card>
 
-      {/* 달력 그리드 */}
+      {/* ② 캘린더 그리드 */}
       <Card className="p-2 sm:p-3">
         <div className="grid grid-cols-7 text-xs text-textSecondary">
           {['일', '월', '화', '수', '목', '금', '토'].map((d, i) => (
@@ -162,7 +198,7 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
               <button
                 key={c.date}
                 type="button"
-                onClick={() => setSelected(c.date)}
+                onClick={() => setSelected((s) => (s === c.date ? null : c.date!))}
                 className={cn(
                   'h-20 sm:h-24 p-1.5 rounded-md border text-left flex flex-col gap-0.5 transition-colors',
                   isSelected
@@ -203,35 +239,54 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
         </div>
       </Card>
 
-      {/* 선택한 날의 거래 리스트 */}
+      {/* ③ 최근 거래내역 한 줄 리스트 */}
       <Card>
-        <CardTitle>
-          {selected ? `${formatDateKST(selected)} 거래` : '날짜를 선택하세요'}
-        </CardTitle>
-        {selected && selectedTxs.length === 0 && (
-          <CardSubtle className="mt-2">이 날의 거래가 없습니다.</CardSubtle>
-        )}
-        {selected && selectedTxs.length > 0 && (
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <CardTitle>
+            {selected
+              ? `${selected.slice(5).replace('-', '월 ')}일 거래`
+              : '최근 거래내역'}
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-textMuted">
+              {selected ? `${visibleRows.length}건` : `이번 달 최신 ${visibleRows.length}건`}
+            </span>
+            {selected && (
+              <Button size="sm" variant="ghost" onClick={() => setSelected(null)}>
+                전체 보기
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {visibleRows.length === 0 ? (
+          <CardSubtle className="mt-3">
+            {selected ? '이 날의 거래가 없습니다.' : '이번 달 거래가 없습니다.'}
+          </CardSubtle>
+        ) : (
           <ul className="mt-3 divide-y divide-divider">
-            {selectedTxs.map((t) => (
-              <li key={t.id} className="py-2 flex items-center justify-between gap-3">
-                <div className="min-w-0 flex items-center gap-2">
-                  <span
-                    className="inline-block h-2 w-2 rounded-full shrink-0"
-                    style={{ backgroundColor: t.category_color ?? '#F472B6' }}
-                  />
-                  <div className="min-w-0">
-                    <div className="text-sm text-textPrimary truncate">
-                      {t.merchant_name || t.category_name || '거래'}
-                    </div>
-                    <div className="text-xs text-textSecondary truncate">
-                      {t.category_name ?? '미지정'} · {t.payment_method_name ?? '미지정'}
-                    </div>
-                  </div>
-                </div>
-                <div
+            {visibleRows.map((t) => (
+              <li
+                key={t.id}
+                className="py-1.5 flex items-center gap-3 min-w-0 text-sm"
+              >
+                <span className="tabular text-xs text-textMuted w-12 shrink-0">{t.date.slice(5)}</span>
+                <span
+                  className="inline-block h-2 w-2 rounded-full shrink-0"
+                  style={{ backgroundColor: t.category_color ?? '#F472B6' }}
+                />
+                <span className="text-textPrimary truncate flex-1">
+                  {t.merchant_name || t.category_name || '거래'}
+                </span>
+                <span className="text-xs text-textMuted truncate hidden sm:inline max-w-[110px]">
+                  {t.category_name ?? '미지정'}
+                </span>
+                <span className="text-xs text-textMuted truncate hidden md:inline max-w-[100px]">
+                  {t.payment_method_name ?? '미지정'}
+                </span>
+                <span
                   className={cn(
-                    'tabular text-sm font-medium whitespace-nowrap',
+                    'tabular font-medium whitespace-nowrap min-w-[80px] text-right',
                     t.type === 'income'
                       ? 'text-income'
                       : t.type === 'transfer'
@@ -241,21 +296,12 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
                 >
                   {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
                   {formatKRW(t.amount)}
-                </div>
+                </span>
               </li>
             ))}
           </ul>
         )}
       </Card>
-    </div>
-  );
-}
-
-function Kpi({ label, value, className }: { label: string; value: string; className?: string }) {
-  return (
-    <div className="rounded-md border border-borderSoft bg-pageBackground p-2.5">
-      <div className="text-[11px] text-textSecondary">{label}</div>
-      <div className={cn('mt-1 text-base sm:text-lg font-semibold tabular truncate', className)}>{value}</div>
     </div>
   );
 }
