@@ -15,6 +15,8 @@ export function buildExtractionPrompt(maskedOcrText: string, hints: LearningHint
 반드시 아래 JSON 스키마로만 출력한다. 설명, 코드블록, 추가 텍스트 금지.
 OCR 텍스트에 없는 정보를 만들지 마라. 불확실하면 null과 warning을 사용한다.
 금액은 정수(원). 날짜는 ISO YYYY-MM-DD 또는 null.
+중요: description, raw_text_basis 는 반드시 string 타입이며, 값이 없으면 null 이 아니라 빈 문자열 "" 로 채운다.
+warnings 는 배열이며, 없으면 빈 배열 [] 로 둔다.
 
 [USER_HINTS]
 ${hintBlock}
