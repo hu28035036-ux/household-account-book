@@ -13,6 +13,16 @@ import {
   type SheetData,
 } from '@/lib/import/parsers';
 import { Modal } from '@/components/common/Modal';
+
+// 운영자 연락 이메일 — Vercel env 에 NEXT_PUBLIC_SUPPORT_EMAIL 을 두면 그 값,
+// 없으면 ADMIN_EMAILS 첫 사용자(hu28035036@gmail.com) 을 fallback.
+const SUPPORT_EMAIL =
+  process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'hu28035036@gmail.com';
+const SUPPORT_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
+  'AI 가계부 — 파일 인식 안 됨',
+)}&body=${encodeURIComponent(
+  '운영자님께,\n\n첨부한 거래내역 파일이 앱에서 인식되지 않습니다.\n비밀번호: \n사용 은행/카드사: \n\n은행 호환 추가 부탁드립니다.\n',
+)}`;
 import {
   autoDetectMapping,
   FIELD_LABELS,
@@ -148,6 +158,17 @@ export function ImportClient() {
             <span className="block mt-1 text-textMuted">
               예) 주민번호 앞 6자리(생년월일) · 카드번호 뒤 4자리 · 본인 설정 비밀번호 등
             </span>
+          </div>
+          <div className="mt-2 rounded-md border border-borderSoft px-3 py-2.5 text-xs text-textSecondary">
+            <div className="font-medium text-textPrimary mb-1">📩 파일 인식이 안 되나요?</div>
+            새 은행 형식이거나 컬럼이 자동으로 잡히지 않는 경우, 파일과 비밀번호를 운영자에게 보내주시면
+            은행 호환을 추가해드립니다.
+            <a
+              href={SUPPORT_MAILTO}
+              className="ml-1 text-textPinkStrong hover:underline break-all"
+            >
+              {SUPPORT_EMAIL}
+            </a>
           </div>
         </Card>
       )}
@@ -314,6 +335,17 @@ export function ImportClient() {
               <li>카드번호 뒤 4자리</li>
               <li>본인이 설정한 비밀번호</li>
             </ul>
+          </div>
+          <div className="rounded-md border border-borderSoft px-3 py-2.5 text-xs text-textSecondary">
+            <div className="font-medium text-textPrimary mb-1">📩 풀어도 인식이 안 되면</div>
+            비밀번호가 맞는데도 항목이 잡히지 않으면 파일과 비밀번호를 운영자에게 보내주세요.
+            은행 호환을 추가해드립니다.
+            <a
+              href={SUPPORT_MAILTO}
+              className="ml-1 text-textPinkStrong hover:underline break-all"
+            >
+              {SUPPORT_EMAIL}
+            </a>
           </div>
           <input
             type="password"
