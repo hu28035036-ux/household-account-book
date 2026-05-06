@@ -8,6 +8,7 @@ import { Button } from '@/components/common/Button';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { localizeAuthError } from '@/lib/auth/errorMessages';
 import { LoginInput } from '@/lib/validators/auth';
+import { InstallGuide } from '@/components/auth/InstallGuide';
 
 export default function LoginClient() {
   const router = useRouter();
@@ -131,6 +132,8 @@ export default function LoginClient() {
         <p className="mt-4 text-center text-xs text-textMuted">
           결제 없이 운영됩니다. 별도 이메일 인증 절차는 없으며 비밀번호로 로그인합니다.
         </p>
+
+        <InstallGuide />
       </div>
     </div>
   );
