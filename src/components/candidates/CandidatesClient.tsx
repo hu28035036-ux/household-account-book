@@ -89,14 +89,21 @@ export function CandidatesClient() {
 
       {message && <p className="text-sm rounded-md bg-successSoft text-success px-3 py-2">{message}</p>}
 
-      <div className="flex items-center gap-2 flex-wrap">
-        <Button size="sm" variant="secondary" onClick={selectAllClean} disabled={cleanCount === 0}>
-          안전 후보 전체 선택
-        </Button>
-        <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())} disabled={selected.size === 0}>
-          선택 해제 ({selected.size})
-        </Button>
-        <span className="text-xs text-textMuted">중복/확인 필요 항목은 일괄 승인에서 자동 제외됩니다.</span>
+      <div className="sticky top-0 z-10 -mx-4 px-4 py-2 bg-pageBackground/95 backdrop-blur border-b border-borderSoft md:static md:mx-0 md:px-0 md:py-0 md:bg-transparent md:backdrop-blur-0 md:border-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button size="sm" variant="secondary" onClick={selectAllClean} disabled={cleanCount === 0}>
+            안전 후보 전체 선택
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())} disabled={selected.size === 0}>
+            선택 해제 ({selected.size})
+          </Button>
+          <div className="ml-auto">
+            <Button onClick={bulkApprove} disabled={pending || selected.size === 0}>
+              {selected.size > 0 ? `선택 ${selected.size}건 일괄 승인` : '일괄 승인 (선택 필요)'}
+            </Button>
+          </div>
+        </div>
+        <p className="mt-1.5 text-xs text-textMuted">중복/확인 필요 항목은 일괄 승인에서 자동 제외됩니다.</p>
       </div>
 
       {loading ? (
@@ -135,14 +142,6 @@ export function CandidatesClient() {
         </div>
       )}
 
-      {/* 데스크톱 하단 바 */}
-      {rows.length > 0 && (
-        <div className="hidden md:flex items-center justify-end gap-2">
-          <Button onClick={bulkApprove} disabled={pending || selected.size === 0}>
-            선택 {selected.size}건 일괄 승인
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

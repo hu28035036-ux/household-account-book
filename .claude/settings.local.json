@@ -5,7 +5,9 @@
       "Bash(vercel.cmd ls *)",
       "Bash(vercel.cmd deploy *)",
       "Bash(npm.cmd run *)",
-      "Bash(NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy SUPABASE_SERVICE_ROLE_KEY=dummy OLLAMA_API_BASE_URL=http://localhost:11434 OLLAMA_MODEL=gemma4:e4b npm.cmd run build)"
+      "Bash(NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy SUPABASE_SERVICE_ROLE_KEY=dummy OLLAMA_API_BASE_URL=http://localhost:11434 OLLAMA_MODEL=gemma4:e4b npm.cmd run build)",
+      "Bash(node scripts/generate-test-data.mjs)",
+      "Bash(node scripts/verify-test-data.mjs)"
     ]
   }
 }
