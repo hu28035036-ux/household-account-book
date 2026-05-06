@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getBudgetProgress } from '@/services/budgetService';
 import { fail, ok } from '@/lib/http/response';
+import { getActiveHouseholdContext } from '@/lib/auth/getActiveHouseholdContext';
 
 export async function GET(req: NextRequest) {
   const supabase = createSupabaseServerClient();
@@ -10,7 +11,8 @@ export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const ym = url.searchParams.get('ym') ?? undefined;
-    const result = await getBudgetProgress(supabase, u.user.id, ym ?? undefined);
+    const ctx = getActiveHouseholdContext();
+    const result = await getBudgetProgress(supabase, u.user.id, ym ?? undefined, ctx);
     return ok(result);
   } catch (e) {
     return fail('INTERNAL', e instanceof Error ? e.message : '조회 실패');

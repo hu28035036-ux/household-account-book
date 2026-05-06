@@ -39,6 +39,7 @@ function defaultYM(): string {
 
 export function BudgetsClient() {
   const { activeId, households } = useActiveHousehold();
+  const activeName = activeId ? households.find((h) => h.id === activeId)?.name ?? null : null;
   const [ym, setYm] = useState(defaultYM());
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [progressItems, setProgressItems] = useState<ProgressItem[]>([]);
@@ -53,12 +54,12 @@ export function BudgetsClient() {
   const [amountStr, setAmountStr] = useState('');
   const [thresholdPct, setThresholdPct] = useState('80');
   const [memo, setMemo] = useState('');
-  const [householdId, setHouseholdId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
+    // 서버는 쿠키(active_household_id)로 컨텍스트 인지. activeId 변경 시 reload만 트리거.
     const [bRes, pRes, cRes] = await Promise.all([
       fetch(`/api/budgets?ym=${ym}`).then((r) => r.json()),
       fetch(`/api/budgets/progress?ym=${ym}`).then((r) => r.json()),
@@ -69,7 +70,7 @@ export function BudgetsClient() {
     setProgressTotal(pRes?.data?.total ?? null);
     setCategories((cRes?.data ?? []).filter((c: Category) => c.type !== 'income'));
     setLoading(false);
-  }, [ym]);
+  }, [ym, activeId]);
 
   useEffect(() => {
     load();
@@ -91,7 +92,6 @@ export function BudgetsClient() {
     setAmountStr('');
     setThresholdPct('80');
     setMemo('');
-    setHouseholdId(activeId);
     setSaveError(null);
     setOpen(true);
   }
@@ -102,7 +102,6 @@ export function BudgetsClient() {
     setAmountStr(String(b.amount));
     setThresholdPct(String(Math.round(b.alert_threshold * 100)));
     setMemo(b.memo ?? '');
-    setHouseholdId(b.household_id ?? null);
     setSaveError(null);
     setOpen(true);
   }
@@ -120,7 +119,6 @@ export function BudgetsClient() {
         amount,
         alert_threshold: thrNum,
         memo: memo || null,
-        household_id: householdId,
       };
       const res = await fetch('/api/budgets', {
         method: 'POST',
@@ -147,7 +145,9 @@ export function BudgetsClient() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="text-2xl font-semibold text-textPrimary">예산</h2>
+        <h2 className="text-2xl font-semibold text-textPrimary">
+          {activeName ? `${activeName} (모임비)` : '개인 가계부'} 예산
+        </h2>
         <div className="flex items-center gap-2">
           <input
             type="month"
@@ -323,23 +323,10 @@ export function BudgetsClient() {
             />
           </label>
 
-          {households.length > 0 && (
-            <label className="block">
-              <span className="text-xs text-textSecondary">공유 범위</span>
-              <select
-                value={householdId ?? ''}
-                onChange={(e) => setHouseholdId(e.target.value || null)}
-                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
-              >
-                <option value="">개인 (공유 안 함)</option>
-                {households.map((h) => (
-                  <option key={h.id} value={h.id}>
-                    {h.name} (모임비)
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
+          <p className="text-xs text-textMuted">
+            현재 컨텍스트: <b className="text-textPrimary">{activeName ? `${activeName} (모임비)` : '개인 가계부'}</b>{' '}
+            — 다른 컨텍스트로 매기려면 우상단 전환기에서 바꾸세요.
+          </p>
 
           {saveError && <p className="text-sm rounded-md bg-dangerSoft text-danger px-3 py-2">{saveError}</p>}
           <div className="flex items-center justify-end gap-2 pt-2">

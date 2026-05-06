@@ -9,24 +9,33 @@ export type Budget = {
   amount: number;
   alert_threshold: number;
   memo: string | null;
+  household_id: string | null;
 };
 
 function monthStartFromYM(ym: string): string {
   return `${ym}-01`;
 }
 
+/**
+ * householdContext:
+ *   - null → 개인 모드 (user_id 일치 + household_id IS NULL)
+ *   - 'X'  → 모임 X 모드 (household_id = X)
+ */
 export async function listBudgets(
   supabase: SupabaseClient,
   userId: string,
   yearMonth?: string,
+  householdContext: string | null = null,
 ) {
   const ym = yearMonth ?? monthRangeKST().from.slice(0, 7);
-  const { data, error } = await supabase
+  let q = supabase
     .from('budgets')
     .select('*, categories(name, color, icon)')
-    .eq('user_id', userId)
-    .eq('month_start', monthStartFromYM(ym))
-    .order('category_id', { ascending: true, nullsFirst: true });
+    .eq('month_start', monthStartFromYM(ym));
+  if (householdContext) q = q.eq('household_id', householdContext);
+  else q = q.eq('user_id', userId).is('household_id', null);
+
+  const { data, error } = await q.order('category_id', { ascending: true, nullsFirst: true });
   if (error) throw error;
   return data ?? [];
 }
@@ -40,72 +49,49 @@ export async function upsertBudget(
     amount: number;
     alert_threshold?: number;
     memo?: string | null;
-    household_id?: string | null;
   },
+  householdContext: string | null = null,
 ) {
   const month_start = monthStartFromYM(input.year_month);
-  const household_id = (input as any).household_id ?? null;
+  const householdId = householdContext;
 
-  if (input.category_id) {
+  // 같은 (scope, category, month) 행이 이미 있는지 검색
+  let exQ = supabase.from('budgets').select('id').eq('month_start', month_start);
+  if (input.category_id) exQ = exQ.eq('category_id', input.category_id);
+  else exQ = exQ.is('category_id', null);
+  if (householdId) exQ = exQ.eq('household_id', householdId);
+  else exQ = exQ.eq('user_id', userId).is('household_id', null);
+  const { data: existing } = await exQ.maybeSingle();
+
+  if (existing) {
     const { data, error } = await supabase
       .from('budgets')
-      .upsert(
-        {
-          user_id: userId,
-          category_id: input.category_id,
-          month_start,
-          amount: input.amount,
-          alert_threshold: input.alert_threshold ?? 0.8,
-          memo: input.memo ?? null,
-          household_id,
-        },
-        { onConflict: 'user_id,category_id,month_start' },
-      )
+      .update({
+        amount: input.amount,
+        alert_threshold: input.alert_threshold ?? 0.8,
+        memo: input.memo ?? null,
+      })
+      .eq('id', existing.id)
       .select('*')
       .single();
     if (error) throw error;
     return data;
-  } else {
-    const { data: existing } = await supabase
-      .from('budgets')
-      .select('id')
-      .eq('user_id', userId)
-      .is('category_id', null)
-      .eq('month_start', month_start)
-      .maybeSingle();
-
-    if (existing) {
-      const { data, error } = await supabase
-        .from('budgets')
-        .update({
-          amount: input.amount,
-          alert_threshold: input.alert_threshold ?? 0.8,
-          memo: input.memo ?? null,
-          household_id,
-        })
-        .eq('id', existing.id)
-        .select('*')
-        .single();
-      if (error) throw error;
-      return data;
-    } else {
-      const { data, error } = await supabase
-        .from('budgets')
-        .insert({
-          user_id: userId,
-          category_id: null,
-          month_start,
-          amount: input.amount,
-          alert_threshold: input.alert_threshold ?? 0.8,
-          memo: input.memo ?? null,
-          household_id,
-        })
-        .select('*')
-        .single();
-      if (error) throw error;
-      return data;
-    }
   }
+  const { data, error } = await supabase
+    .from('budgets')
+    .insert({
+      user_id: userId,
+      category_id: input.category_id ?? null,
+      month_start,
+      amount: input.amount,
+      alert_threshold: input.alert_threshold ?? 0.8,
+      memo: input.memo ?? null,
+      household_id: householdId,
+    })
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data;
 }
 
 export async function deleteBudget(supabase: SupabaseClient, userId: string, id: string) {
@@ -128,25 +114,33 @@ export async function getBudgetProgress(
   supabase: SupabaseClient,
   userId: string,
   yearMonth?: string,
-): Promise<{ range: { from: string; to: string }; items: BudgetProgressItem[]; total?: BudgetProgressItem }> {
+  householdContext: string | null = null,
+): Promise<{
+  range: { from: string; to: string };
+  items: BudgetProgressItem[];
+  total?: BudgetProgressItem;
+}> {
   const ym = yearMonth ?? monthRangeKST().from.slice(0, 7);
   const { from, to } = monthRangeKST(ym);
   const month_start = monthStartFromYM(ym);
 
-  const [{ data: budgets }, { data: txs }] = await Promise.all([
-    supabase
-      .from('budgets')
-      .select('id, category_id, amount, alert_threshold, categories(name, color)')
-      .eq('user_id', userId)
-      .eq('month_start', month_start),
-    supabase
-      .from('transactions')
-      .select('category_id, amount, type')
-      .eq('user_id', userId)
-      .eq('type', 'expense')
-      .gte('transaction_date', from)
-      .lte('transaction_date', to),
-  ]);
+  let bQ = supabase
+    .from('budgets')
+    .select('id, category_id, amount, alert_threshold, categories(name, color)')
+    .eq('month_start', month_start);
+  if (householdContext) bQ = bQ.eq('household_id', householdContext);
+  else bQ = bQ.eq('user_id', userId).is('household_id', null);
+
+  let tQ = supabase
+    .from('transactions')
+    .select('category_id, amount, type')
+    .eq('type', 'expense')
+    .gte('transaction_date', from)
+    .lte('transaction_date', to);
+  if (householdContext) tQ = tQ.eq('household_id', householdContext);
+  else tQ = tQ.eq('user_id', userId).is('household_id', null);
+
+  const [{ data: budgets }, { data: txs }] = await Promise.all([bQ, tQ]);
 
   const spentByCategory: Record<string, number> = {};
   let spentTotal = 0;
