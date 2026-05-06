@@ -36,6 +36,10 @@ export function CandidatesClient() {
       ).length,
     [rows],
   );
+  const duplicateRows = useMemo(
+    () => rows.filter((c) => c.duplicate_status === 'duplicate'),
+    [rows],
+  );
 
   function toggle(id: string, on: boolean) {
     setSelected((prev) => {
@@ -80,6 +84,34 @@ export function CandidatesClient() {
     }
   }
 
+  async function bulkRejectDuplicates() {
+    if (duplicateRows.length === 0) return;
+    if (
+      !confirm(
+        `중복 가능성 높음 ${duplicateRows.length}건을 일괄 거부할까요? 거래내역에는 등록되지 않습니다.`,
+      )
+    )
+      return;
+    setPending(true);
+    setMessage(null);
+    try {
+      const res = await fetch('/api/candidates/reject-bulk', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ ids: duplicateRows.map((r) => r.id) }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error?.message ?? '실패');
+      const r = json?.data?.rejected ?? 0;
+      setMessage(`중복 의심 ${r}건 일괄 거부됨`);
+      load();
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : '실패');
+    } finally {
+      setPending(false);
+    }
+  }
+
   return (
     <div className="space-y-4 pb-24 md:pb-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -98,13 +130,31 @@ export function CandidatesClient() {
           <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())} disabled={selected.size === 0}>
             선택 해제 ({selected.size})
           </Button>
+          {duplicateRows.length > 0 && (
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={bulkRejectDuplicates}
+              disabled={pending}
+            >
+              중복 {duplicateRows.length}건 일괄 거부
+            </Button>
+          )}
           <div className="ml-auto">
             <Button size="sm" onClick={bulkApprove} disabled={pending || selected.size === 0}>
               {selected.size > 0 ? `선택 ${selected.size}건 일괄 승인` : '일괄 승인 (선택 필요)'}
             </Button>
           </div>
         </div>
-        <p className="mt-1.5 text-xs text-textMuted">중복/확인 필요 항목은 일괄 승인에서 자동 제외됩니다.</p>
+        <p className="mt-1.5 text-xs text-textMuted">
+          중복/확인 필요 항목은 일괄 승인에서 자동 제외됩니다.
+          {duplicateRows.length > 0 && (
+            <>
+              {' '}중복 가능성 높음 <b className="text-danger">{duplicateRows.length}건</b>은
+              위 버튼으로 한 번에 거부할 수 있어요.
+            </>
+          )}
+        </p>
       </div>
 
       {loading ? (

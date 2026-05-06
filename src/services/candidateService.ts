@@ -49,6 +49,27 @@ export async function rejectCandidate(supabase: SupabaseClient, userId: string, 
   return data;
 }
 
+/** 다건 일괄 거부 — 중복 의심 일괄 정리 등에 사용. */
+export async function rejectBulk(supabase: SupabaseClient, userId: string, ids: string[]) {
+  if (ids.length === 0) return { rejectedIds: [] as string[] };
+  const { data, error } = await supabase
+    .from('transaction_candidates')
+    .update({ user_action: 'rejected' })
+    .eq('user_id', userId)
+    .in('id', ids)
+    .select('id');
+  if (error) throw error;
+  const rejectedIds = (data ?? []).map((r) => r.id as string);
+  for (const id of rejectedIds) {
+    try {
+      await logCorrection(supabase, userId, id, 'user_action', 'pending', 'rejected', 'bulk_reject');
+    } catch {
+      // 로그 실패는 무시 — 거부 자체는 이미 끝난 상태
+    }
+  }
+  return { rejectedIds };
+}
+
 async function resolveCategoryByName(
   supabase: SupabaseClient,
   userId: string,
