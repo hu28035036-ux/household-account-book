@@ -21,6 +21,8 @@ export function TransactionsClient() {
   const [q, setQ] = useState('');
   const [type, setType] = useState<'' | 'income' | 'expense' | 'transfer'>('');
   const [scope, setScope] = useState<'' | 'personal' | 'household'>('');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkPending, setBulkPending] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -38,6 +40,7 @@ export function TransactionsClient() {
     setTotal(txRes?.data?.total ?? 0);
     setCategories(catRes?.data ?? []);
     setPaymentMethods(pmRes?.data ?? []);
+    setSelected(new Set());
     setLoading(false);
   }, [q, type, scope]);
 
@@ -49,6 +52,48 @@ export function TransactionsClient() {
     if (!confirm(`이 거래를 삭제할까요?\n${row.merchant_name ?? ''} ${row.amount?.toLocaleString?.() ?? ''}원`)) return;
     const res = await fetch(`/api/transactions/${row.id}`, { method: 'DELETE' });
     if (res.ok) load();
+  }
+
+  function toggle(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    setSelected((prev) => {
+      const allOn = rows.length > 0 && rows.every((r) => prev.has(r.id));
+      return allOn ? new Set() : new Set(rows.map((r) => r.id));
+    });
+  }
+
+  async function bulkDelete() {
+    if (selected.size === 0) return;
+    if (!confirm(`선택한 ${selected.size}건을 삭제할까요? 되돌릴 수 없습니다.`)) return;
+    setBulkPending(true);
+    try {
+      const res = await fetch('/api/transactions/delete-bulk', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ ids: Array.from(selected) }),
+      });
+      const j = await res.json();
+      if (!res.ok) {
+        alert(j?.error?.message ?? '일괄 삭제 실패');
+        return;
+      }
+      const deleted = j?.data?.deleted ?? 0;
+      const skipped = j?.data?.skipped ?? 0;
+      if (skipped > 0) {
+        alert(`${deleted}건 삭제 · ${skipped}건은 권한이 없어 건너뜀(다른 가족이 만든 거래)`);
+      }
+      await load();
+    } finally {
+      setBulkPending(false);
+    }
   }
 
   return (
@@ -96,7 +141,39 @@ export function TransactionsClient() {
         </div>
       </Card>
 
-      <div className="text-xs text-textSecondary">총 {total}건</div>
+      <div className="flex items-center justify-between gap-2 text-xs text-textSecondary">
+        <span>총 {total}건</span>
+      </div>
+
+      {!loading && rows.length > 0 && (
+        <div className="sticky top-0 z-10 -mx-4 px-4 py-2 bg-pageBackground/95 backdrop-blur border-b border-borderSoft md:static md:mx-0 md:px-0 md:py-0 md:bg-transparent md:backdrop-blur-0 md:border-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button size="sm" variant="secondary" onClick={toggleAll}>
+              {rows.length > 0 && rows.every((r) => selected.has(r.id)) ? '전체 해제' : '전체 선택'}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setSelected(new Set())}
+              disabled={selected.size === 0}
+            >
+              선택 해제 ({selected.size})
+            </Button>
+            <div className="ml-auto">
+              <Button
+                onClick={bulkDelete}
+                disabled={bulkPending || selected.size === 0}
+                variant="danger"
+              >
+                {selected.size > 0 ? `선택 ${selected.size}건 삭제` : '일괄 삭제 (선택 필요)'}
+              </Button>
+            </div>
+          </div>
+          <p className="mt-1.5 text-xs text-textMuted">
+            본인이 만든 거래만 삭제됩니다. 다른 가족이 만든 가족 공유 거래는 자동으로 제외됩니다.
+          </p>
+        </div>
+      )}
 
       {loading ? (
         <Card>
@@ -112,6 +189,9 @@ export function TransactionsClient() {
                 setEditorOpen(true);
               }}
               onDelete={onDelete}
+              selectedIds={selected}
+              onToggle={toggle}
+              onToggleAll={toggleAll}
             />
           </div>
           <div className="md:hidden">
@@ -122,6 +202,8 @@ export function TransactionsClient() {
                 setEditorOpen(true);
               }}
               onDelete={onDelete}
+              selectedIds={selected}
+              onToggle={toggle}
             />
           </div>
         </>

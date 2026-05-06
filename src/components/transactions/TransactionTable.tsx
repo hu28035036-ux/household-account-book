@@ -22,14 +22,34 @@ type Props = {
   rows: Row[];
   onEdit?: (row: Row) => void;
   onDelete?: (row: Row) => void;
+  selectedIds?: Set<string>;
+  onToggle?: (id: string) => void;
+  onToggleAll?: () => void;
 };
 
-export function TransactionTable({ rows, onEdit, onDelete }: Props) {
+export function TransactionTable({ rows, onEdit, onDelete, selectedIds, onToggle, onToggleAll }: Props) {
+  const selectionEnabled = !!selectedIds;
+  const allChecked = selectionEnabled && rows.length > 0 && rows.every((r) => selectedIds!.has(r.id));
+  const someChecked = selectionEnabled && rows.some((r) => selectedIds!.has(r.id)) && !allChecked;
   return (
     <div className="overflow-x-auto rounded-card border border-borderDefault bg-cardBackground">
       <table className="min-w-full text-sm">
         <thead className="bg-sectionBackground text-textSecondary">
           <tr>
+            {selectionEnabled && (
+              <th className="px-3 py-2 w-10">
+                <input
+                  type="checkbox"
+                  checked={allChecked}
+                  ref={(el) => {
+                    if (el) el.indeterminate = someChecked;
+                  }}
+                  onChange={() => onToggleAll?.()}
+                  aria-label="현재 페이지 전체 선택"
+                  className="h-4 w-4 cursor-pointer accent-primaryPink"
+                />
+              </th>
+            )}
             <th className="text-left px-3 py-2 whitespace-nowrap">날짜</th>
             <th className="text-left px-3 py-2">가맹점</th>
             <th className="text-left px-3 py-2">카테고리</th>
@@ -41,7 +61,24 @@ export function TransactionTable({ rows, onEdit, onDelete }: Props) {
         </thead>
         <tbody className="divide-y divide-divider">
           {rows.map((r) => (
-            <tr key={r.id} className="hover:bg-softPinkBackground/40">
+            <tr
+              key={r.id}
+              className={
+                'hover:bg-softPinkBackground/40 ' +
+                (selectionEnabled && selectedIds!.has(r.id) ? 'bg-primaryPinkSoft/60' : '')
+              }
+            >
+              {selectionEnabled && (
+                <td className="px-3 py-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds!.has(r.id)}
+                    onChange={() => onToggle?.(r.id)}
+                    aria-label={`${r.merchant_name ?? '거래'} 선택`}
+                    className="h-4 w-4 cursor-pointer accent-primaryPink"
+                  />
+                </td>
+              )}
               <td className="px-3 py-2 whitespace-nowrap text-textPrimary">{formatDateKST(r.transaction_date)}</td>
               <td className="px-3 py-2 text-textPrimary max-w-[200px]">
                 <span className="inline-flex items-center gap-1.5">
@@ -96,7 +133,7 @@ export function TransactionTable({ rows, onEdit, onDelete }: Props) {
           ))}
           {rows.length === 0 && (
             <tr>
-              <td colSpan={7} className="px-3 py-10 text-center text-textSecondary">
+              <td colSpan={selectionEnabled ? 8 : 7} className="px-3 py-10 text-center text-textSecondary">
                 거래내역이 없습니다.
               </td>
             </tr>

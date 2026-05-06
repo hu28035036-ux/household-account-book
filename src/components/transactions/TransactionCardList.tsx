@@ -23,9 +23,12 @@ type Props = {
   rows: Row[];
   onEdit?: (row: Row) => void;
   onDelete?: (row: Row) => void;
+  selectedIds?: Set<string>;
+  onToggle?: (id: string) => void;
 };
 
-export function TransactionCardList({ rows, onEdit, onDelete }: Props) {
+export function TransactionCardList({ rows, onEdit, onDelete, selectedIds, onToggle }: Props) {
+  const selectionEnabled = !!selectedIds;
   if (rows.length === 0) {
     return (
       <Card>
@@ -37,9 +40,19 @@ export function TransactionCardList({ rows, onEdit, onDelete }: Props) {
     <ul className="space-y-3">
       {rows.map((r) => (
         <li key={r.id}>
-          <Card className="p-4">
+          <Card className={'p-4 ' + (selectionEnabled && selectedIds!.has(r.id) ? 'ring-2 ring-primaryPink' : '')}>
             <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
+              <div className="flex items-start gap-2 min-w-0">
+                {selectionEnabled && (
+                  <input
+                    type="checkbox"
+                    checked={selectedIds!.has(r.id)}
+                    onChange={() => onToggle?.(r.id)}
+                    aria-label={`${r.merchant_name ?? '거래'} 선택`}
+                    className="mt-1 h-5 w-5 cursor-pointer accent-primaryPink shrink-0"
+                  />
+                )}
+                <div className="min-w-0">
                 <div className="text-base font-semibold text-textPrimary flex items-center gap-1.5">
                   {r.household_id && (
                     <span
@@ -53,6 +66,7 @@ export function TransactionCardList({ rows, onEdit, onDelete }: Props) {
                 <div className="mt-0.5 text-xs text-textSecondary">
                   {formatDateKST(r.transaction_date)} · {r.categories?.name ?? '미지정'} ·{' '}
                   {r.payment_methods?.name ?? '미지정'}
+                </div>
                 </div>
               </div>
               <div

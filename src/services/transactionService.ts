@@ -92,3 +92,24 @@ export async function deleteTransaction(supabase: SupabaseClient, userId: string
     .eq('id', id);
   if (error) throw error;
 }
+
+/**
+ * 다건 일괄 삭제. user_id 가 일치하는 행만 지워지므로 다른 사용자가 만든
+ * 가족 공유 거래는 안전하게 건너뜀. 반환값에 실제 삭제된 id 목록을 담아
+ * 호출 측에서 "삭제 N / 건너뜀 M"을 표시할 수 있게 한다.
+ */
+export async function deleteTransactionsBulk(
+  supabase: SupabaseClient,
+  userId: string,
+  ids: string[],
+) {
+  if (ids.length === 0) return { deletedIds: [] as string[] };
+  const { data, error } = await supabase
+    .from('transactions')
+    .delete()
+    .eq('user_id', userId)
+    .in('id', ids)
+    .select('id');
+  if (error) throw error;
+  return { deletedIds: (data ?? []).map((r) => r.id as string) };
+}
