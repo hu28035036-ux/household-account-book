@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
+import { BirthdateSelect } from '@/components/common/BirthdateSelect';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { localizeAuthError } from '@/lib/auth/errorMessages';
 import { SignupInput } from '@/lib/validators/auth';
@@ -152,13 +153,7 @@ export default function SignupClient() {
               />
             </Field>
             <Field label="생년월일">
-              <input
-                type="date"
-                value={birthdate}
-                onChange={(e) => setBirthdate(e.target.value)}
-                required
-                className="w-full h-11 px-3 rounded-lg bg-white border border-borderDefault text-textPrimary"
-              />
+              <BirthdateSelect value={birthdate} onChange={setBirthdate} />
             </Field>
             <Field label="이메일">
               <input
