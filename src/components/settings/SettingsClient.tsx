@@ -155,14 +155,45 @@ export function SettingsClient() {
 
         <Card>
           <CardTitle>데이터 내보내기</CardTitle>
-          <CardSubtle className="mt-1">본인 데이터만 받습니다.</CardSubtle>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <a href="/api/export" className="inline-flex">
-              <Button variant="secondary">전체 JSON</Button>
+          <CardSubtle className="mt-1">
+            본인 데이터만 받습니다. 모임 컨텍스트와 무관하게 본인 계정의 모든 행을 포함.
+          </CardSubtle>
+
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <a href="/api/export/transactions/xlsx" className="inline-flex w-full">
+              <Button variant="secondary" fullWidth>📗 거래 (XLSX)</Button>
             </a>
-            <a href="/api/export/transactions" className="inline-flex">
-              <Button variant="secondary">거래 CSV</Button>
+            <a href="/api/export/transactions" className="inline-flex w-full">
+              <Button variant="secondary" fullWidth>📄 거래 (CSV)</Button>
             </a>
+            <a href="/api/export/xlsx" className="inline-flex w-full">
+              <Button variant="secondary" fullWidth>📚 전체 (XLSX)</Button>
+            </a>
+            <a href="/api/export" className="inline-flex w-full">
+              <Button variant="secondary" fullWidth>🗂 전체 (JSON)</Button>
+            </a>
+          </div>
+
+          <div className="mt-3 rounded-md border border-borderSoft px-3 py-2.5 text-xs text-textSecondary leading-relaxed">
+            <div className="font-medium text-textPrimary mb-1">형식 안내</div>
+            <ul className="space-y-1">
+              <li>
+                <b>📗 거래 XLSX</b> — 거래내역 한 시트. 한글 컬럼·천 단위 콤마·자동 폭.
+                엑셀에서 바로 열기.
+              </li>
+              <li>
+                <b>📄 거래 CSV</b> — 영문 컬럼. 구글 시트·다른 가계부 앱·BI 도구용.
+                UTF-8 BOM 포함 (한글 안 깨짐).
+              </li>
+              <li>
+                <b>📚 전체 XLSX</b> — 거래·카테고리·결제수단·예산·고정 거래·분석 후보·AI 분석
+                기록 7개 시트.
+              </li>
+              <li>
+                <b>🗂 전체 JSON</b> — 모든 테이블 raw dump (학습 규칙·OCR 결과·로그 포함).
+                전체 백업·앱 이전용.
+              </li>
+            </ul>
           </div>
         </Card>
 
