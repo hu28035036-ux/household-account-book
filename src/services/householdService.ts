@@ -61,13 +61,32 @@ export async function deleteHousehold(supabase: SupabaseClient, userId: string, 
 }
 
 export async function listMembers(supabase: SupabaseClient, householdId: string) {
-  const { data, error } = await supabase
+  const { data: members, error } = await supabase
     .from('household_members')
     .select('*')
     .eq('household_id', householdId)
     .order('joined_at', { ascending: true });
   if (error) throw error;
-  return data ?? [];
+  if (!members || members.length === 0) return [];
+
+  // 별명/이름 표시를 위해 같은 모임 멤버의 profile 정보 조회
+  const userIds = members.map((m: any) => m.user_id as string);
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('user_id, nickname, full_name, username')
+    .in('user_id', userIds);
+  const map = new Map<string, any>();
+  for (const p of profiles ?? []) map.set((p as any).user_id, p);
+
+  return members.map((m: any) => {
+    const p = map.get(m.user_id);
+    return {
+      ...m,
+      nickname: p?.nickname ?? null,
+      full_name: p?.full_name ?? null,
+      username: p?.username ?? null,
+    };
+  });
 }
 
 export async function removeMember(

@@ -8,6 +8,7 @@ import { Modal } from '@/components/common/Modal';
 import { formatDateKST } from '@/lib/formatting/date';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { MfaCard } from './MfaCard';
+import { ProfileCard } from './ProfileCard';
 
 type Me = { id: string; email: string | null; created_at: string; display_name: string | null };
 type AiProvider = { provider: 'openai' | 'ollama'; ok: boolean; model: string; reason?: string };
@@ -96,6 +97,8 @@ export function SettingsClient() {
             </Button>
           </div>
         </Card>
+
+        <ProfileCard />
 
         <MfaCard />
 

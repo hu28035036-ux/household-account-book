@@ -18,7 +18,15 @@ type Household = {
   is_owner: boolean;
   member_count: number;
 };
-type Member = { id: string; user_id: string; role: 'owner' | 'member'; joined_at: string };
+type Member = {
+  id: string;
+  user_id: string;
+  role: 'owner' | 'member';
+  joined_at: string;
+  nickname: string | null;
+  full_name: string | null;
+  username: string | null;
+};
 type Invite = { id: string; code: string; expires_at: string; used_at: string | null; created_at: string };
 
 export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
@@ -279,22 +287,44 @@ export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
                 <div className="mt-4">
                   <div className="text-sm font-medium text-textPrimary mb-2">멤버</div>
                   <ul className="space-y-1">
-                    {members.map((m) => (
-                      <li key={m.id} className="flex items-center justify-between gap-2 text-sm">
-                        <div className="min-w-0 truncate">
-                          <span className="text-textPrimary">{m.user_id.slice(0, 8)}…</span>
-                          <span className="ml-2 text-textSecondary">{formatDateKST(m.joined_at)}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge tone={m.role === 'owner' ? 'pink' : 'muted'}>{m.role}</Badge>
-                          {active.is_owner && m.user_id !== currentUserId && (
-                            <Button size="sm" variant="ghost" onClick={() => removeMem(m)}>
-                              <Trash2 className="h-4 w-4 text-danger" strokeWidth={1.75} />
-                            </Button>
-                          )}
-                        </div>
-                      </li>
-                    ))}
+                    {members.map((m) => {
+                      // 표시 우선순위: 별명 > 이름 > 아이디 > UUID 앞 8자
+                      const displayName =
+                        m.nickname?.trim() ||
+                        m.full_name?.trim() ||
+                        m.username?.trim() ||
+                        `사용자 ${m.user_id.slice(0, 8)}`;
+                      const isMe = m.user_id === currentUserId;
+                      return (
+                        <li
+                          key={m.id}
+                          className="flex items-center justify-between gap-2 text-sm"
+                        >
+                          <div className="min-w-0 flex-1 flex items-center gap-2 flex-wrap">
+                            <span className="text-textPrimary truncate">{displayName}</span>
+                            {isMe && <Badge tone="muted">나</Badge>}
+                            {m.nickname && m.full_name && (
+                              <span className="text-xs text-textMuted truncate">
+                                ({m.full_name})
+                              </span>
+                            )}
+                            <span className="ml-auto text-xs text-textSecondary whitespace-nowrap">
+                              {formatDateKST(m.joined_at)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Badge tone={m.role === 'owner' ? 'pink' : 'muted'}>
+                              {m.role === 'owner' ? '총무' : '멤버'}
+                            </Badge>
+                            {active.is_owner && !isMe && (
+                              <Button size="sm" variant="ghost" onClick={() => removeMem(m)}>
+                                <Trash2 className="h-4 w-4 text-danger" strokeWidth={1.75} />
+                              </Button>
+                            )}
+                          </div>
+                        </li>
+                      );
+                    })}
                     {members.length === 0 && (
                       <li className="text-sm text-textSecondary">멤버가 없습니다.</li>
                     )}
