@@ -34,11 +34,18 @@ export async function listBudgets(
 export async function upsertBudget(
   supabase: SupabaseClient,
   userId: string,
-  input: { category_id: string | null; year_month: string; amount: number; alert_threshold?: number; memo?: string | null },
+  input: {
+    category_id: string | null;
+    year_month: string;
+    amount: number;
+    alert_threshold?: number;
+    memo?: string | null;
+    household_id?: string | null;
+  },
 ) {
   const month_start = monthStartFromYM(input.year_month);
+  const household_id = (input as any).household_id ?? null;
 
-  // category_id가 null인지 아닌지에 따라 적절한 partial unique를 사용해 upsert.
   if (input.category_id) {
     const { data, error } = await supabase
       .from('budgets')
@@ -50,6 +57,7 @@ export async function upsertBudget(
           amount: input.amount,
           alert_threshold: input.alert_threshold ?? 0.8,
           memo: input.memo ?? null,
+          household_id,
         },
         { onConflict: 'user_id,category_id,month_start' },
       )
@@ -58,7 +66,6 @@ export async function upsertBudget(
     if (error) throw error;
     return data;
   } else {
-    // 전체 예산: category_id IS NULL 매칭은 upsert로 깔끔히 안 되므로 select 후 분기.
     const { data: existing } = await supabase
       .from('budgets')
       .select('id')
@@ -74,6 +81,7 @@ export async function upsertBudget(
           amount: input.amount,
           alert_threshold: input.alert_threshold ?? 0.8,
           memo: input.memo ?? null,
+          household_id,
         })
         .eq('id', existing.id)
         .select('*')
@@ -90,6 +98,7 @@ export async function upsertBudget(
           amount: input.amount,
           alert_threshold: input.alert_threshold ?? 0.8,
           memo: input.memo ?? null,
+          household_id,
         })
         .select('*')
         .single();

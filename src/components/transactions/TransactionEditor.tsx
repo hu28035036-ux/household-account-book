@@ -5,6 +5,7 @@ import { Modal } from '@/components/common/Modal';
 import { Button } from '@/components/common/Button';
 import { todayKSTISO } from '@/lib/formatting/date';
 import { parseKRWInput } from '@/lib/formatting/money';
+import { useActiveHousehold } from '@/lib/active-household';
 
 type Category = { id: string; name: string; type: string };
 type PaymentMethod = { id: string; name: string };
@@ -18,6 +19,7 @@ type Initial = {
   category_id?: string | null;
   payment_method_id?: string | null;
   memo?: string | null;
+  household_id?: string | null;
 };
 
 type Props = {
@@ -31,6 +33,7 @@ type Props = {
 
 export function TransactionEditor({ open, onClose, initial, categories, paymentMethods, onSaved }: Props) {
   const editing = !!initial?.id;
+  const { activeId, households } = useActiveHousehold();
   const [date, setDate] = useState(initial?.transaction_date ?? todayKSTISO());
   const [type, setType] = useState<'income' | 'expense' | 'transfer'>(initial?.type ?? 'expense');
   const [amountStr, setAmountStr] = useState(initial?.amount ? String(initial.amount) : '');
@@ -38,6 +41,9 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
   const [categoryId, setCategoryId] = useState(initial?.category_id ?? '');
   const [paymentMethodId, setPaymentMethodId] = useState(initial?.payment_method_id ?? '');
   const [memo, setMemo] = useState(initial?.memo ?? '');
+  const [householdId, setHouseholdId] = useState<string | null>(
+    initial?.household_id ?? (editing ? null : activeId),
+  );
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,8 +56,9 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
     setCategoryId(initial?.category_id ?? '');
     setPaymentMethodId(initial?.payment_method_id ?? '');
     setMemo(initial?.memo ?? '');
+    setHouseholdId(initial?.household_id ?? (editing ? null : activeId));
     setError(null);
-  }, [open, initial]);
+  }, [open, initial, editing, activeId]);
 
   async function save() {
     setError(null);
@@ -70,6 +77,7 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
         category_id: categoryId || null,
         payment_method_id: paymentMethodId || null,
         memo: memo || null,
+        household_id: householdId,
       };
       const res = await fetch(editing ? `/api/transactions/${initial!.id}` : '/api/transactions', {
         method: editing ? 'PATCH' : 'POST',
@@ -175,6 +183,26 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
             className="mt-1 w-full px-3 py-2 rounded-lg border border-borderDefault bg-white text-textPrimary"
           />
         </label>
+        {households.length > 0 && (
+          <label className="block">
+            <span className="text-xs text-textSecondary">공유 범위</span>
+            <select
+              value={householdId ?? ''}
+              onChange={(e) => setHouseholdId(e.target.value || null)}
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+            >
+              <option value="">개인 (공유 안 함)</option>
+              {households.map((h) => (
+                <option key={h.id} value={h.id}>
+                  {h.name} (가족 공유)
+                </option>
+              ))}
+            </select>
+            <span className="block mt-1 text-xs text-textMuted">
+              가족으로 저장하면 해당 가족 멤버 모두가 이 거래를 볼 수 있습니다(읽기 전용).
+            </span>
+          </label>
+        )}
         {error && <p className="text-sm rounded-md bg-dangerSoft text-danger px-3 py-2">{error}</p>}
         <div className="flex items-center justify-end gap-2 pt-2">
           <Button variant="ghost" onClick={onClose} disabled={pending}>

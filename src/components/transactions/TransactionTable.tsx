@@ -13,6 +13,7 @@ type Row = {
   merchant_name: string | null;
   description: string | null;
   memo: string | null;
+  household_id: string | null;
   categories?: { name: string; color: string | null; icon: string | null } | null;
   payment_methods?: { name: string; type: string; masked_number: string | null } | null;
 };
@@ -42,8 +43,17 @@ export function TransactionTable({ rows, onEdit, onDelete }: Props) {
           {rows.map((r) => (
             <tr key={r.id} className="hover:bg-softPinkBackground/40">
               <td className="px-3 py-2 whitespace-nowrap text-textPrimary">{formatDateKST(r.transaction_date)}</td>
-              <td className="px-3 py-2 text-textPrimary truncate max-w-[200px]">
-                {r.merchant_name || '-'}
+              <td className="px-3 py-2 text-textPrimary max-w-[200px]">
+                <span className="inline-flex items-center gap-1.5">
+                  {r.household_id && (
+                    <span
+                      title="가족 공유"
+                      className="inline-block h-1.5 w-1.5 rounded-full bg-primaryPink shrink-0"
+                      aria-label="가족 공유"
+                    />
+                  )}
+                  <span className="truncate">{r.merchant_name || '-'}</span>
+                </span>
               </td>
               <td className="px-3 py-2">
                 <span className="inline-flex items-center gap-1.5">

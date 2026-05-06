@@ -20,12 +20,14 @@ export function TransactionsClient() {
   const [editing, setEditing] = useState<Row | null>(null);
   const [q, setQ] = useState('');
   const [type, setType] = useState<'' | 'income' | 'expense' | 'transfer'>('');
+  const [scope, setScope] = useState<'' | 'personal' | 'household'>('');
 
   const load = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
     if (q) params.set('q', q);
     if (type) params.set('type', type);
+    if (scope) params.set('scope', scope);
     params.set('limit', '50');
     const [txRes, catRes, pmRes] = await Promise.all([
       fetch('/api/transactions?' + params.toString()).then((r) => r.json()),
@@ -37,7 +39,7 @@ export function TransactionsClient() {
     setCategories(catRes?.data ?? []);
     setPaymentMethods(pmRes?.data ?? []);
     setLoading(false);
-  }, [q, type]);
+  }, [q, type, scope]);
 
   useEffect(() => {
     load();
@@ -81,6 +83,15 @@ export function TransactionsClient() {
             <option value="expense">지출</option>
             <option value="income">수입</option>
             <option value="transfer">이체</option>
+          </select>
+          <select
+            value={scope}
+            onChange={(e) => setScope(e.target.value as any)}
+            className="h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+          >
+            <option value="">개인+가족 전체</option>
+            <option value="personal">개인만</option>
+            <option value="household">가족 공유만</option>
           </select>
         </div>
       </Card>

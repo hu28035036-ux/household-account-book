@@ -10,13 +10,21 @@ export async function listTransactions(
   userId: string,
   q: TransactionListQuery,
 ) {
+  // RLS가 본인 + 멤버인 가족 공유분을 모두 보여주므로 user_id 필터를 강제하지 않는다.
+  // 단, scope=personal/household 또는 household_id로 좁힐 수 있다.
   let query = supabase
     .from('transactions')
     .select('*, categories(name,color,icon), payment_methods(name,type,masked_number)', { count: 'exact' })
-    .eq('user_id', userId)
     .order('transaction_date', { ascending: false })
     .order('created_at', { ascending: false })
     .range(q.offset, q.offset + q.limit - 1);
+
+  if (q.scope === 'personal') {
+    query = query.is('household_id', null).eq('user_id', userId);
+  } else if (q.scope === 'household') {
+    query = query.not('household_id', 'is', null);
+  }
+  if (q.household_id) query = query.eq('household_id', q.household_id);
 
   if (q.from) query = query.gte('transaction_date', q.from);
   if (q.to) query = query.lte('transaction_date', q.to);

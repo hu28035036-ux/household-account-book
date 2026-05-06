@@ -43,6 +43,7 @@ export const CreateTransactionInput = z.object({
   category_id: Uuid.nullable().optional(),
   payment_method_id: Uuid.nullable().optional(),
   memo: z.string().max(500).optional().nullable(),
+  household_id: Uuid.nullable().optional(),
 });
 export type CreateTransactionInput = z.infer<typeof CreateTransactionInput>;
 
@@ -56,6 +57,8 @@ export const TransactionListQuery = z.object({
   category_id: Uuid.optional(),
   payment_method_id: Uuid.optional(),
   q: z.string().max(100).optional(),
+  scope: z.enum(['all', 'personal', 'household']).optional(),
+  household_id: Uuid.optional(),
   limit: z.coerce.number().int().min(1).max(200).default(50),
   offset: z.coerce.number().int().min(0).default(0),
 });

@@ -8,6 +8,7 @@ import { Modal } from '@/components/common/Modal';
 import { Badge } from '@/components/common/Badge';
 import { BudgetBar } from './BudgetBar';
 import { formatKRW, parseKRWInput } from '@/lib/formatting/money';
+import { useActiveHousehold } from '@/lib/active-household';
 
 type Category = { id: string; name: string; color: string | null; type: string };
 type Budget = {
@@ -17,6 +18,7 @@ type Budget = {
   amount: number;
   alert_threshold: number;
   memo: string | null;
+  household_id: string | null;
   categories?: { name: string; color: string | null } | null;
 };
 type ProgressItem = {
@@ -36,6 +38,7 @@ function defaultYM(): string {
 }
 
 export function BudgetsClient() {
+  const { activeId, households } = useActiveHousehold();
   const [ym, setYm] = useState(defaultYM());
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [progressItems, setProgressItems] = useState<ProgressItem[]>([]);
@@ -50,6 +53,7 @@ export function BudgetsClient() {
   const [amountStr, setAmountStr] = useState('');
   const [thresholdPct, setThresholdPct] = useState('80');
   const [memo, setMemo] = useState('');
+  const [householdId, setHouseholdId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -87,6 +91,7 @@ export function BudgetsClient() {
     setAmountStr('');
     setThresholdPct('80');
     setMemo('');
+    setHouseholdId(activeId);
     setSaveError(null);
     setOpen(true);
   }
@@ -97,6 +102,7 @@ export function BudgetsClient() {
     setAmountStr(String(b.amount));
     setThresholdPct(String(Math.round(b.alert_threshold * 100)));
     setMemo(b.memo ?? '');
+    setHouseholdId(b.household_id ?? null);
     setSaveError(null);
     setOpen(true);
   }
@@ -114,6 +120,7 @@ export function BudgetsClient() {
         amount,
         alert_threshold: thrNum,
         memo: memo || null,
+        household_id: householdId,
       };
       const res = await fetch('/api/budgets', {
         method: 'POST',
@@ -315,6 +322,24 @@ export function BudgetsClient() {
               className="mt-1 w-full px-3 py-2 rounded-lg border border-borderDefault bg-white text-textPrimary"
             />
           </label>
+
+          {households.length > 0 && (
+            <label className="block">
+              <span className="text-xs text-textSecondary">공유 범위</span>
+              <select
+                value={householdId ?? ''}
+                onChange={(e) => setHouseholdId(e.target.value || null)}
+                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              >
+                <option value="">개인 (공유 안 함)</option>
+                {households.map((h) => (
+                  <option key={h.id} value={h.id}>
+                    {h.name} (가족 공유)
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
 
           {saveError && <p className="text-sm rounded-md bg-dangerSoft text-danger px-3 py-2">{saveError}</p>}
           <div className="flex items-center justify-end gap-2 pt-2">

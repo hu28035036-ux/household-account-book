@@ -10,6 +10,7 @@ const Body = z.object({
   amount: z.number().int().min(0),
   alert_threshold: z.number().min(0).max(1).optional(),
   memo: z.string().max(200).nullable().optional(),
+  household_id: z.string().uuid().nullable().optional(),
 });
 
 export async function GET(req: NextRequest) {

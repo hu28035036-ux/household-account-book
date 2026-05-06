@@ -17,3 +17,7 @@ next-env.d.ts
 playwright-report/
 test-results/
 .playwright/
+
+# bkit runtime logs (노이즈 방지)
+.bkit/audit/
+.bkit/runtime/

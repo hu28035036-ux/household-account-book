@@ -14,6 +14,7 @@ type Row = {
   merchant_name: string | null;
   description: string | null;
   memo: string | null;
+  household_id: string | null;
   categories?: { name: string; color: string | null } | null;
   payment_methods?: { name: string; masked_number: string | null } | null;
 };
@@ -39,8 +40,15 @@ export function TransactionCardList({ rows, onEdit, onDelete }: Props) {
           <Card className="p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <div className="text-base font-semibold text-textPrimary truncate">
-                  {r.merchant_name || r.categories?.name || '거래'}
+                <div className="text-base font-semibold text-textPrimary flex items-center gap-1.5">
+                  {r.household_id && (
+                    <span
+                      title="가족 공유"
+                      className="inline-block h-1.5 w-1.5 rounded-full bg-primaryPink shrink-0"
+                      aria-label="가족 공유"
+                    />
+                  )}
+                  <span className="truncate">{r.merchant_name || r.categories?.name || '거래'}</span>
                 </div>
                 <div className="mt-0.5 text-xs text-textSecondary">
                   {formatDateKST(r.transaction_date)} · {r.categories?.name ?? '미지정'} ·{' '}
