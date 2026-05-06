@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell($items = Get-ChildItem -Force -ErrorAction SilentlyContinue; if \\($items\\) { $items | ForEach-Object { $_.Name } } else { \"EMPTY\" }; if \\(Test-Path \"docs\"\\) { \"DOCS_EXISTS\" } else { \"DOCS_MISSING\" })"
+      "PowerShell($items = Get-ChildItem -Force -ErrorAction SilentlyContinue; if \\($items\\) { $items | ForEach-Object { $_.Name } } else { \"EMPTY\" }; if \\(Test-Path \"docs\"\\) { \"DOCS_EXISTS\" } else { \"DOCS_MISSING\" })",
+      "Bash(vercel.cmd ls *)",
+      "Bash(vercel.cmd deploy *)",
+      "Bash(npm.cmd run *)",
+      "Bash(NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy SUPABASE_SERVICE_ROLE_KEY=dummy OLLAMA_API_BASE_URL=http://localhost:11434 OLLAMA_MODEL=gemma4:e4b npm.cmd run build)"
     ]
   }
 }
