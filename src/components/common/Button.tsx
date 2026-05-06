@@ -17,9 +17,16 @@ const VARIANT: Record<Variant, string> = {
   danger: 'bg-danger text-white hover:bg-red-600 focus-visible:ring-danger',
 };
 
+// 사이즈별 실제 픽셀·타이포 — 코드에서 size="..." 한 줄만 보고도 크기를 알 수 있게 명시.
 const SIZE: Record<Size, string> = {
+  // sm = height 36px / paddingX 12px / font 14px / radius 6px
+  //  → 액션바 (분석 후보·거래 일괄선택), 행 인라인 액션
   sm: 'h-9 px-3 text-sm rounded-md',
+  // md = height 44px / paddingX 16px / font 14px / radius 8px
+  //  → 표준 폼 / 페이지 CTA (default)
   md: 'h-11 px-4 text-sm rounded-lg',
+  // lg = height 48px / paddingX 20px / font 16px / radius 8px
+  //  → 모바일 풀폭, 회원가입·로그인 같은 강조 액션
   lg: 'h-12 px-5 text-base rounded-lg',
 };
 
