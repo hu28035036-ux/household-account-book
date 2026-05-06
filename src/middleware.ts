@@ -8,6 +8,7 @@ const PROTECTED_PREFIXES = [
   '/transactions',
   '/upload',
   '/candidates',
+  '/stats',
   '/budgets',
   '/categories',
   '/payment-methods',

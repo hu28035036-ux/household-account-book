@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard,
+  Calendar,
+  BarChart3,
   Receipt,
   Upload,
   ListChecks,
@@ -20,10 +21,11 @@ import { cn } from '@/lib/utils/cn';
 
 // PITFALLS §1.3: 새 보호 라우트는 middleware/Sidebar/(BottomNav)/e2e 4곳을 모두 갱신
 const NAV = [
-  { href: '/dashboard', label: '대시보드', icon: LayoutDashboard },
+  { href: '/dashboard', label: '월 캘린더', icon: Calendar },
   { href: '/transactions', label: '거래내역', icon: Receipt },
   { href: '/upload', label: 'AI 업로드', icon: Upload },
   { href: '/candidates', label: '분석 후보', icon: ListChecks },
+  { href: '/stats', label: '통계', icon: BarChart3 },
   { href: '/budgets', label: '예산', icon: PiggyBank },
   { href: '/categories', label: '카테고리', icon: Tags },
   { href: '/payment-methods', label: '결제수단', icon: CreditCard },

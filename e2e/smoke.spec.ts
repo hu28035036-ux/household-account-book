@@ -12,6 +12,7 @@ const PROTECTED_PATHS = [
   '/transactions',
   '/upload',
   '/candidates',
+  '/stats',
   '/budgets',
   '/categories',
   '/payment-methods',
