@@ -53,8 +53,14 @@ export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const limit = Math.min(50, Math.max(1, Number(url.searchParams.get('limit') ?? '20')));
+    const createdFrom = url.searchParams.get('createdFrom') ?? undefined;
+    const createdTo = url.searchParams.get('createdTo') ?? undefined;
     const ctx = getActiveHouseholdContext();
-    const rows = await listStatsAiHistory(supabase, u.user.id, ctx, limit);
+    const rows = await listStatsAiHistory(supabase, u.user.id, ctx, {
+      limit,
+      createdFrom,
+      createdTo,
+    });
     return ok(rows);
   } catch (e) {
     return fail('INTERNAL', e instanceof Error ? e.message : '이력 조회 실패');
