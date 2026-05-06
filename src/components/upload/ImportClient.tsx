@@ -53,6 +53,8 @@ export function ImportClient() {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<SheetData | null>(null);
   const [mapping, setMapping] = useState<ColumnMapping>({});
+  // C 옵션: 학습/휴리스틱으로 분류 안 된 가맹점에 한해 AI 한 번 호출
+  const [useLlmFallback, setUseLlmFallback] = useState(false);
 
   // 비번 보호 파일 흐름
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -130,7 +132,7 @@ export function ImportClient() {
       const res = await fetch('/api/import/commit', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ candidates }),
+        body: JSON.stringify({ candidates, useLlmFallback }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error?.message ?? 'import 실패');
@@ -317,6 +319,39 @@ export function ImportClient() {
               📌 <b>{data.rows.length}건</b>이 한 번에 ‘분석 후보’로 들어갑니다. 이미 입력된 거래와
               중복일 수 있으니, 가져오기 후 <b>분석 후보 페이지에서 중복 의심 표시</b>를 꼭 확인하고
               승인하세요.
+            </div>
+
+            <div className="mt-3 rounded-md border border-borderSoft px-3 py-2.5 text-xs text-textSecondary">
+              <div className="font-medium text-textPrimary mb-1">🏷️ 카테고리 자동 분류</div>
+              <ul className="list-disc pl-4 space-y-0.5">
+                <li>
+                  과거에 같은 가맹점에 매긴 카테고리가 있으면 <b>자동 적용</b>됩니다 (학습).
+                </li>
+                <li>
+                  스타벅스·GS25·넷플릭스 같은 <b>흔한 가맹점</b>은 사전 매칭으로 자동 분류됩니다.
+                </li>
+                <li>
+                  <b>개인 카페 / 작은 식당 등</b>은 매칭이 어려울 수 있어요. 그런 행은
+                  <span className="ml-1 inline-flex items-center rounded px-1.5 py-0.5 bg-warningSoft text-warning">
+                    카테고리 확인 필요
+                  </span>{' '}
+                  배지로 표시되니 후보 페이지에서 직접 골라주세요.
+                </li>
+              </ul>
+              <label className="mt-2 flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 h-4 w-4 accent-primaryPink"
+                  checked={useLlmFallback}
+                  onChange={(e) => setUseLlmFallback(e.target.checked)}
+                />
+                <span className="text-textPrimary">
+                  AI 로 한 번 더 추정해 보기{' '}
+                  <span className="text-textMuted">
+                    (분류 안 된 행만 한 번에 호출 — 1000건 기준 약 1~2원)
+                  </span>
+                </span>
+              </label>
             </div>
             <div className="mt-4 flex items-center justify-end gap-2">
               <Button

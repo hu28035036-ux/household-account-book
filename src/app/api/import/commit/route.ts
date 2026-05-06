@@ -16,7 +16,10 @@ const Candidate = z.object({
   warnings: z.array(z.string()).default([]),
 });
 
-const Body = z.object({ candidates: z.array(Candidate).min(1).max(2000) });
+const Body = z.object({
+  candidates: z.array(Candidate).min(1).max(2000),
+  useLlmFallback: z.boolean().optional().default(false),
+});
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -27,7 +30,9 @@ export async function POST(req: NextRequest) {
   if (!u.user) return fail('UNAUTHORIZED', '로그인이 필요합니다.');
   try {
     const body = Body.parse(await req.json());
-    const result = await importCandidates(supabase, u.user.id, body.candidates);
+    const result = await importCandidates(supabase, u.user.id, body.candidates, {
+      useLlmFallback: body.useLlmFallback,
+    });
     return ok(result, { status: 201 });
   } catch (e) {
     return fail('BAD_REQUEST', e instanceof Error ? e.message : '입력 오류');

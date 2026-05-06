@@ -34,6 +34,7 @@ const WARN_LABELS: Record<string, string> = {
   date_uncertain: '날짜 확인 필요',
   amount_uncertain: '금액 확인 필요',
   merchant_uncertain: '가맹점 확인 필요',
+  category_uncertain: '카테고리 확인 필요',
   basis_not_found: '근거 텍스트 누락',
   differs_from_user_pattern: '평소 패턴과 다름',
   recurring_candidate: '반복 지출 가능성',
