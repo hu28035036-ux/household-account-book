@@ -131,6 +131,52 @@ export function UploadClient() {
 
       <AiServerStatus />
 
+      <Card>
+        <CardTitle>📸 영수증·내역 사진 / PDF 업로드 안내</CardTitle>
+        <div className="mt-2 space-y-3 text-sm text-textSecondary leading-relaxed">
+          <div>
+            <div className="font-medium text-textPrimary mb-1">어떤 파일을 올리면 되나요?</div>
+            <ul className="list-disc pl-5 space-y-0.5">
+              <li>편의점·마트·식당 등에서 받은 <b>종이 영수증 사진</b></li>
+              <li>카드 결제 내역 / 계좌 거래내역 <b>화면 캡처</b></li>
+              <li>은행 앱·카드사 앱이 발급한 <b>PDF 명세서</b></li>
+              <li>SMS 결제 알림 캡처도 가능</li>
+            </ul>
+          </div>
+
+          <div>
+            <div className="font-medium text-textPrimary mb-1">잘 인식되려면</div>
+            <ul className="list-disc pl-5 space-y-0.5">
+              <li>가맹점·금액·날짜가 <b>또렷하게</b> 보이도록</li>
+              <li>조명이 충분한 곳에서, 영수증을 <b>평평하게</b> 펴고</li>
+              <li>한 장에 한 영수증 — 여러 개면 따로 올려주세요</li>
+              <li>너무 멀거나 흐릿하면 AI 분석 후 “확인 필요”로 표시됩니다</li>
+            </ul>
+          </div>
+
+          <div>
+            <div className="font-medium text-textPrimary mb-1">처리 흐름</div>
+            <ol className="list-decimal pl-5 space-y-0.5">
+              <li>업로드 → 본인 브라우저에서 <b>OCR</b>(텍스트 추출, 약 5~15초)</li>
+              <li>민감정보 자동 <b>마스킹</b>(카드/주민/전화/계좌번호)</li>
+              <li><b>OpenAI gpt-4o-mini</b> 가 가맹점·금액·카테고리 추정 (1~3초)</li>
+              <li>‘분석 후보’ 페이지에 등록 → 검토 후 승인 → 거래내역에 반영</li>
+            </ol>
+          </div>
+
+          <div className="rounded-md bg-softPinkBackground/60 px-3 py-2 text-xs">
+            🔒 OCR 텍스트는 본인 PC/폰 안에서 처리되고, AI에 보내질 때는 카드번호·주민번호·
+            전화번호가 자동으로 가려진 상태로 전송됩니다. 원본 텍스트는{' '}
+            <b className="text-textPrimary">7일 후 자동 삭제</b>됩니다.
+          </div>
+
+          <div className="rounded-md border border-borderSoft px-3 py-2 text-xs text-textMuted">
+            💡 비용: 영수증 1장당 약 <b className="text-textSecondary">0.3원</b> 정도 (gpt-4o-mini).
+            같은 영수증을 다시 올리면 캐시로 LLM 호출이 생략되어 비용이 더 줄어듭니다.
+          </div>
+        </div>
+      </Card>
+
       <Dropzone onFiles={onFiles} />
 
       {items.length === 0 && (
