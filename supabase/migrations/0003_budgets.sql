@@ -26,6 +26,7 @@ create unique index if not exists uniq_budgets_total
 create index if not exists idx_budgets_user_month
   on public.budgets(user_id, month_start desc);
 
+drop trigger if exists trg_budgets_updated_at on public.budgets;
 create trigger trg_budgets_updated_at before update on public.budgets
 for each row execute function public.set_updated_at();
 

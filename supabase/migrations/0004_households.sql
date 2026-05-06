@@ -13,6 +13,7 @@ create table if not exists public.households (
   updated_at timestamptz not null default now()
 );
 create index if not exists idx_households_owner on public.households(owner_id);
+drop trigger if exists trg_households_updated_at on public.households;
 create trigger trg_households_updated_at before update on public.households
 for each row execute function public.set_updated_at();
 

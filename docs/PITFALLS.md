@@ -286,6 +286,12 @@
 - **권고**: (app) 그룹 내 page들은 자체 `redirect('/login')`을 호출하지 말 것. middleware + (app)/layout.tsx 두 단계가 이미 보호하며, page에서 추가 redirect가 일어나면 query 보존이 깨질 수 있음.
 - **대신**: `if (!u.user) return null;`로 안전 종료하고 라우팅은 상위 layer에 위임.
 
+### 12.6 `create trigger`는 `if not exists`가 없어 두 번 실행 시 충돌
+- **증상**: `ERROR: 42710: trigger "trg_profiles_updated_at" for relation "profiles" already exists`
+- **원인**: PostgreSQL의 `create trigger`는 `create table if not exists`처럼 멱등 옵션이 표준화돼 있지 않음. 두 번째 실행에서 충돌.
+- **해결**: 모든 `create trigger` 앞에 `drop trigger if exists <name> on <table>;`를 동반시켜 멱등화.
+- **회귀 예방**: 신규 마이그레이션 작성 시 트리거가 추가되면 이 짝을 함께 둘 것. 검토 시 `grep -nE "^create trigger" supabase/migrations/*.sql`로 누락된 drop이 있는지 확인.
+
 ### 12.5 e2e 실행 후 dev server 잔존 → 다음 실행 timeout
 - **증상**: 두 번째 e2e 실행이 `Port 3000 is in use, trying 3001 instead.` 후 `Error: Timed out waiting 120000ms from config.webServer.`로 fail.
 - **원인**: 이전 e2e가 띄운 `npm run dev` 프로세스가 SIGINT 무시하고 포트 3000을 잡고 있음. webServer는 3001로 fallback 시도지만 `BASE_URL`은 3000을 가리킴.

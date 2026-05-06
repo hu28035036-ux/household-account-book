@@ -27,6 +27,7 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+drop trigger if exists trg_profiles_updated_at on public.profiles;
 create trigger trg_profiles_updated_at before update on public.profiles
 for each row execute function public.set_updated_at();
 
@@ -45,6 +46,7 @@ create table if not exists public.categories (
   updated_at timestamptz not null default now()
 );
 create index if not exists idx_categories_user on public.categories(user_id);
+drop trigger if exists trg_categories_updated_at on public.categories;
 create trigger trg_categories_updated_at before update on public.categories
 for each row execute function public.set_updated_at();
 
@@ -63,6 +65,7 @@ create table if not exists public.payment_methods (
   updated_at timestamptz not null default now()
 );
 create index if not exists idx_payment_methods_user on public.payment_methods(user_id);
+drop trigger if exists trg_payment_methods_updated_at on public.payment_methods;
 create trigger trg_payment_methods_updated_at before update on public.payment_methods
 for each row execute function public.set_updated_at();
 
@@ -82,6 +85,7 @@ create table if not exists public.uploaded_files (
   updated_at timestamptz not null default now()
 );
 create index if not exists idx_uploaded_files_user_status on public.uploaded_files(user_id, status, created_at desc);
+drop trigger if exists trg_uploaded_files_updated_at on public.uploaded_files;
 create trigger trg_uploaded_files_updated_at before update on public.uploaded_files
 for each row execute function public.set_updated_at();
 
@@ -119,6 +123,7 @@ create table if not exists public.ai_extraction_jobs (
   updated_at timestamptz not null default now()
 );
 create index if not exists idx_ai_jobs_user_file on public.ai_extraction_jobs(user_id, uploaded_file_id);
+drop trigger if exists trg_ai_jobs_updated_at on public.ai_extraction_jobs;
 create trigger trg_ai_jobs_updated_at before update on public.ai_extraction_jobs
 for each row execute function public.set_updated_at();
 
@@ -145,6 +150,7 @@ create table if not exists public.transaction_candidates (
   updated_at timestamptz not null default now()
 );
 create index if not exists idx_candidates_user_action on public.transaction_candidates(user_id, user_action, created_at desc);
+drop trigger if exists trg_candidates_updated_at on public.transaction_candidates;
 create trigger trg_candidates_updated_at before update on public.transaction_candidates
 for each row execute function public.set_updated_at();
 
@@ -174,6 +180,7 @@ create table if not exists public.transactions (
 );
 create index if not exists idx_transactions_user_date on public.transactions(user_id, transaction_date desc);
 create index if not exists idx_transactions_user_cat_date on public.transactions(user_id, category_id, transaction_date);
+drop trigger if exists trg_transactions_updated_at on public.transactions;
 create trigger trg_transactions_updated_at before update on public.transactions
 for each row execute function public.set_updated_at();
 
@@ -195,6 +202,7 @@ create table if not exists public.user_learning_rules (
   updated_at timestamptz not null default now()
 );
 create index if not exists idx_user_learning_user_type on public.user_learning_rules(user_id, rule_type);
+drop trigger if exists trg_user_learning_updated_at on public.user_learning_rules;
 create trigger trg_user_learning_updated_at before update on public.user_learning_rules
 for each row execute function public.set_updated_at();
 
@@ -228,6 +236,7 @@ create table if not exists public.merchant_learning_rules (
   updated_at timestamptz not null default now()
 );
 create index if not exists idx_merchant_learning_user_norm on public.merchant_learning_rules(user_id, merchant_normalized_name);
+drop trigger if exists trg_merchant_learning_updated_at on public.merchant_learning_rules;
 create trigger trg_merchant_learning_updated_at before update on public.merchant_learning_rules
 for each row execute function public.set_updated_at();
 
