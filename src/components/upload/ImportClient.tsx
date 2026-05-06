@@ -18,10 +18,22 @@ import { Modal } from '@/components/common/Modal';
 // 없으면 ADMIN_EMAILS 첫 사용자(hu28035036@gmail.com) 을 fallback.
 const SUPPORT_EMAIL =
   process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'hu28035036@gmail.com';
+// 메일 본문 양식 — "파일·비밀번호는 절대 보내지 마세요" 를 명시. 사용자가 빈칸만 채워서
+// 보내면 운영자가 헤더 패턴만 보고 코드에 정규식을 추가할 수 있다.
 const SUPPORT_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
-  'AI 가계부 — 파일 인식 안 됨',
+  'AI 가계부 — 새 은행 호환 요청',
 )}&body=${encodeURIComponent(
-  '운영자님께,\n\n첨부한 거래내역 파일이 앱에서 인식되지 않습니다.\n비밀번호: \n사용 은행/카드사: \n\n은행 호환 추가 부탁드립니다.\n',
+  [
+    '운영자님,',
+    '',
+    '새 은행/카드사 형식이 자동 인식되지 않아 호환 추가 부탁드립니다.',
+    '',
+    '은행/카드사 이름: ',
+    '헤더 텍스트(엑셀 첫 줄의 컬럼 이름들을 그대로): ',
+    '',
+    '※ 보안을 위해 파일과 비밀번호는 절대 보내지 않습니다.',
+    '',
+  ].join('\n'),
 )}`;
 import {
   autoDetectMapping,
@@ -161,14 +173,29 @@ export function ImportClient() {
           </div>
           <div className="mt-2 rounded-md border border-borderSoft px-3 py-2.5 text-xs text-textSecondary">
             <div className="font-medium text-textPrimary mb-1">📩 파일 인식이 안 되나요?</div>
-            새 은행 형식이거나 컬럼이 자동으로 잡히지 않는 경우, 파일과 비밀번호를 운영자에게 보내주시면
-            은행 호환을 추가해드립니다.
-            <a
-              href={SUPPORT_MAILTO}
-              className="ml-1 text-textPinkStrong hover:underline break-all"
-            >
-              {SUPPORT_EMAIL}
-            </a>
+            새 은행/카드사 형식은 운영자에게 알려주시면 호환을 추가해드립니다. 다음 두 가지만
+            보내주세요 —{' '}
+            <b className="text-danger">파일·비밀번호는 절대 보내지 마세요.</b>
+            <ul className="mt-1 list-disc pl-4 space-y-0.5">
+              <li>
+                <b>은행/카드사 이름</b> (예: 카카오뱅크, KB국민, 토스뱅크)
+              </li>
+              <li>
+                <b>헤더 텍스트</b> (예: <span className="font-mono">거래일시 | 구분 | 거래금액 | 잔액 | 거래구분 | 내용 | 메모</span>)
+              </li>
+            </ul>
+            <div className="mt-2">
+              <a href={SUPPORT_MAILTO} className="text-textPinkStrong hover:underline break-all">
+                ✉ {SUPPORT_EMAIL} 로 메일 보내기
+              </a>
+            </div>
+            <div className="mt-2 pt-2 border-t border-borderSoft text-textMuted">
+              💡 <b>헤더란?</b> 파일을 엑셀로 열었을 때 거래 데이터 한 줄 위에 적힌 컬럼 이름들입니다.
+              <br />
+              예: 카카오뱅크 파일을 열면 위쪽에 “성명·계좌번호·조회기간” 같은 메타 정보가 있고,
+              그 아래에 <span className="font-mono">거래일시 | 구분 | 거래금액 | …</span> 한 줄이
+              보일 거예요. <b>이 한 줄</b>을 그대로 옮겨 적어 보내시면 됩니다.
+            </div>
           </div>
           <div className="mt-2 rounded-md bg-warningSoft px-3 py-2.5 text-xs text-warning">
             <div className="font-medium mb-1">📌 대량 import 주의</div>
@@ -349,14 +376,17 @@ export function ImportClient() {
           </div>
           <div className="rounded-md border border-borderSoft px-3 py-2.5 text-xs text-textSecondary">
             <div className="font-medium text-textPrimary mb-1">📩 풀어도 인식이 안 되면</div>
-            비밀번호가 맞는데도 항목이 잡히지 않으면 파일과 비밀번호를 운영자에게 보내주세요.
-            은행 호환을 추가해드립니다.
-            <a
-              href={SUPPORT_MAILTO}
-              className="ml-1 text-textPinkStrong hover:underline break-all"
-            >
-              {SUPPORT_EMAIL}
-            </a>
+            비밀번호는 맞는데 컬럼이 자동으로 잡히지 않으면 운영자에게 알려주시면 호환을
+            추가해드립니다.{' '}
+            <b className="text-danger">파일·비밀번호는 절대 보내지 마세요.</b>
+            <br />
+            은행 이름과 <b>헤더 텍스트</b>(엑셀에서 거래 데이터 한 줄 위에 적힌 컬럼 이름들)만
+            적어 보내주시면 됩니다.
+            <div className="mt-1">
+              <a href={SUPPORT_MAILTO} className="text-textPinkStrong hover:underline break-all">
+                ✉ {SUPPORT_EMAIL}
+              </a>
+            </div>
           </div>
           <input
             type="password"
