@@ -56,9 +56,9 @@ export function TransactionCardList({ rows, onEdit, onDelete, selectedIds, onTog
                 <div className="text-base font-semibold text-textPrimary flex items-center gap-1.5">
                   {r.household_id && (
                     <span
-                      title="가족 공유"
+                      title="모임비"
                       className="inline-block h-1.5 w-1.5 rounded-full bg-primaryPink shrink-0"
-                      aria-label="가족 공유"
+                      aria-label="모임비"
                     />
                   )}
                   <span className="truncate">{r.merchant_name || r.categories?.name || '거래'}</span>

@@ -334,7 +334,7 @@ export function BudgetsClient() {
                 <option value="">개인 (공유 안 함)</option>
                 {households.map((h) => (
                   <option key={h.id} value={h.id}>
-                    {h.name} (가족 공유)
+                    {h.name} (모임비)
                   </option>
                 ))}
               </select>

@@ -134,9 +134,9 @@ export function TransactionsClient() {
             onChange={(e) => setScope(e.target.value as any)}
             className="h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
           >
-            <option value="">개인+가족 전체</option>
+            <option value="">개인+모임비 전체</option>
             <option value="personal">개인만</option>
-            <option value="household">가족 공유만</option>
+            <option value="household">모임비만</option>
           </select>
         </div>
       </Card>
@@ -170,7 +170,7 @@ export function TransactionsClient() {
             </div>
           </div>
           <p className="mt-1.5 text-xs text-textMuted">
-            본인이 만든 거래만 삭제됩니다. 다른 가족이 만든 가족 공유 거래는 자동으로 제외됩니다.
+            본인이 만든 거래만 삭제됩니다. 다른 멤버가 만든 모임비 거래는 자동으로 제외됩니다.
           </p>
         </div>
       )}

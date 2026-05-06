@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { cn } from '@/lib/utils/cn';
-import { formatKRW } from '@/lib/formatting/money';
+import { formatKRW, compactKRW } from '@/lib/formatting/money';
 
 type DailyBucket = {
   date: string;
@@ -125,7 +125,7 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
                 <CardSubtle>{overBudget ? '예산 초과' : '남은 예산'}</CardSubtle>
                 <div
                   className={cn(
-                    'mt-1 text-3xl sm:text-4xl font-semibold tabular',
+                    'mt-1 text-xl sm:text-2xl font-semibold tabular',
                     overBudget ? 'text-danger' : 'text-textPinkStrong',
                   )}
                 >
@@ -200,7 +200,7 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
                 type="button"
                 onClick={() => setSelected((s) => (s === c.date ? null : c.date!))}
                 className={cn(
-                  'h-20 sm:h-24 p-1.5 rounded-md border text-left flex flex-col gap-0.5 transition-colors',
+                  'h-20 sm:h-24 p-1 sm:p-1.5 rounded-md border text-left flex flex-col gap-0.5 transition-colors overflow-hidden',
                   isSelected
                     ? 'border-primaryPink bg-primaryPinkSoft'
                     : isToday
@@ -224,13 +224,13 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
                   )}
                 </div>
                 {bucket && bucket.expense > 0 && (
-                  <div className="text-[11px] tabular text-expense truncate">
-                    -{formatKRW(bucket.expense)}
+                  <div className="text-[10px] sm:text-[11px] tabular text-expense whitespace-nowrap leading-tight">
+                    -{compactKRW(bucket.expense)}
                   </div>
                 )}
                 {bucket && bucket.income > 0 && (
-                  <div className="text-[11px] tabular text-income truncate">
-                    +{formatKRW(bucket.income)}
+                  <div className="text-[10px] sm:text-[11px] tabular text-income whitespace-nowrap leading-tight">
+                    +{compactKRW(bucket.income)}
                   </div>
                 )}
               </button>

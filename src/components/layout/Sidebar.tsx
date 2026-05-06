@@ -29,7 +29,7 @@ const NAV = [
   { href: '/budgets', label: '예산', icon: PiggyBank },
   { href: '/categories', label: '카테고리', icon: Tags },
   { href: '/payment-methods', label: '결제수단', icon: CreditCard },
-  { href: '/households', label: '가족 공유', icon: Users },
+  { href: '/households', label: '모임비', icon: Users },
   { href: '/notifications', label: '알림', icon: Bell },
   { href: '/files', label: '원본 파일', icon: Files },
   { href: '/settings', label: '설정', icon: Settings },
