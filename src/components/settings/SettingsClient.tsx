@@ -10,6 +10,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { MfaCard } from './MfaCard';
 import { ProfileCard } from './ProfileCard';
 import { PcUrlCard } from './PcUrlCard';
+import { DonateCard } from './DonateCard';
 
 type Me = { id: string; email: string | null; created_at: string; display_name: string | null };
 type AiProvider = { provider: 'openai' | 'ollama'; ok: boolean; model: string; reason?: string };
@@ -196,6 +197,8 @@ export function SettingsClient() {
             </ul>
           </div>
         </Card>
+
+        <DonateCard />
 
         <Card className="lg:col-span-2">
           <CardTitle className="text-danger">계정 삭제</CardTitle>
