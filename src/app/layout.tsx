@@ -38,9 +38,16 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
+// 사용자 테마를 첫 페인트 직전에 적용 — React hydration 전에 동기 실행되어
+// "기본 핑크 → 라벤더" 깜빡임을 막는다. localStorage 가 비어있거나 'pink' 면 아무것도 안 함.
+const themeInitScript = `try{var t=localStorage.getItem('theme');if(t&&t!=='pink'&&['lavender','mint','mocha'].indexOf(t)>=0){document.documentElement.setAttribute('data-theme',t);}}catch(e){}`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-screen bg-appBackground text-textPrimary font-sans">
         {children}
       </body>

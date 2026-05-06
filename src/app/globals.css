@@ -2,9 +2,108 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================================================
+   테마 토큰 — html[data-theme] 로 분기
+   기본은 핑크. data-theme 속성이 없으면 :root 가 적용된다.
+   각 테마는 동일한 변수 set 을 덮어쓰므로 화면 어느 곳에서도
+   "primaryPink"/"appBackground" 같은 Tailwind 색상 이름은 그대로
+   쓰되 실제 색은 테마에 따라 자동 전환된다.
+   ========================================================= */
+:root {
+  /* === 핑크 (기본) === */
+  --app-bg: #FFF7FA;
+  --page-bg: #FFFFFF;
+  --soft-bg: #FFF1F5;
+  --card-bg: #FFFFFF;
+  --section-bg: #FFF5F8;
+
+  --primary: #F472B6;
+  --primary-hover: #EC4899;
+  --primary-soft: #FCE7F3;
+  --primary-light: #FBCFE8;
+  --primary-border: #F9A8D4;
+  --primary-dark: #DB2777;
+  --primary-strong: #BE185D;
+  --text-on-primary: #FFFFFF;
+
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+
+  --border-default: #F3D4E3;
+  --border-soft: #FCE7F3;
+  --divider: #F8E1EA;
+}
+
+html[data-theme='lavender'] {
+  --app-bg: #FAF8FF;
+  --page-bg: #FFFFFF;
+  --soft-bg: #F3EFFF;
+  --card-bg: #FFFFFF;
+  --section-bg: #F8F5FF;
+  --primary: #A78BFA;
+  --primary-hover: #8B5CF6;
+  --primary-soft: #EDE9FE;
+  --primary-light: #DDD6FE;
+  --primary-border: #C4B5FD;
+  --primary-dark: #7C3AED;
+  --primary-strong: #5B21B6;
+  --text-on-primary: #FFFFFF;
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --border-default: #D8CCFD;
+  --border-soft: #EDE9FE;
+  --divider: #E4DAFF;
+}
+
+html[data-theme='mint'] {
+  --app-bg: #F4FFF9;
+  --page-bg: #FFFFFF;
+  --soft-bg: #ECFDF5;
+  --card-bg: #FFFFFF;
+  --section-bg: #F0FDF7;
+  --primary: #14B8A6;
+  --primary-hover: #0D9488;
+  --primary-soft: #CCFBF1;
+  --primary-light: #99F6E4;
+  --primary-border: #5EEAD4;
+  --primary-dark: #0F766E;
+  --primary-strong: #115E59;
+  --text-on-primary: #FFFFFF;
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --border-default: #A7F3D0;
+  --border-soft: #D1FAE5;
+  --divider: #BBF7D0;
+}
+
+html[data-theme='mocha'] {
+  --app-bg: #FAF6F0;
+  --page-bg: #FFFFFF;
+  --soft-bg: #F2EAD9;
+  --card-bg: #FFFFFF;
+  --section-bg: #F6EFE0;
+  --primary: #A78B6E;
+  --primary-hover: #8B6F50;
+  --primary-soft: #F0E5D6;
+  --primary-light: #E5D5BE;
+  --primary-border: #C9B59A;
+  --primary-dark: #6B4F35;
+  --primary-strong: #4A3520;
+  --text-on-primary: #FFFFFF;
+  --text-primary: #2D2418;
+  --text-secondary: #6B5D4A;
+  --text-muted: #97876F;
+  --border-default: #DCC8AB;
+  --border-soft: #EFE4D2;
+  --divider: #E8DAC4;
+}
+
 html, body {
-  background-color: #FFF7FA;
-  color: #1F2937;
+  background-color: var(--app-bg);
+  color: var(--text-primary);
 }
 
 body {
