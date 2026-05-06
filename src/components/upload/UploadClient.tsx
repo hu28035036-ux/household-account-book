@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
+import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
-import { FileText } from 'lucide-react';
+import { FileText, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Dropzone } from './Dropzone';
 import { OcrPreview } from './OcrPreview';
 import { recognizeImage } from '@/lib/ocr/tesseract';
@@ -178,6 +179,38 @@ export function UploadClient() {
       </Card>
 
       <Dropzone onFiles={onFiles} />
+
+      {/* 분석 완료된 항목이 있으면 분석 후보로 빠르게 이동 */}
+      {(() => {
+        const analyzedCount = items.filter((it) => it.status === 'analyzed').length;
+        const inProgress = items.filter((it) =>
+          ['queued', 'uploading', 'uploaded', 'ocr_running', 'ocr_done', 'analyzing'].includes(it.status),
+        ).length;
+        if (analyzedCount === 0) return null;
+        return (
+          <Card className="bg-successSoft border-success/40">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2 min-w-0">
+                <CheckCircle2 className="h-5 w-5 text-success shrink-0" strokeWidth={1.75} />
+                <div className="min-w-0">
+                  <div className="font-medium text-textPrimary">
+                    분석 완료 {analyzedCount}건
+                    {inProgress > 0 && (
+                      <span className="ml-2 text-xs text-textMuted">(처리 중 {inProgress}건)</span>
+                    )}
+                  </div>
+                  <div className="text-xs text-textSecondary">
+                    분석 후보 페이지에서 검토 후 일괄 승인하면 거래내역에 반영됩니다.
+                  </div>
+                </div>
+              </div>
+              <Button onClick={() => router.push('/candidates')} className="shrink-0">
+                분석 후보로 이동 <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
+              </Button>
+            </div>
+          </Card>
+        );
+      })()}
 
       {items.length === 0 && (
         <Card>
