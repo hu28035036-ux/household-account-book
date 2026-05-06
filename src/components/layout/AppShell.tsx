@@ -21,7 +21,7 @@ export function AppShell({ title, userEmail, isAdmin = false, children }: Props)
           <main className="flex-1 px-4 sm:px-6 py-5 pb-24 md:pb-8">
             <div className="max-w-7xl mx-auto w-full">{children}</div>
           </main>
-          <BottomNav />
+          <BottomNav isAdmin={isAdmin} />
         </div>
       </div>
     </ActiveHouseholdProvider>
