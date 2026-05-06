@@ -78,7 +78,7 @@ export function ThemeSwitcher() {
         <div
           role="listbox"
           aria-label="테마 선택"
-          className="absolute right-0 mt-2 w-52 z-30 rounded-modal bg-pageBackground border border-borderDefault shadow-card overflow-hidden"
+          className="absolute right-0 mt-2 w-48 max-w-[calc(100vw-1.5rem)] z-40 rounded-modal bg-pageBackground border border-borderDefault shadow-card overflow-hidden"
         >
           {THEMES.map((t) => (
             <button
