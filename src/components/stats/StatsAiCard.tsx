@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
@@ -101,6 +101,24 @@ export function StatsAiCard() {
   const [error, setError] = useState<string | null>(null);
   const [current, setCurrent] = useState<AiResult | null>(null);
   const [history, setHistory] = useState<HistoryRow[]>([]);
+  // 분석 결과 접기/펴기 — 사용자 preference 를 localStorage 에 저장.
+  // 이력은 이미 DB 에 저장되니, 여기서 토글 상태만 유지하면 페이지 이동 후 와도 동일하게 보임.
+  const [resultCollapsed, setResultCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    setResultCollapsed(window.localStorage.getItem('stats-ai-card-collapsed') === '1');
+  }, []);
+
+  function toggleCollapsed() {
+    setResultCollapsed((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('stats-ai-card-collapsed', next ? '1' : '0');
+      }
+      return next;
+    });
+  }
 
   const loadHistory = useCallback(async () => {
     try {
@@ -158,7 +176,7 @@ export function StatsAiCard() {
       </div>
       <CardSubtle className="mt-1">
         선택한 기간의 지출 패턴을 요약하고, 절약 포인트 3~5개를 제안합니다.
-        분석 결과는 자동으로 저장되어 다른 페이지에 갔다 와도 그대로 보입니다.
+        분석 결과는 자동 저장되며, 다른 페이지 갔다 와도 “AI 기록”에서 다시 펼쳐볼 수 있어요.
       </CardSubtle>
 
       <div className="mt-3 flex items-center gap-2 flex-wrap">
@@ -209,8 +227,31 @@ export function StatsAiCard() {
       )}
 
       {current && (
-        <div className="mt-4">
-          <ResultBlock r={current} />
+        <div className="mt-4 border-t border-borderSoft pt-3">
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            className="w-full flex items-center justify-between gap-2 text-left"
+            aria-expanded={!resultCollapsed}
+          >
+            <span className="text-sm font-medium text-textPrimary">분석 결과</span>
+            <span className="flex items-center gap-1 text-xs text-textMuted">
+              {resultCollapsed ? (
+                <>
+                  <ChevronDown className="h-4 w-4" strokeWidth={1.75} /> 펴기
+                </>
+              ) : (
+                <>
+                  <ChevronUp className="h-4 w-4" strokeWidth={1.75} /> 접기
+                </>
+              )}
+            </span>
+          </button>
+          {!resultCollapsed && (
+            <div className="mt-3">
+              <ResultBlock r={current} />
+            </div>
+          )}
         </div>
       )}
 
