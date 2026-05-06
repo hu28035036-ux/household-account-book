@@ -30,4 +30,16 @@ describe('localizeAuthError', () => {
   it('직접 던진 한국어 메시지(EMAIL_NOT_ALLOWED 포함)는 그대로 인식', () => {
     expect(localizeAuthError('초대 명단에 등록되지 않은 이메일입니다 (EMAIL_NOT_ALLOWED): foo@bar.com')).toMatch(/초대 명단/);
   });
+  it('Invalid login credentials → 아이디/비번 안내', () => {
+    expect(localizeAuthError('Invalid login credentials')).toMatch(/아이디 또는 비밀번호/);
+  });
+  it('Already registered → 이미 가입 안내', () => {
+    expect(localizeAuthError('User already registered')).toMatch(/이미 가입/);
+  });
+  it('weak password → 비밀번호 길이 안내', () => {
+    expect(localizeAuthError('Password should be at least 8 characters')).toMatch(/비밀번호.*짧/);
+  });
+  it('signups disabled → 회원가입 비활성', () => {
+    expect(localizeAuthError('Signups not allowed for this instance')).toMatch(/회원가입.*비활성/);
+  });
 });

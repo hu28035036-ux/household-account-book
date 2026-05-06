@@ -7,8 +7,8 @@ export function localizeAuthError(rawMessage: string | null | undefined, fallbac
   const m = (rawMessage ?? '').toLowerCase().trim();
   if (!m) return fallback;
 
-  // 화이트리스트 거부
-  if (/email_not_allowed|not.*on.*invite|not allowed/.test(m)) {
+  // 화이트리스트 거부 (구버전 호환 — 자유 가입 모드에서는 발생하지 않음)
+  if (/email_not_allowed|not.*on.*invite|invite list/.test(m)) {
     return '초대 명단에 등록되지 않은 이메일입니다. 관리자에게 등록을 요청하세요.';
   }
 
@@ -32,7 +32,22 @@ export function localizeAuthError(rawMessage: string | null | undefined, fallbac
     return '인증 코드가 만료되었거나 일치하지 않습니다. 새 코드를 받아 다시 시도하세요.';
   }
   if (/invalid login credentials|invalid grant/.test(m)) {
-    return '인증 정보가 올바르지 않습니다.';
+    return '아이디 또는 비밀번호가 올바르지 않습니다.';
+  }
+
+  // 비밀번호 정책
+  if (/password.*should be at least|password.*too short|weak password/.test(m)) {
+    return '비밀번호가 너무 짧거나 약합니다(8자 이상 권장).';
+  }
+
+  // 이미 가입된 이메일
+  if (/user already registered|already registered|already exists/.test(m)) {
+    return '이미 가입된 이메일입니다. 로그인 화면에서 진행해 주세요.';
+  }
+
+  // 사용자 등록 비활성화
+  if (/signups not allowed|signup.*disabled/.test(m)) {
+    return '현재 회원가입이 비활성화되어 있습니다. 운영자에게 문의해 주세요.';
   }
 
   // 사용자 차단

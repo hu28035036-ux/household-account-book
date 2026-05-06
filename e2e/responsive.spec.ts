@@ -23,11 +23,11 @@ test('로그인 화면: 핵심 컨트롤 터치 영역 ≥ 44px (모바일에서
     test.skip();
     return;
   }
-  const button = page.getByRole('button', { name: /인증 코드 받기/ });
+  const button = page.getByRole('button', { name: /^로그인$/ });
   const box = await button.boundingBox();
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
 
-  const input = page.getByLabel('이메일');
+  const input = page.getByLabel('아이디');
   const inputBox = await input.boundingBox();
   expect(inputBox?.height ?? 0).toBeGreaterThanOrEqual(40);
 });

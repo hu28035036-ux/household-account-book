@@ -17,7 +17,7 @@ const PROTECTED_PREFIXES = [
   '/files',
   '/admin',
 ];
-const PUBLIC_ONLY = ['/login'];
+const PUBLIC_ONLY = ['/login', '/signup'];
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
