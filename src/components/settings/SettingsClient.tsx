@@ -9,6 +9,7 @@ import { formatDateKST } from '@/lib/formatting/date';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { MfaCard } from './MfaCard';
 import { ProfileCard } from './ProfileCard';
+import { PcUrlCard } from './PcUrlCard';
 
 type Me = { id: string; email: string | null; created_at: string; display_name: string | null };
 type AiProvider = { provider: 'openai' | 'ollama'; ok: boolean; model: string; reason?: string };
@@ -139,6 +140,8 @@ export function SettingsClient() {
             <p className="mt-2 text-xs rounded-md bg-warningSoft text-warning px-3 py-2">{aiReason}</p>
           )}
         </Card>
+
+        <PcUrlCard />
 
         <Card>
           <CardTitle>보안 / 원본 데이터</CardTitle>
