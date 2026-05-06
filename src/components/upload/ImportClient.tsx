@@ -170,6 +170,12 @@ export function ImportClient() {
               {SUPPORT_EMAIL}
             </a>
           </div>
+          <div className="mt-2 rounded-md bg-warningSoft px-3 py-2.5 text-xs text-warning">
+            <div className="font-medium mb-1">📌 대량 import 주의</div>
+            한 번에 수십~수백 건의 거래가 한꺼번에 등록됩니다. 이미 직접 입력했거나 영수증 분석으로
+            등록된 거래와 <b>중복</b>이 있을 수 있어요. 가져오기 후{' '}
+            <b>‘분석 후보’ 페이지에서 중복 의심 표시</b>를 꼭 확인하고 승인하세요.
+          </div>
         </Card>
       )}
 
@@ -264,6 +270,11 @@ export function ImportClient() {
                   ))}
                 </tbody>
               </table>
+            </div>
+            <div className="mt-3 rounded-md bg-warningSoft px-3 py-2 text-xs text-warning">
+              📌 <b>{data.rows.length}건</b>이 한 번에 ‘분석 후보’로 들어갑니다. 이미 입력된 거래와
+              중복일 수 있으니, 가져오기 후 <b>분석 후보 페이지에서 중복 의심 표시</b>를 꼭 확인하고
+              승인하세요.
             </div>
             <div className="mt-4 flex items-center justify-end gap-2">
               <Button
