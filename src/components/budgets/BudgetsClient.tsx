@@ -146,7 +146,7 @@ export function BudgetsClient() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <h2 className="text-2xl font-semibold text-textPrimary">
-          {activeName ? `${activeName} (모임비)` : '개인 가계부'} 예산
+          {activeName ? `${activeName} (모임)` : '개인 가계부'} 예산
         </h2>
         <div className="flex items-center gap-2">
           <input
@@ -324,7 +324,7 @@ export function BudgetsClient() {
           </label>
 
           <p className="text-xs text-textMuted">
-            현재 컨텍스트: <b className="text-textPrimary">{activeName ? `${activeName} (모임비)` : '개인 가계부'}</b>{' '}
+            현재 컨텍스트: <b className="text-textPrimary">{activeName ? `${activeName} (모임)` : '개인 가계부'}</b>{' '}
             — 다른 컨텍스트로 매기려면 우상단 전환기에서 바꾸세요.
           </p>
 

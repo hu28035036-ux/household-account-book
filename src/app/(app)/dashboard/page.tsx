@@ -32,7 +32,7 @@ export default async function DashboardPage({
     <div className="space-y-4">
       <div className="flex items-baseline gap-2 flex-wrap">
         <h2 className="text-2xl font-semibold text-textPrimary">
-          {householdName ? `${householdName} (모임비)` : '개인 가계부'}
+          {householdName ? `${householdName} (모임)` : '개인 가계부'}
         </h2>
         <span className="text-xs text-textMuted">월 캘린더</span>
       </div>

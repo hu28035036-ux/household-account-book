@@ -45,7 +45,7 @@ export default async function StatsPage() {
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h2 className="text-2xl font-semibold text-textPrimary">
-            {householdName ? `${householdName} (모임비)` : '개인 가계부'} 통계
+            {householdName ? `${householdName} (모임)` : '개인 가계부'} 통계
           </h2>
           <p className="mt-0.5 text-xs text-textMuted">
             * 카테고리/거래/예산 카드는 활성 컨텍스트 기준. 6개월 흐름·고정지출·인사이트·AI 통계는

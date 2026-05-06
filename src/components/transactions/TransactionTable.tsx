@@ -84,9 +84,9 @@ export function TransactionTable({ rows, onEdit, onDelete, selectedIds, onToggle
                 <span className="inline-flex items-center gap-1.5">
                   {r.household_id && (
                     <span
-                      title="모임비"
+                      title="모임"
                       className="inline-block h-1.5 w-1.5 rounded-full bg-primaryPink shrink-0"
-                      aria-label="모임비"
+                      aria-label="모임"
                     />
                   )}
                   <span className="truncate">{r.merchant_name || '-'}</span>

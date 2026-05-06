@@ -194,12 +194,12 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
               <option value="">개인 (공유 안 함)</option>
               {households.map((h) => (
                 <option key={h.id} value={h.id}>
-                  {h.name} (모임비)
+                  {h.name} (모임)
                 </option>
               ))}
             </select>
             <span className="block mt-1 text-xs text-textMuted">
-              모임비로 저장하면 해당 모임 멤버 모두가 이 거래를 볼 수 있습니다(읽기 전용).
+              모임으로 저장하면 해당 모임 멤버 모두가 이 거래를 볼 수 있습니다(읽기 전용).
             </span>
           </label>
         )}

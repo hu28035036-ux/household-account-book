@@ -104,7 +104,7 @@ export function TransactionsClient() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <h2 className="text-2xl font-semibold text-textPrimary">
-          {activeName ? `${activeName} (모임비)` : '개인 가계부'} 거래내역
+          {activeName ? `${activeName} (모임)` : '개인 가계부'} 거래내역
         </h2>
         <Button
           onClick={() => {
@@ -169,7 +169,7 @@ export function TransactionsClient() {
             </div>
           </div>
           <p className="mt-1.5 text-xs text-textMuted">
-            본인이 만든 거래만 삭제됩니다. 다른 멤버가 만든 모임비 거래는 자동으로 제외됩니다.
+            본인이 만든 거래만 삭제됩니다. 다른 멤버가 만든 모임 거래는 자동으로 제외됩니다.
           </p>
         </div>
       )}

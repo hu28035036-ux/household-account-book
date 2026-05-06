@@ -175,7 +175,7 @@ export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="text-2xl font-semibold text-textPrimary">모임비</h2>
+        <h2 className="text-2xl font-semibold text-textPrimary">모임</h2>
         <div className="flex items-center gap-2">
           <Button variant="secondary" onClick={() => setJoinOpen(true)}>
             <Ticket className="h-4 w-4" strokeWidth={1.75} /> 초대 코드로 합류

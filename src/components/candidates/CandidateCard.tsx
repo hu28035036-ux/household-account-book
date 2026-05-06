@@ -182,46 +182,64 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
 
           {editing && (
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
-              />
-              <select
-                value={type}
-                onChange={(e) => setType(e.target.value as any)}
-                className="h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
-              >
-                <option value="expense">지출</option>
-                <option value="income">수입</option>
-                <option value="transfer">이체</option>
-              </select>
-              <input
-                inputMode="numeric"
-                value={amountStr}
-                onChange={(e) => setAmountStr(e.target.value)}
-                placeholder="금액"
-                className="h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm tabular"
-              />
-              <input
-                value={merchant}
-                onChange={(e) => setMerchant(e.target.value)}
-                placeholder="가맹점"
-                className="h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
-              />
-              <input
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="카테고리 (이름)"
-                className="h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
-              />
-              <input
-                value={payment}
-                onChange={(e) => setPayment(e.target.value)}
-                placeholder="결제수단 (이름)"
-                className="h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
-              />
+              <label className="flex items-center gap-2">
+                <span className="w-16 shrink-0 text-xs text-textSecondary">날짜</span>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="flex-1 h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
+                />
+              </label>
+              <label className="flex items-center gap-2">
+                <span className="w-16 shrink-0 text-xs text-textSecondary">유형</span>
+                <select
+                  value={type}
+                  onChange={(e) => setType(e.target.value as any)}
+                  className="flex-1 h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
+                >
+                  <option value="expense">지출</option>
+                  <option value="income">수입</option>
+                  <option value="transfer">이체</option>
+                </select>
+              </label>
+              <label className="flex items-center gap-2">
+                <span className="w-16 shrink-0 text-xs text-textSecondary">금액</span>
+                <input
+                  inputMode="numeric"
+                  value={amountStr}
+                  onChange={(e) => setAmountStr(e.target.value)}
+                  placeholder="예: 12000"
+                  className="flex-1 h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm tabular"
+                />
+              </label>
+              <label className="flex items-center gap-2">
+                <span className="w-16 shrink-0 text-xs text-textSecondary">가맹점</span>
+                <input
+                  value={merchant}
+                  onChange={(e) => setMerchant(e.target.value)}
+                  placeholder="예: 스타벅스 강남점"
+                  className="flex-1 h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
+                />
+              </label>
+              <label className="flex items-center gap-2">
+                <span className="w-16 shrink-0 text-xs text-textSecondary">카테고리</span>
+                <input
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  placeholder="예: 카페/간식"
+                  className="flex-1 h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
+                />
+              </label>
+              <label className="flex items-center gap-2">
+                <span className="w-16 shrink-0 text-xs text-textSecondary">결제수단</span>
+                <input
+                  value={payment}
+                  onChange={(e) => setPayment(e.target.value)}
+                  placeholder="예: 신용카드"
+                  className="flex-1 h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
+                />
+              </label>
             </div>
           )}
 
