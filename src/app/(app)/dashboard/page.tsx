@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getDashboardSummary } from '@/services/dashboardService';
 import {
   getAiAnalyticsSummary,
+  getInsights,
   getMonthlySeries,
   getRecurringCandidates,
 } from '@/services/analyticsService';
@@ -12,6 +13,7 @@ import { formatKRW } from '@/lib/formatting/money';
 import { formatDateKST } from '@/lib/formatting/date';
 import { MonthlyBars } from '@/components/charts/MonthlyBars';
 import { BudgetBar } from '@/components/budgets/BudgetBar';
+import { InsightsSection } from '@/components/insights/InsightsSection';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,12 +22,13 @@ export default async function DashboardPage() {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return null;
 
-  const [summary, series, recurring, ai, budgets] = await Promise.all([
+  const [summary, series, recurring, ai, budgets, insights] = await Promise.all([
     getDashboardSummary(supabase, u.user.id),
     getMonthlySeries(supabase, u.user.id, 6),
     getRecurringCandidates(supabase, u.user.id, 3),
     getAiAnalyticsSummary(supabase, u.user.id),
     getBudgetProgress(supabase, u.user.id),
+    getInsights(supabase, u.user.id),
   ]);
 
   const approvalRate =
@@ -194,6 +197,15 @@ export default async function DashboardPage() {
           )}
         </Card>
       </section>
+
+      <InsightsSection
+        topUp={insights.topUp}
+        topDown={insights.topDown}
+        anomalies={insights.anomalies}
+        weekday={insights.weekday}
+        totalThis={insights.total_this}
+        totalLast={insights.total_last}
+      />
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>

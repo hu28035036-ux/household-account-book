@@ -1,5 +1,14 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { monthRangeKST } from '@/lib/formatting/date';
+import {
+  categoryDeltas,
+  detectAnomalies,
+  weekdayPattern,
+  type ExpenseRow,
+  type CategoryDelta,
+  type AnomalyRow,
+  type WeekdayPattern,
+} from '@/lib/insights/compute';
 
 /**
  * 최근 N개월 월별 지출/수입 시계열.
@@ -127,5 +136,77 @@ export async function getAiAnalyticsSummary(supabase: SupabaseClient, userId: st
     rejectedCandidates: rejectedCandidates ?? 0,
     successJobs,
     failedJobs,
+  };
+}
+
+/**
+ * 이번 달 소비 인사이트.
+ * - 카테고리별 전월 대비 증감 top up/down
+ * - 최근 30일 이상 거래 (가맹점 평균 대비 N배)
+ * - 주말/평일 일평균 비교
+ */
+export async function getInsights(
+  supabase: SupabaseClient,
+  userId: string,
+  yearMonth?: string,
+): Promise<{
+  range: { from: string; to: string };
+  topUp: CategoryDelta[];
+  topDown: CategoryDelta[];
+  anomalies: AnomalyRow[];
+  weekday: WeekdayPattern;
+  total_this: number;
+  total_last: number;
+}> {
+  const ym = yearMonth ?? monthRangeKST().from.slice(0, 7);
+  const { from, to } = monthRangeKST(ym);
+
+  // 전월 범위
+  const [y, m] = ym.split('-').map(Number);
+  const lastDate = new Date(Date.UTC(y, m - 2, 1));
+  const lastYm = `${lastDate.getUTCFullYear()}-${String(lastDate.getUTCMonth() + 1).padStart(2, '0')}`;
+  const lastRange = monthRangeKST(lastYm);
+
+  // 이상 탐지용 30일 윈도우
+  const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const minFrom = since30 < lastRange.from ? since30 : lastRange.from;
+
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('transaction_date, amount, merchant_name, category_id, categories(name,color)')
+    .eq('user_id', userId)
+    .eq('type', 'expense')
+    .gte('transaction_date', minFrom);
+  if (error) throw error;
+
+  const all: ExpenseRow[] = (data ?? []).map((r: any) => ({
+    transaction_date: r.transaction_date as string,
+    amount: Number(r.amount),
+    merchant_name: r.merchant_name ?? null,
+    category_id: r.category_id ?? null,
+    category_name: r.categories?.name ?? null,
+    category_color: r.categories?.color ?? null,
+  }));
+
+  const inRange = (r: ExpenseRow, f: string, t: string) => r.transaction_date >= f && r.transaction_date <= t;
+  const thisRows = all.filter((r) => inRange(r, from, to));
+  const lastRows = all.filter((r) => inRange(r, lastRange.from, lastRange.to));
+  const anomalyRows = all.filter((r) => r.transaction_date >= since30);
+
+  const deltas = categoryDeltas(thisRows, lastRows).sort((a, b) => b.delta - a.delta);
+  const topUp = deltas.filter((d) => d.delta > 0).slice(0, 5);
+  const topDown = deltas.filter((d) => d.delta < 0).slice(-5).reverse();
+
+  const totalThis = thisRows.reduce((s, r) => s + r.amount, 0);
+  const totalLast = lastRows.reduce((s, r) => s + r.amount, 0);
+
+  return {
+    range: { from, to },
+    topUp,
+    topDown,
+    anomalies: detectAnomalies(anomalyRows),
+    weekday: weekdayPattern(thisRows),
+    total_this: totalThis,
+    total_last: totalLast,
   };
 }
