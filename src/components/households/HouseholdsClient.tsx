@@ -1,12 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Trash2, Pencil, Users, Copy, LogOut, Ticket } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Plus, Trash2, Pencil, Users, Copy, LogOut, Ticket, Eye } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Modal } from '@/components/common/Modal';
 import { Badge } from '@/components/common/Badge';
 import { formatDateKST } from '@/lib/formatting/date';
+import { useActiveHousehold } from '@/lib/active-household';
 
 type Household = {
   id: string;
@@ -20,6 +22,8 @@ type Member = { id: string; user_id: string; role: 'owner' | 'member'; joined_at
 type Invite = { id: string; code: string; expires_at: string; used_at: string | null; created_at: string };
 
 export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
+  const router = useRouter();
+  const { setActive: setGlobalActive } = useActiveHousehold();
   const [list, setList] = useState<Household[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -188,15 +192,15 @@ export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
         </Card>
       ) : list.length === 0 ? (
         <Card>
-          <CardTitle>아직 가족이 없어요</CardTitle>
+          <CardTitle>아직 모임이 없어요</CardTitle>
           <CardSubtle className="mt-1">
-            새 가족을 만들거나, 다른 사람이 보낸 초대 코드로 합류할 수 있어요.
+            새 모임을 만들거나, 다른 사람이 보낸 초대 코드로 합류할 수 있어요.
           </CardSubtle>
         </Card>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <Card className="lg:col-span-1">
-            <CardTitle>내 가족 목록</CardTitle>
+            <CardTitle>내 모임 목록</CardTitle>
             <ul className="mt-3 space-y-2">
               {list.map((h) => (
                 <li key={h.id}>
@@ -228,6 +232,15 @@ export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <CardTitle>{active.name}</CardTitle>
                   <div className="flex items-center gap-1">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setGlobalActive(active.id);
+                        router.push('/dashboard');
+                      }}
+                    >
+                      <Eye className="h-4 w-4" strokeWidth={1.75} /> 이 모임으로 보기
+                    </Button>
                     {active.is_owner && (
                       <Button size="sm" variant="ghost" onClick={() => rename(active)}>
                         <Pencil className="h-4 w-4" strokeWidth={1.75} /> 이름 변경

@@ -1,19 +1,30 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { monthRangeKST } from '@/lib/formatting/date';
 
+/**
+ * householdContext:
+ *   - null → 개인 모드 (user_id 일치 + household_id IS NULL)
+ *   - 'X'  → 모임 X 모드 (household_id = X), RLS 가 멤버인지 검증
+ */
 export async function getDashboardSummary(
   supabase: SupabaseClient,
   userId: string,
   yearMonth?: string,
+  householdContext: string | null = null,
 ) {
   const { from, to } = monthRangeKST(yearMonth);
 
-  const { data: txs, error } = await supabase
+  let txQ = supabase
     .from('transactions')
-    .select('type, amount, category_id, payment_method_id, transaction_date, categories(name,color), payment_methods(name)')
-    .eq('user_id', userId)
+    .select(
+      'type, amount, category_id, payment_method_id, transaction_date, categories(name,color), payment_methods(name)',
+    )
     .gte('transaction_date', from)
     .lte('transaction_date', to);
+  if (householdContext) txQ = txQ.eq('household_id', householdContext);
+  else txQ = txQ.eq('user_id', userId).is('household_id', null);
+
+  const { data: txs, error } = await txQ;
   if (error) throw error;
 
   let income = 0;
@@ -39,16 +50,22 @@ export async function getDashboardSummary(
     }
   }
 
-  const { count: pendingCandidates } = await supabase
+  let pendQ = supabase
     .from('transaction_candidates')
     .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId)
     .eq('user_action', 'pending');
+  if (householdContext) pendQ = pendQ.eq('household_id', householdContext);
+  else pendQ = pendQ.eq('user_id', userId).is('household_id', null);
+  const { count: pendingCandidates } = await pendQ;
 
-  const { data: recent } = await supabase
+  let recentQ = supabase
     .from('transactions')
-    .select('id, transaction_date, type, amount, merchant_name, categories(name,color), payment_methods(name)')
-    .eq('user_id', userId)
+    .select(
+      'id, transaction_date, type, amount, merchant_name, categories(name,color), payment_methods(name)',
+    );
+  if (householdContext) recentQ = recentQ.eq('household_id', householdContext);
+  else recentQ = recentQ.eq('user_id', userId).is('household_id', null);
+  const { data: recent } = await recentQ
     .order('transaction_date', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(8);

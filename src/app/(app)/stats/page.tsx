@@ -2,6 +2,8 @@ import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Badge } from '@/components/common/Badge';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getDashboardSummary } from '@/services/dashboardService';
+import { getActiveHouseholdContext } from '@/lib/auth/getActiveHouseholdContext';
+import { getActiveHouseholdName } from '@/lib/auth/getActiveHouseholdName';
 import {
   getAiAnalyticsSummary,
   getInsights,
@@ -22,8 +24,12 @@ export default async function StatsPage() {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return null;
 
+  const householdContext = getActiveHouseholdContext();
+  const householdName = householdContext
+    ? await getActiveHouseholdName(supabase, householdContext)
+    : null;
   const [summary, series, recurring, ai, budgets, insights] = await Promise.all([
-    getDashboardSummary(supabase, u.user.id),
+    getDashboardSummary(supabase, u.user.id, undefined, householdContext),
     getMonthlySeries(supabase, u.user.id, 6),
     getRecurringCandidates(supabase, u.user.id, 3),
     getAiAnalyticsSummary(supabase, u.user.id),
@@ -37,7 +43,15 @@ export default async function StatsPage() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="text-2xl font-semibold text-textPrimary">통계</h2>
+        <div>
+          <h2 className="text-2xl font-semibold text-textPrimary">
+            {householdName ? `${householdName} (모임비)` : '개인 가계부'} 통계
+          </h2>
+          <p className="mt-0.5 text-xs text-textMuted">
+            * 카테고리/거래/예산 카드는 활성 컨텍스트 기준. 6개월 흐름·고정지출·인사이트·AI 통계는
+            본인 데이터 전체를 보여줍니다.
+          </p>
+        </div>
         <Badge tone="muted">
           {summary.range.from} ~ {summary.range.to}
         </Badge>

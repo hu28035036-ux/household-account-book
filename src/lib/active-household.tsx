@@ -1,8 +1,11 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 
 const STORAGE_KEY = 'active_household_id';
+// 서버 컴포넌트(SSR 대시보드/통계)에서 cookies()로 읽기 위한 키.
+const COOKIE_KEY = 'active_household_id';
 
 export type ActiveHousehold = {
   id: string;
@@ -26,7 +29,17 @@ const ActiveHouseholdCtx = createContext<Ctx>({
   refresh: async () => {},
 });
 
+function writeCookie(value: string | null) {
+  if (typeof document === 'undefined') return;
+  if (value) {
+    document.cookie = `${COOKIE_KEY}=${value}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+  } else {
+    document.cookie = `${COOKIE_KEY}=; path=/; max-age=0; samesite=lax`;
+  }
+}
+
 export function ActiveHouseholdProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [activeId, setActiveIdState] = useState<string | null>(null);
   const [households, setHouseholds] = useState<ActiveHousehold[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,11 +65,14 @@ export function ActiveHouseholdProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const v = window.localStorage.getItem(STORAGE_KEY);
-    setActiveIdState(v && v !== 'null' ? v : null);
+    const next = v && v !== 'null' ? v : null;
+    setActiveIdState(next);
+    // localStorage 와 쿠키를 항상 동기화 (서버에선 쿠키만 보임)
+    writeCookie(next);
     void refresh();
   }, [refresh]);
 
-  // 활성 id가 더 이상 멤버가 아닌 가족이면 자동 해제
+  // 활성 id가 더 이상 멤버가 아닌 모임이면 자동 해제
   useEffect(() => {
     if (!activeId || households.length === 0) return;
     if (!households.find((h) => h.id === activeId)) {
@@ -65,13 +81,19 @@ export function ActiveHouseholdProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeId, households]);
 
-  const setActive = useCallback((id: string | null) => {
-    if (typeof window !== 'undefined') {
-      if (id) window.localStorage.setItem(STORAGE_KEY, id);
-      else window.localStorage.removeItem(STORAGE_KEY);
-    }
-    setActiveIdState(id);
-  }, []);
+  const setActive = useCallback(
+    (id: string | null) => {
+      if (typeof window !== 'undefined') {
+        if (id) window.localStorage.setItem(STORAGE_KEY, id);
+        else window.localStorage.removeItem(STORAGE_KEY);
+        writeCookie(id);
+      }
+      setActiveIdState(id);
+      // SSR 페이지(대시보드/통계)가 새 쿠키로 다시 렌더링되도록 트리거
+      router.refresh();
+    },
+    [router],
+  );
 
   return (
     <ActiveHouseholdCtx.Provider value={{ activeId, households, loading, setActive, refresh }}>

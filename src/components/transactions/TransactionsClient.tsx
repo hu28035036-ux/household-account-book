@@ -7,10 +7,13 @@ import { Card } from '@/components/common/Card';
 import { TransactionTable } from './TransactionTable';
 import { TransactionCardList } from './TransactionCardList';
 import { TransactionEditor } from './TransactionEditor';
+import { useActiveHousehold } from '@/lib/active-household';
 
 type Row = any;
 
 export function TransactionsClient() {
+  const { activeId, households } = useActiveHousehold();
+  const activeName = activeId ? households.find((h) => h.id === activeId)?.name ?? null : null;
   const [rows, setRows] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
   const [categories, setCategories] = useState<any[]>([]);
@@ -20,7 +23,6 @@ export function TransactionsClient() {
   const [editing, setEditing] = useState<Row | null>(null);
   const [q, setQ] = useState('');
   const [type, setType] = useState<'' | 'income' | 'expense' | 'transfer'>('');
-  const [scope, setScope] = useState<'' | 'personal' | 'household'>('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkPending, setBulkPending] = useState(false);
 
@@ -29,7 +31,9 @@ export function TransactionsClient() {
     const params = new URLSearchParams();
     if (q) params.set('q', q);
     if (type) params.set('type', type);
-    if (scope) params.set('scope', scope);
+    // 활성 컨텍스트가 모임이면 그 모임만, 아니면 개인만 (헤더 우상단의 컨텍스트가 단일 진실 소스)
+    if (activeId) params.set('household_id', activeId);
+    else params.set('scope', 'personal');
     params.set('limit', '50');
     const [txRes, catRes, pmRes] = await Promise.all([
       fetch('/api/transactions?' + params.toString()).then((r) => r.json()),
@@ -42,7 +46,7 @@ export function TransactionsClient() {
     setPaymentMethods(pmRes?.data ?? []);
     setSelected(new Set());
     setLoading(false);
-  }, [q, type, scope]);
+  }, [q, type, activeId]);
 
   useEffect(() => {
     load();
@@ -99,7 +103,9 @@ export function TransactionsClient() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="text-2xl font-semibold text-textPrimary">거래내역</h2>
+        <h2 className="text-2xl font-semibold text-textPrimary">
+          {activeName ? `${activeName} (모임비)` : '개인 가계부'} 거래내역
+        </h2>
         <Button
           onClick={() => {
             setEditing(null);
@@ -128,15 +134,6 @@ export function TransactionsClient() {
             <option value="expense">지출</option>
             <option value="income">수입</option>
             <option value="transfer">이체</option>
-          </select>
-          <select
-            value={scope}
-            onChange={(e) => setScope(e.target.value as any)}
-            className="h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
-          >
-            <option value="">개인+모임비 전체</option>
-            <option value="personal">개인만</option>
-            <option value="household">모임비만</option>
           </select>
         </div>
       </Card>

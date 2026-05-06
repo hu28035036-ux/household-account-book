@@ -10,11 +10,11 @@ export type DailyBucket = {
 
 export type CalendarMonth = {
   range: { from: string; to: string }; // KST 1일 ~ 말일
-  daily: DailyBucket[]; // 날짜별 합계 (해당 월 내 거래만)
+  daily: DailyBucket[];
   totals: { expense: number; income: number; balance: number };
-  budgetTotal: number; // 이번 달 전체 예산 (없으면 0)
-  budgetUsedPct: number; // 0..999
-  budgetRemaining: number; // 음수면 초과
+  budgetTotal: number;
+  budgetUsedPct: number;
+  budgetRemaining: number;
   recentByDate: Record<string, Array<{
     id: string;
     type: 'income' | 'expense' | 'transfer';
@@ -26,26 +26,35 @@ export type CalendarMonth = {
   }>>;
 };
 
+/**
+ * 월 캘린더 데이터.
+ * householdContext:
+ *   - null  → 개인 모드 (household_id IS NULL & user_id = me)
+ *   - 'X'   → 모임 X 모드 (household_id = X) — RLS 가 멤버 여부 검증
+ */
 export async function getCalendarMonth(
   supabase: SupabaseClient,
   userId: string,
   yearMonth?: string,
+  householdContext: string | null = null,
 ): Promise<CalendarMonth> {
   const ym = yearMonth ?? monthRangeKST().from.slice(0, 7);
   const { from, to } = monthRangeKST(ym);
 
-  // 거래 조회 (해당 월)
-  const { data: txs } = await supabase
+  let txQ = supabase
     .from('transactions')
     .select(
       'id, transaction_date, type, amount, merchant_name, categories(name,color), payment_methods(name)',
     )
-    .eq('user_id', userId)
     .gte('transaction_date', from)
-    .lte('transaction_date', to)
-    .order('transaction_date', { ascending: true });
+    .lte('transaction_date', to);
+  if (householdContext) {
+    txQ = txQ.eq('household_id', householdContext);
+  } else {
+    txQ = txQ.eq('user_id', userId).is('household_id', null);
+  }
+  const { data: txs } = await txQ.order('transaction_date', { ascending: true });
 
-  // 일별 버킷 + 일별 거래 모음
   const byDate: Record<string, DailyBucket> = {};
   const recentByDate: CalendarMonth['recentByDate'] = {};
   let totalExpense = 0;
@@ -77,17 +86,18 @@ export async function getCalendarMonth(
     }
   }
 
-  // 예산 (전체 예산만 우선; category 단위는 통계 페이지에서)
+  // 전체 예산 — 컨텍스트와 동일한 범위
   const monthStart = `${ym}-01`;
-  const { data: totalBudget } = await supabase
-    .from('budgets')
-    .select('amount')
-    .eq('user_id', userId)
-    .is('category_id', null)
-    .eq('month_start', monthStart)
-    .maybeSingle();
+  let budgetQ = supabase.from('budgets').select('amount').is('category_id', null).eq('month_start', monthStart);
+  if (householdContext) {
+    budgetQ = budgetQ.eq('household_id', householdContext);
+  } else {
+    budgetQ = budgetQ.eq('user_id', userId).is('household_id', null);
+  }
+  const { data: totalBudget } = await budgetQ.maybeSingle();
   const budgetTotal = totalBudget ? Number(totalBudget.amount) : 0;
-  const budgetUsedPct = budgetTotal > 0 ? Math.min(999, Math.round((totalExpense / budgetTotal) * 100)) : 0;
+  const budgetUsedPct =
+    budgetTotal > 0 ? Math.min(999, Math.round((totalExpense / budgetTotal) * 100)) : 0;
   const budgetRemaining = budgetTotal > 0 ? budgetTotal - totalExpense : 0;
 
   return {

@@ -37,7 +37,7 @@ export function HouseholdSwitcher() {
         aria-expanded={open}
       >
         {active ? <Users className="h-4 w-4" strokeWidth={1.75} /> : <User className="h-4 w-4" strokeWidth={1.75} />}
-        <span className="max-w-[120px] truncate">{active ? active.name : '개인'}</span>
+        <span className="max-w-[120px] truncate">{active ? `${active.name} 모임` : '개인 가계부'}</span>
         <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.75} />
       </button>
       {open && (
@@ -47,8 +47,8 @@ export function HouseholdSwitcher() {
         >
           <Item
             icon={<User className="h-4 w-4" strokeWidth={1.75} />}
-            label="개인"
-            sub="공유 안 함"
+            label="개인 가계부"
+            sub="나만 보기"
             selected={!activeId}
             onClick={() => {
               setActive(null);
