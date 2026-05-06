@@ -216,9 +216,24 @@ export function ImportClient() {
         <>
           <Card>
             <div className="flex items-center justify-between gap-3 flex-wrap">
-              <CardTitle>컬럼 매핑</CardTitle>
+              <div className="flex items-center gap-2 flex-wrap">
+                <CardTitle>컬럼 매핑</CardTitle>
+                {data.detectedBank ? (
+                  <Badge tone="success">📂 {data.detectedBank}</Badge>
+                ) : (
+                  <Badge tone="muted">📂 인식 불가</Badge>
+                )}
+              </div>
               <Badge tone="muted">총 {data.rows.length}행</Badge>
             </div>
+            {(data.fileName || data.sheetName) && (
+              <CardSubtle className="mt-1">
+                {data.fileName && <span className="break-all">{data.fileName}</span>}
+                {data.sheetName && (
+                  <span className="ml-1 text-textMuted">· 시트: {data.sheetName}</span>
+                )}
+              </CardSubtle>
+            )}
             <CardSubtle className="mt-1">
               자동 감지된 결과를 확인하고, 잘못 잡혔으면 직접 골라주세요.
             </CardSubtle>

@@ -5,7 +5,97 @@
  */
 
 export type SheetRow = Record<string, string>;
-export type SheetData = { headers: string[]; rows: SheetRow[] };
+export type SheetData = {
+  headers: string[];
+  rows: SheetRow[];
+  fileName?: string;
+  sheetName?: string;
+  detectedBank?: string | null;
+};
+
+/**
+ * 파일/시트/헤더 텍스트로 은행·카드사 추정. 모르면 null.
+ * 한국 시중·인터넷·지방 은행 + 카드사 + 페이/저축은행/우체국까지 폭넓게 매칭.
+ */
+export function detectBank(
+  fileName: string,
+  sheetName: string,
+  headers: string[],
+): string | null {
+  const text = `${fileName} ${sheetName}`.toLowerCase();
+
+  // === 인터넷전문은행 / 빅테크 ===
+  if (/카카오뱅크|kakaobank/i.test(text)) return '카카오뱅크';
+  if (/토스뱅크|tossbank/i.test(text)) return '토스뱅크';
+  if (/케이뱅크|k뱅크|kbank/i.test(text)) return '케이뱅크';
+
+  // === 시중은행 ===
+  if (/kb국민|국민은행|kbstar/i.test(text)) return 'KB국민은행';
+  if (/신한은행|shinhan\s*bank/i.test(text)) return '신한은행';
+  if (/우리은행|wooribank/i.test(text)) return '우리은행';
+  if (/하나은행|hana\s*bank/i.test(text)) return '하나은행';
+  if (/nh농협|농협은행|nonghyup/i.test(text)) return 'NH농협은행';
+  if (/ibk기업|기업은행/i.test(text)) return 'IBK기업은행';
+  if (/sc제일|standard\s*chartered/i.test(text)) return 'SC제일은행';
+  if (/씨티은행|citibank/i.test(text)) return '씨티은행';
+  if (/산업은행|kdb/i.test(text)) return 'KDB산업은행';
+
+  // === 지방은행 ===
+  if (/부산은행|busan\s*bank/i.test(text)) return '부산은행';
+  if (/경남은행|kyongnam/i.test(text)) return '경남은행';
+  if (/대구은행|daegu\s*bank|imbank/i.test(text)) return '대구은행';
+  if (/광주은행|kjbank/i.test(text)) return '광주은행';
+  if (/전북은행|jbbank/i.test(text)) return '전북은행';
+  if (/제주은행|jejubank/i.test(text)) return '제주은행';
+
+  // === 협동/특수 ===
+  if (/수협/i.test(text)) return '수협은행';
+  if (/새마을금고|kfcc/i.test(text)) return '새마을금고';
+  if (/신협/i.test(text)) return '신협';
+  if (/우체국/i.test(text)) return '우체국';
+  if (/저축은행/i.test(text)) return '저축은행';
+
+  // === 페이 / 빅테크 ===
+  if (/카카오\s*페이|kakaopay/i.test(text)) return '카카오페이';
+  if (/네이버\s*페이|naverpay/i.test(text)) return '네이버페이';
+  if (/토스\b|tossapp/i.test(text)) return '토스';
+  if (/페이코|payco/i.test(text)) return '페이코';
+  if (/삼성페이|samsungpay/i.test(text)) return '삼성페이';
+  if (/애플페이|apple\s*pay/i.test(text)) return '애플페이';
+
+  // === 카드사 ===
+  if (/현대카드|hyundaicard/i.test(text)) return '현대카드';
+  if (/삼성카드|samsungcard/i.test(text)) return '삼성카드';
+  if (/롯데카드|lottecard/i.test(text)) return '롯데카드';
+  if (/비씨카드|bccard|bc\s*카드/i.test(text)) return '비씨카드';
+  if (/하나카드|hanacard/i.test(text)) return '하나카드';
+  if (/우리카드|wooricard/i.test(text)) return '우리카드';
+  if (/신한카드|shinhancard/i.test(text)) return '신한카드';
+  if (/kb국민카드|국민카드|kbcard/i.test(text)) return 'KB국민카드';
+  if (/nh농협카드|농협카드|nh\s*card/i.test(text)) return 'NH농협카드';
+  if (/씨티카드|citicard/i.test(text)) return '씨티카드';
+  if (/현대캐피탈|hyundaicapital/i.test(text)) return '현대캐피탈';
+
+  // === 증권 / 보험 ===
+  if (/미래에셋|mirae/i.test(text)) return '미래에셋증권';
+  if (/한국투자|kis/i.test(text)) return '한국투자증권';
+  if (/삼성증권|samsungsec/i.test(text)) return '삼성증권';
+  if (/키움증권|kiwoom/i.test(text)) return '키움증권';
+  if (/nh투자|nh\s*sec/i.test(text)) return 'NH투자증권';
+
+  // === 헤더 조합 fallback ===
+  const h = headers.join(' ').toLowerCase();
+  if (/거래일시/.test(h) && /구분/.test(h) && /거래\s*후\s*잔액/.test(h)) {
+    return '카카오뱅크 (헤더 추정)';
+  }
+  if (/이용\s*일/.test(h) && /이용\s*처/.test(h) && /이용\s*금액/.test(h)) {
+    return '신용카드 명세서';
+  }
+  if (/출금\s*(금액|액)/.test(h) && /입금\s*(금액|액)/.test(h) && /잔액/.test(h)) {
+    return '은행 거래내역';
+  }
+  return null;
+}
 
 /**
  * 호출 측에서 빈 비번이면 평범하게 파싱 시도, 비번이 걸려있으면
@@ -29,7 +119,12 @@ export async function parseClientFile(file: File, password?: string): Promise<Sh
   const name = file.name.toLowerCase();
   if (name.endsWith('.csv') || file.type === 'text/csv') {
     const text = await readAsText(file);
-    return parseCsv(text);
+    const csv = parseCsv(text);
+    return {
+      ...csv,
+      fileName: file.name,
+      detectedBank: detectBank(file.name, '', csv.headers),
+    };
   }
   if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
     const XLSX = await import('xlsx');
@@ -66,7 +161,8 @@ export async function parseClientFile(file: File, password?: string): Promise<Sh
     }
 
     const wb = XLSX.read(buffer, { type: 'array' });
-    const ws = wb.Sheets[wb.SheetNames[0]];
+    const sheetName = wb.SheetNames[0] ?? '';
+    const ws = wb.Sheets[sheetName];
     if (!ws) throw new Error('워크시트가 비어 있습니다.');
     // 한국 은행 파일은 1행에 메타정보(성명/계좌번호/조회기간 등)가 있고,
     // 5~15행 어디쯤에 진짜 헤더 행이 있다. 헤더 행을 휴리스틱으로 탐지.
@@ -90,7 +186,13 @@ export async function parseClientFile(file: File, password?: string): Promise<Sh
         }
         return out;
       });
-    return { headers, rows };
+    return {
+      headers,
+      rows,
+      fileName: file.name,
+      sheetName,
+      detectedBank: detectBank(file.name, sheetName, headers),
+    };
   }
   throw new Error('CSV 또는 XLSX 파일만 지원합니다.');
 }
