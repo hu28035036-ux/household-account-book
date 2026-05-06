@@ -17,6 +17,8 @@ import { MonthlyBars } from '@/components/charts/MonthlyBars';
 import { BudgetBar } from '@/components/budgets/BudgetBar';
 import { InsightsSection } from '@/components/insights/InsightsSection';
 import { StatsAiCard } from '@/components/stats/StatsAiCard';
+import { CardUsageCard } from '@/components/stats/CardUsageCard';
+import { getCardUsageReport } from '@/services/cardStatsService';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,13 +31,14 @@ export default async function StatsPage() {
   const householdName = householdContext
     ? await getActiveHouseholdName(supabase, householdContext)
     : null;
-  const [summary, series, recurring, ai, budgets, insights] = await Promise.all([
+  const [summary, series, recurring, ai, budgets, insights, cardUsage] = await Promise.all([
     getDashboardSummary(supabase, u.user.id, undefined, householdContext),
     getMonthlySeries(supabase, u.user.id, 6),
     getRecurringCandidates(supabase, u.user.id, 3),
     getAiAnalyticsSummary(supabase, u.user.id),
     getBudgetProgress(supabase, u.user.id),
     getInsights(supabase, u.user.id),
+    getCardUsageReport(supabase, u.user.id, undefined, householdContext),
   ]);
 
   const approvalRate =
@@ -60,6 +63,9 @@ export default async function StatsPage() {
 
       {/* AI 분석 — 사용자가 버튼 클릭 시에만 호출 */}
       <StatsAiCard />
+
+      {/* 카드 사용 통계 — 결제수단 type='card' 만 */}
+      <CardUsageCard report={cardUsage} />
 
       {/* 카테고리별 + 결제수단별 + 최근 거래 */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
