@@ -1,7 +1,20 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
-const PROTECTED_PREFIXES = ['/dashboard', '/transactions', '/upload', '/candidates', '/budgets', '/categories', '/payment-methods', '/settings', '/files'];
+// 새 보호 라우트 추가 시 다음 4곳을 모두 갱신: middleware / Sidebar / (해당 시) BottomNav / e2e smoke
+// PITFALLS §1.3 참고
+const PROTECTED_PREFIXES = [
+  '/dashboard',
+  '/transactions',
+  '/upload',
+  '/candidates',
+  '/budgets',
+  '/categories',
+  '/payment-methods',
+  '/households',
+  '/settings',
+  '/files',
+];
 const PUBLIC_ONLY = ['/login'];
 
 export async function middleware(req: NextRequest) {

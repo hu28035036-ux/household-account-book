@@ -6,7 +6,10 @@ const useExternalServer = !!process.env.E2E_BASE_URL;
 export default defineConfig({
   testDir: './e2e',
   timeout: 60_000,
-  expect: { timeout: 10_000 },
+  expect: {
+    timeout: 10_000,
+    toHaveScreenshot: { maxDiffPixelRatio: 0.02, animations: 'disabled' },
+  },
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list']],
@@ -18,9 +21,19 @@ export default defineConfig({
     timezoneId: 'Asia/Seoul',
   },
   projects: [
-    { name: 'mobile-360', use: { ...devices['Pixel 5'], viewport: { width: 360, height: 740 } } },
-    { name: 'mobile-390', use: { ...devices['iPhone 13'], viewport: { width: 390, height: 844 } } },
-    { name: 'tablet-768', use: { ...devices['iPad (gen 7) landscape'], viewport: { width: 768, height: 1024 } } },
+    // mobile/tablet도 chromium 기반으로 통일 (CI에서 webkit/firefox 별도 설치 부담 제거)
+    {
+      name: 'mobile-360',
+      use: { ...devices['Pixel 5'], viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true },
+    },
+    {
+      name: 'mobile-390',
+      use: { ...devices['Pixel 5'], viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true },
+    },
+    {
+      name: 'tablet-768',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 768, height: 1024 } },
+    },
     { name: 'desktop-1024', use: { ...devices['Desktop Chrome'], viewport: { width: 1024, height: 768 } } },
     { name: 'desktop-1280', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
     { name: 'desktop-1440', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },

@@ -9,8 +9,8 @@ const PATTERNS = {
   rrn: /\b\d{6}-\d{7}\b/g,
   // 사업자등록번호 10자리
   brn: /\b\d{3}-\d{2}-\d{5}\b/g,
-  // 전화번호 010-xxxx-xxxx (서울 02 포함)
-  phone: /\b(?:01[016789]|02|0[3-9]\d)-?\d{3,4}-?\d{4}\b/g,
+  // 전화번호 010-xxxx-xxxx, 02-xxx-xxxx, 0XX-xxx-xxxx (area code 캡처)
+  phone: /\b(01[016789]|02|0[3-9]\d)-?(\d{3,4})-?(\d{4})\b/g,
   // 승인번호 라벨
   approvalNum: /(승인\s*번호\s*[:#]?\s*)\d{4,}/g,
   // 길게 이어진 숫자(추정 계좌). 단어 경계 사이 8자리 이상 연속 숫자.
@@ -42,9 +42,8 @@ export function maskBrn(text: string): string {
 }
 
 export function maskPhone(text: string): string {
-  return text.replace(PATTERNS.phone, (m) => {
-    const digits = m.replace(/[-\s]/g, '');
-    return digits.slice(0, 3) + '-****-' + digits.slice(-4);
+  return text.replace(PATTERNS.phone, (_m, area: string, _mid: string, last4: string) => {
+    return `${area}-****-${last4}`;
   });
 }
 

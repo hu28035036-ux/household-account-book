@@ -18,6 +18,8 @@ describe('masking', () => {
   it('전화번호 끝 4자리만', () => {
     expect(maskPhone('010-1234-5678')).toBe('010-****-5678');
     expect(maskPhone('02-123-4567')).toBe('02-****-4567');
+    expect(maskPhone('031-123-4567')).toBe('031-****-4567');
+    expect(maskPhone('02-1234-5678')).toBe('02-****-5678');
   });
 
   it('승인번호 라벨 뒤 숫자 가림', () => {

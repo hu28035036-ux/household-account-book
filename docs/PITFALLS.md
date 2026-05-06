@@ -259,6 +259,35 @@
 
 ---
 
+## 12. 회귀 케이스 (검증 사이클에서 실제로 잡힌 것)
+
+### 12.1 `maskPhone` 시외번호(02) 잘못 슬라이스
+- **증상**: `maskPhone('02-123-4567')` → `'021-****-4567'` (앞 3자리 고정 슬라이스).
+- **원인**: 정규식 매치 그대로 받아 `digits.slice(0, 3)`. 02는 area code가 2자리라 mid 첫 디지트까지 area로 흡수됨.
+- **해결**: 정규식에 area / mid / last4 캡처 그룹 사용:
+  ```ts
+  phone: /\b(01[016789]|02|0[3-9]\d)-?(\d{3,4})-?(\d{4})\b/g
+  return text.replace(PATTERNS.phone, (_m, area, _mid, last4) => `${area}-****-${last4}`);
+  ```
+- **회귀 테스트**: `tests/unit/masking.test.ts`에 `02-123-4567 / 031-123-4567 / 02-1234-5678` 케이스.
+
+### 12.2 보호 라우트 추가하고 middleware 갱신 누락
+- **증상**: `/households`만 미로그인 시 `/login`으로 가는데 `?redirect=...` query가 없음. 다른 보호 라우트는 정상.
+- **원인**: middleware의 `PROTECTED_PREFIXES`에 `/households` 추가 누락. 미들웨어가 통과시키니 `(app)/layout.tsx`의 `redirect('/login')`이 query 없는 redirect를 만듦.
+- **해결**: middleware의 PROTECTED_PREFIXES에 누락된 경로 추가. 코멘트로 4곳 갱신 체크리스트 명시. e2e smoke의 `PROTECTED_PATHS`가 모든 보호 라우트를 포함해야 함(이번엔 e2e가 정확히 잡아냄).
+- **검증**: e2e smoke가 모든 PROTECTED_PATHS에 대해 `/login?redirect=...` 패턴 강제.
+
+### 12.3 Playwright `iPhone 13` device → webkit 의존
+- **증상**: `chromium`만 install된 환경에서 `mobile-390` 프로젝트가 `Executable doesn't exist at .../webkit-.../Playwright.exe`.
+- **원인**: `devices['iPhone 13']`은 webkit 기반.
+- **해결**: 모바일 프로젝트도 `devices['Pixel 5']`(chromium) + `viewport`만 조정 + `isMobile/hasTouch` 명시. CI가 chromium만 설치해도 충분.
+
+### 12.4 page.tsx에서 `redirect('/login')` 호출
+- **권고**: (app) 그룹 내 page들은 자체 `redirect('/login')`을 호출하지 말 것. middleware + (app)/layout.tsx 두 단계가 이미 보호하며, page에서 추가 redirect가 일어나면 query 보존이 깨질 수 있음.
+- **대신**: `if (!u.user) return null;`로 안전 종료하고 라우팅은 상위 layer에 위임.
+
+---
+
 ## 추가 발견 시 갱신 규칙
 
 새로운 실수가 발생하면:
