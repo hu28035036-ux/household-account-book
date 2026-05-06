@@ -3,6 +3,7 @@ import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { Header } from './Header';
 import { ActiveHouseholdProvider } from '@/lib/active-household';
+import { SwUpdatePrompt } from '@/components/common/SwUpdatePrompt';
 
 type Props = {
   title?: string;
@@ -24,6 +25,7 @@ export function AppShell({ title, userEmail, isAdmin = false, children }: Props)
           <BottomNav isAdmin={isAdmin} />
         </div>
       </div>
+      <SwUpdatePrompt />
     </ActiveHouseholdProvider>
   );
 }
