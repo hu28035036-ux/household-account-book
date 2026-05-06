@@ -103,7 +103,14 @@ export function AdminClient({ currentEmail }: { currentEmail: string | null }) {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="text-2xl font-semibold text-textPrimary">관리자 콘솔</h2>
+        <div>
+          <h2 className="text-2xl font-semibold text-textPrimary">관리자 콘솔</h2>
+          <p className="mt-0.5 text-xs text-textSecondary">
+            개발자 전용 — 일반 사용자에게는 메뉴와 페이지 모두 노출되지 않습니다.
+            <code className="ml-1 px-1 rounded bg-sectionBackground text-textPrimary">ADMIN_EMAILS</code>{' '}
+            환경변수로 식별합니다.
+          </p>
+        </div>
         <Badge tone="muted">
           <ShieldAlert className="h-3 w-3" strokeWidth={1.75} /> {currentEmail}
         </Badge>

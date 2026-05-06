@@ -42,7 +42,7 @@ const MORE = [
   { href: '/settings', label: '설정', icon: Settings },
 ];
 
-const ADMIN_ITEM = { href: '/admin', label: '관리자', icon: ShieldAlert };
+const ADMIN_ITEM = { href: '/admin', label: '관리자 (개발자)', icon: ShieldAlert };
 
 type Props = { isAdmin?: boolean };
 
