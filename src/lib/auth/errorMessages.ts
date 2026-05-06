@@ -14,7 +14,7 @@ export function localizeAuthError(rawMessage: string | null | undefined, fallbac
 
   // 트리거가 던진 raise exception → "Database error saving new user"로 래핑됨
   if (/database error saving new user/.test(m)) {
-    return '가입이 거부되었습니다. 초대 명단(allowed_emails)에 등록되어 있는지 운영자에게 확인해 주세요.';
+    return '가입 처리 중 오류가 발생했습니다. 잠시 후 다시 시도하거나 운영자에게 문의해 주세요.';
   }
 
   // 메일 발송 한도

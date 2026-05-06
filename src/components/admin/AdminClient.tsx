@@ -109,17 +109,19 @@ export function AdminClient({ currentEmail }: { currentEmail: string | null }) {
         </Badge>
       </div>
 
-      {/* 화이트리스트 */}
+      {/* 메모/태그 (자유 가입 모드 전환 후 보조 용도) */}
       <Card>
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <CardTitle>이메일 화이트리스트</CardTitle>
+            <CardTitle>이메일 메모 (선택)</CardTitle>
             <CardSubtle className="mt-1">
-              여기 등록된 이메일만 매직링크 가입이 허용됩니다. (트리거가 가입 시 검증)
+              자유 가입 모드입니다 — 이 목록은 가입을 차단하지 않습니다.
+              운영자가 친구·가족·테스트 등 메모로 분류해두는 용도입니다.
+              차단·삭제는 아래 가입자 표에서 진행하세요.
             </CardSubtle>
           </div>
           <Button onClick={() => setAddOpen(true)}>
-            <Plus className="h-4 w-4" strokeWidth={1.75} /> 이메일 추가
+            <Plus className="h-4 w-4" strokeWidth={1.75} /> 메모 추가
           </Button>
         </div>
 

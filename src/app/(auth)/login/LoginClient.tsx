@@ -115,7 +115,7 @@ export default function LoginClient() {
           {step === 'email' ? (
             <>
               <CardTitle>이메일 인증</CardTitle>
-              <CardSubtle className="mt-1">초대 명단의 이메일만 가입·로그인이 가능합니다.</CardSubtle>
+              <CardSubtle className="mt-1">이메일로 6자리 코드를 받아 가입·로그인합니다. 별도 비밀번호는 없습니다.</CardSubtle>
 
               <form onSubmit={sendCode} className="mt-5 space-y-3">
                 <label className="block">
@@ -182,7 +182,7 @@ export default function LoginClient() {
         </Card>
 
         <p className="mt-4 text-center text-xs text-textMuted">
-          본 서비스는 결제 없이 운영되며, 초대받은 이메일만 가입할 수 있습니다.
+          결제·비밀번호 없이 이메일 인증으로 가입·로그인합니다.
           <br />한 번 인증하면 같은 브라우저에서 자동으로 유지됩니다.
         </p>
       </div>

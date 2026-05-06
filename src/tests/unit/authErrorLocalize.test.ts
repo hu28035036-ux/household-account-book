@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { localizeAuthError } from '@/lib/auth/errorMessages';
 
 describe('localizeAuthError', () => {
-  it('Database error saving new user → 화이트리스트 안내', () => {
-    expect(localizeAuthError('Database error saving new user')).toMatch(/초대 명단/);
+  it('Database error saving new user → 일반 가입 오류 안내', () => {
+    expect(localizeAuthError('Database error saving new user')).toMatch(/가입 처리 중/);
   });
   it('email rate limit exceeded → 발송 한도', () => {
     expect(localizeAuthError('Email rate limit exceeded')).toMatch(/발송 한도/);
