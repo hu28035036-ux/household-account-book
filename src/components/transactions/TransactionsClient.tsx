@@ -143,7 +143,7 @@ export function TransactionsClient() {
       </div>
 
       {!loading && rows.length > 0 && (
-        <div className="sticky top-0 z-10 -mx-4 px-4 py-2 bg-pageBackground/95 backdrop-blur border-b border-borderSoft md:static md:mx-0 md:px-0 md:py-0 md:bg-transparent md:backdrop-blur-0 md:border-0">
+        <div className="sticky top-14 z-10 -mx-4 px-4 py-2 bg-pageBackground/95 backdrop-blur border-b border-borderSoft md:static md:top-auto md:mx-0 md:px-0 md:py-0 md:bg-transparent md:backdrop-blur-0 md:border-0">
           <div className="flex items-center gap-2 flex-wrap">
             <Button size="sm" variant="secondary" onClick={toggleAll}>
               {rows.length > 0 && rows.every((r) => selected.has(r.id)) ? '전체 해제' : '전체 선택'}
