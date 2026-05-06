@@ -1,0 +1,40 @@
+name: Keep Warm
+
+# Vercel Hobby cold start를 방지하기 위해 매 5분마다 가벼운 헬스 엔드포인트를 호출.
+# /api/ai-status: 인증 불필요, Ollama 터널 가용 여부만 확인하는 가벼운 라우트.
+
+on:
+  schedule:
+    # GitHub Actions cron은 UTC. 매 5분마다.
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: keep-warm
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping Vercel /api/ai-status
+        run: |
+          for i in 1 2 3; do
+            CODE=$(curl -fsS -o /dev/null -w "%{http_code}" --max-time 15 \
+              https://household-account-book-seven-phi.vercel.app/api/ai-status) && \
+              echo "ai-status HTTP $CODE" && exit 0
+            echo "retry $i..."
+            sleep 5
+          done
+          echo "all retries failed"
+          exit 1
+
+      - name: Ping /login (warm SSR)
+        run: |
+          curl -fsS -o /dev/null -w "/login HTTP %{http_code} time=%{time_total}s\n" \
+            --max-time 15 \
+            https://household-account-book-seven-phi.vercel.app/login || true
