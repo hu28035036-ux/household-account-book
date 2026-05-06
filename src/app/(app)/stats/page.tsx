@@ -16,6 +16,7 @@ import { formatDateKST } from '@/lib/formatting/date';
 import { MonthlyBars } from '@/components/charts/MonthlyBars';
 import { BudgetBar } from '@/components/budgets/BudgetBar';
 import { InsightsSection } from '@/components/insights/InsightsSection';
+import { StatsAiCard } from '@/components/stats/StatsAiCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,6 +57,9 @@ export default async function StatsPage() {
           {summary.range.from} ~ {summary.range.to}
         </Badge>
       </div>
+
+      {/* AI 분석 — 사용자가 버튼 클릭 시에만 호출 */}
+      <StatsAiCard />
 
       {/* 카테고리별 + 결제수단별 + 최근 거래 */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
