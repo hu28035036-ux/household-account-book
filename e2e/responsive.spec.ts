@@ -23,7 +23,7 @@ test('로그인 화면: 핵심 컨트롤 터치 영역 ≥ 44px (모바일에서
     test.skip();
     return;
   }
-  const button = page.getByRole('button', { name: /로그인 링크 보내기/ });
+  const button = page.getByRole('button', { name: /인증 코드 받기/ });
   const box = await button.boundingBox();
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
 
