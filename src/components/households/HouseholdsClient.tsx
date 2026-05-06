@@ -231,29 +231,41 @@ export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
               <>
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <CardTitle>{active.name}</CardTitle>
-                  <div className="flex items-center gap-1">
+                  {/* 액션 버튼 통일 — h-8 / px-2 / text-xs (한 줄 유지용 컴팩트 사이즈) */}
+                  <div className="flex items-center gap-1 flex-nowrap">
                     <Button
                       size="sm"
                       onClick={() => {
                         setGlobalActive(active.id);
                         router.push('/dashboard');
                       }}
+                      className="!h-8 !px-2 !text-xs !gap-1"
                     >
-                      <Eye className="h-4 w-4" strokeWidth={1.75} /> 이 모임으로 보기
+                      <Eye className="h-3.5 w-3.5" strokeWidth={1.75} /> 모임 보기
                     </Button>
                     {active.is_owner && (
-                      <Button size="sm" variant="ghost" onClick={() => rename(active)}>
-                        <Pencil className="h-4 w-4" strokeWidth={1.75} /> 이름 변경
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => rename(active)}
+                        className="!h-8 !px-2 !text-xs !gap-1"
+                      >
+                        <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} /> 이름
                       </Button>
                     )}
-                    <Button size="sm" variant="ghost" onClick={() => leaveOrDelete(active)}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => leaveOrDelete(active)}
+                      className="!h-8 !px-2 !text-xs !gap-1"
+                    >
                       {active.is_owner ? (
                         <>
-                          <Trash2 className="h-4 w-4 text-danger" strokeWidth={1.75} /> 삭제
+                          <Trash2 className="h-3.5 w-3.5 text-danger" strokeWidth={1.75} /> 삭제
                         </>
                       ) : (
                         <>
-                          <LogOut className="h-4 w-4 text-danger" strokeWidth={1.75} /> 탈퇴
+                          <LogOut className="h-3.5 w-3.5 text-danger" strokeWidth={1.75} /> 탈퇴
                         </>
                       )}
                     </Button>
