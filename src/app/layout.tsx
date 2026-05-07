@@ -32,7 +32,11 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 5,
+  // PWA 앱 일관성 위해 사용자 확대 잠금. iOS Safari 16+ 는 시스템 줌으로 우회 가능.
+  // 글자 작은 경우 OS 폰트 크기 설정으로 해결 권장.
+  maximumScale: 1,
+  minimumScale: 1,
+  userScalable: false,
   themeColor: '#FFF7FA',
   // iOS 풀스크린 시 노치/홈바 영역까지 활용
   viewportFit: 'cover',
