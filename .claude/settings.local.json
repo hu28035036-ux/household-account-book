@@ -56,7 +56,18 @@
       "Bash(curl -sI https://household-account-book-5vgz.vercel.app/api/me)",
       "Bash(curl -sI https://household-account-book-5vgz.vercel.app/api/ai-status)",
       "Bash(awk ' *)",
-      "Bash(node scripts/audit-rls.mjs)"
+      "Bash(node scripts/audit-rls.mjs)",
+      "Bash(curl -sL https://household-account-book-5vgz.vercel.app/login)",
+      "Bash(curl -sL \"https://household-account-book-5vgz.vercel.app/login\")",
+      "Bash(curl -sL \"https://household-account-book-5vgz.vercel.app/\")",
+      "Bash(curl -sI \"https://household-account-book-5vgz.vercel.app/login\")",
+      "Bash(curl -sI \"https://household-account-book-c0vftgb5p-hu28035036-2116s-projects.vercel.app/login\")",
+      "Bash(curl -sI \"https://household-account-book-qjei5t7cv-hu28035036-2116s-projects.vercel.app/login\")",
+      "Bash(curl -sL \"https://household-account-book-c0vftgb5p-hu28035036-2116s-projects.vercel.app/login\")",
+      "Bash(grep \"vercel.app$\")",
+      "Bash(awk '{print $2}')",
+      "Bash(curl -sI \"https://household-account-book-5vgz.vercel.app/sw.js\")",
+      "Bash(curl -s \"https://household-account-book-5vgz.vercel.app/sw.js\")"
     ]
   }
 }

@@ -11,6 +11,10 @@ const withPWA = withPWAInit({
   reloadOnOnline: true,
   workboxOptions: {
     disableDevLogs: true,
+    // 새 SW 발견 즉시 활성화 — 사용자가 토스트 무시해도 다음 진입 시 자동 갱신.
+    // (SwUpdatePrompt 토스트는 보조: 현재 열린 탭에서 즉시 적용 원할 때 사용)
+    skipWaiting: true,
+    clientsClaim: true,
     // SSR/auth-aware 페이지는 캐시 X — 항상 네트워크 우선
     runtimeCaching: [
       // /api/* — 절대 캐시 X
