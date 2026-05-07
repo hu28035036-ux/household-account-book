@@ -7,6 +7,7 @@ import { HouseholdSwitcher } from './HouseholdSwitcher';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { HelpSheet } from './HelpSheet';
+import { AssistantSheet } from '@/components/assistant/AssistantSheet';
 
 type Props = { title?: string; userEmail?: string | null };
 
@@ -23,6 +24,7 @@ export function Header({ title, userEmail }: Props) {
         <h1 className="text-base sm:text-lg font-semibold text-textPrimary truncate min-w-0">{title ?? ''}</h1>
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <HelpSheet />
+          <AssistantSheet />
           <ThemeSwitcher />
           <NotificationBell />
           <HouseholdSwitcher />
