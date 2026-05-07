@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import {
   HelpCircle,
@@ -21,6 +22,10 @@ const STORAGE_KEY = 'help-seen';
 
 export function HelpSheet({ autoOnFirstVisit = true }: { autoOnFirstVisit?: boolean }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // SSR 안전: client mount 후에만 portal 사용
+  useEffect(() => setMounted(true), []);
 
   // 처음 진입한 사용자에게 한 번 자동 노출 (한 번 닫으면 다시 안 뜸)
   useEffect(() => {
@@ -62,9 +67,9 @@ export function HelpSheet({ autoOnFirstVisit = true }: { autoOnFirstVisit?: bool
         <HelpCircle className="h-4 w-4 text-textSecondary" strokeWidth={1.75} />
       </button>
 
-      {open && (
+      {mounted && open && createPortal(
         <div
-          className="fixed inset-0 z-50"
+          className="fixed inset-0 z-[60]"
           role="dialog"
           aria-modal="true"
           aria-label="가계부 사용 가이드"
@@ -79,7 +84,7 @@ export function HelpSheet({ autoOnFirstVisit = true }: { autoOnFirstVisit?: bool
 
           {/* 시트: 모바일 = 풀스크린, sm 이상 = 우측 슬라이드 */}
           <div
-            className="absolute inset-x-0 bottom-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:max-w-md w-full bg-pageBackground rounded-t-2xl sm:rounded-none border-t sm:border-t-0 sm:border-l border-borderDefault shadow-2xl flex flex-col max-h-[92vh] sm:max-h-screen"
+            className="absolute inset-x-0 bottom-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:max-w-md w-full h-[88vh] sm:h-screen bg-pageBackground rounded-t-2xl sm:rounded-none border-t sm:border-t-0 sm:border-l border-borderDefault shadow-2xl flex flex-col"
             style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.75rem)' }}
           >
             <div className="sticky top-0 bg-pageBackground/95 backdrop-blur flex items-center justify-between gap-2 px-4 py-3 border-b border-borderSoft">
@@ -213,7 +218,8 @@ export function HelpSheet({ autoOnFirstVisit = true }: { autoOnFirstVisit?: bool
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
