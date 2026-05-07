@@ -22,6 +22,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import type { Intent } from '@/lib/ai/assistantSchema';
+import { PrivacyConsentModal } from '@/components/common/PrivacyConsentModal';
 
 const NAV_DESTINATIONS: Record<string, { path: string; label: string }> = {
   calendar: { path: '/dashboard', label: '월 캘린더' },
@@ -110,16 +111,45 @@ export function AssistantSheet() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodOption[]>([]);
+  const [consentRequired, setConsentRequired] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => setMounted(true), []);
+
+  // 첫 마운트 시 동의 상태 확인 (한 번만)
+  useEffect(() => {
+    if (consentChecked) return;
+    fetch('/api/me', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((j) => {
+        const consented = !!j?.data?.privacy_consent_at;
+        setConsentChecked(true);
+        if (!consented) {
+          // 시트 열림 시점에 동의 모달 띄우기 위해 플래그 set 만 (지금은 모달 안 띄움)
+        }
+      })
+      .catch(() => setConsentChecked(true));
+  }, [consentChecked]);
+
+  // 시트 열기 전 동의 확인 — 미동의면 모달 먼저 띄움
+  function tryOpenSheet() {
+    fetch('/api/me', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((j) => {
+        const consented = !!j?.data?.privacy_consent_at;
+        if (consented) setOpen(true);
+        else setConsentRequired(true);
+      })
+      .catch(() => setOpen(true)); // 네트워크 실패 시 그냥 진입 (보수적)
+  }
 
   // Ctrl+K / Cmd+K 단축키 — 어디서나 열기
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        setOpen(true);
+        tryOpenSheet();
       }
       if (e.key === 'Escape' && open) setOpen(false);
     };
@@ -269,13 +299,23 @@ export function AssistantSheet() {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={tryOpenSheet}
         aria-label="AI 입력"
         title="AI 입력 (Ctrl+K)"
         className="h-9 w-9 inline-flex items-center justify-center rounded-md border border-borderDefault bg-white hover:bg-softPinkBackground transition-colors"
       >
         <Sparkles className="h-4 w-4 text-textPinkStrong" strokeWidth={1.75} />
       </button>
+
+      <PrivacyConsentModal
+        open={consentRequired}
+        onClose={() => setConsentRequired(false)}
+        onAgreed={() => {
+          setConsentRequired(false);
+          setOpen(true);
+        }}
+        reason="AI 입력 어시스턴트 사용 전 개인정보처리방침 동의가 필요합니다. 명령은 OpenAI 로 일시 전송됩니다."
+      />
 
       {open &&
         createPortal(

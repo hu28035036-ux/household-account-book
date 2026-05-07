@@ -20,7 +20,7 @@ const PROTECTED_PREFIXES = [
   '/recurring',
   '/banking',
   '/guide',
-  '/privacy',
+  // /privacy 는 의도적으로 공개 (가입 전 검토용) — PROTECTED_PREFIXES 에 넣지 않음
   '/admin',
 ];
 const PUBLIC_ONLY = ['/login', '/signup'];

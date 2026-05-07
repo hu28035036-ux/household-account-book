@@ -22,6 +22,7 @@ export default function SignupClient() {
   const [error, setError] = useState<string | null>(null);
   const [usernameOk, setUsernameOk] = useState<null | boolean>(null);
   const [usernameMsg, setUsernameMsg] = useState<string>('');
+  const [agreedPrivacy, setAgreedPrivacy] = useState(false);
 
   // 이미 로그인 상태면 대시보드로
   useEffect(() => {
@@ -63,6 +64,10 @@ export default function SignupClient() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!agreedPrivacy) {
+      setError('개인정보처리방침 동의가 필요합니다.');
+      return;
+    }
     if (pw !== pw2) {
       setError('비밀번호 확인이 일치하지 않습니다.');
       return;
@@ -93,6 +98,16 @@ export default function SignupClient() {
         },
       });
       if (error) throw error;
+      // 동의 시각 기록 (실패해도 가입 자체는 성공이므로 swallow)
+      try {
+        await fetch('/api/account/consent', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ type: 'privacy', version: 'v1' }),
+        });
+      } catch {
+        // ignore — 다음 진입 시 모달로 다시 받음
+      }
       // Confirm email OFF 정책이면 즉시 세션 생성됨 → /dashboard
       router.replace('/dashboard');
       router.refresh();
@@ -111,7 +126,8 @@ export default function SignupClient() {
     !!email &&
     pw.length >= 8 &&
     pw === pw2 &&
-    usernameOk !== false;
+    usernameOk !== false &&
+    agreedPrivacy;
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-appBackground">
@@ -190,6 +206,30 @@ export default function SignupClient() {
                 <p className="mt-1 text-xs text-danger">비밀번호 확인이 일치하지 않습니다.</p>
               )}
             </Field>
+
+            <label className="flex items-start gap-2 px-1 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={agreedPrivacy}
+                onChange={(e) => setAgreedPrivacy(e.target.checked)}
+                className="mt-1 h-4 w-4 accent-primaryPink shrink-0"
+              />
+              <span className="text-xs leading-relaxed text-textSecondary">
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-textPinkStrong underline underline-offset-2"
+                >
+                  개인정보처리방침
+                </Link>
+                에 동의합니다 <span className="text-danger">(필수)</span>
+                <br />
+                <span className="text-textMuted">
+                  AI 분석을 위해 영수증 텍스트가 OpenAI 로 일시 전달되는 것을 포함합니다.
+                </span>
+              </span>
+            </label>
 
             {error && (
               <p className="text-sm rounded-md bg-dangerSoft text-danger px-3 py-2">{error}</p>

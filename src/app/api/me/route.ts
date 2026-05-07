@@ -26,21 +26,43 @@ export async function GET() {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return fail('UNAUTHORIZED', '로그인이 필요합니다.');
 
-  const { data: profile } = await supabase
+  // 컬럼 누락(마이그레이션 미적용) 환경에서도 깨지지 않도록 try/catch 로 fallback
+  let privacy_consent_at: string | null = null;
+  let privacy_consent_version: string | null = null;
+  let baseSelect = 'username, full_name, birthdate, nickname, display_name, created_at';
+  let extendedSelect = baseSelect + ', privacy_consent_at, privacy_consent_version';
+  let profile: Record<string, unknown> | null = null;
+
+  const ext = await supabase
     .from('profiles')
-    .select('username, full_name, birthdate, nickname, display_name, created_at')
+    .select(extendedSelect)
     .eq('user_id', u.user.id)
     .maybeSingle();
+  if (ext.error) {
+    // privacy_consent_* 컬럼 부재 → fallback
+    const base = await supabase
+      .from('profiles')
+      .select(baseSelect)
+      .eq('user_id', u.user.id)
+      .maybeSingle();
+    profile = base.data as Record<string, unknown> | null;
+  } else {
+    profile = ext.data as Record<string, unknown> | null;
+    privacy_consent_at = (profile?.privacy_consent_at as string | null) ?? null;
+    privacy_consent_version = (profile?.privacy_consent_version as string | null) ?? null;
+  }
 
   return ok({
     id: u.user.id,
     email: u.user.email,
     created_at: u.user.created_at,
-    username: profile?.username ?? null,
-    full_name: profile?.full_name ?? null,
-    birthdate: profile?.birthdate ?? null,
-    nickname: profile?.nickname ?? null,
-    display_name: profile?.display_name ?? null,
+    username: (profile?.username as string | null) ?? null,
+    full_name: (profile?.full_name as string | null) ?? null,
+    birthdate: (profile?.birthdate as string | null) ?? null,
+    nickname: (profile?.nickname as string | null) ?? null,
+    display_name: (profile?.display_name as string | null) ?? null,
+    privacy_consent_at,
+    privacy_consent_version,
   });
 }
 
