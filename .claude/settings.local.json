@@ -39,7 +39,8 @@
       "Read(//tmp/**)",
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:3000/login)",
       "Bash(node scripts/test-assistant-e2e.mjs)",
-      "Bash(npx --no-install vitest run src/tests/unit/assistantSchema.test.ts src/tests/unit/assistantExecute.test.ts)"
+      "Bash(npx --no-install vitest run src/tests/unit/assistantSchema.test.ts src/tests/unit/assistantExecute.test.ts)",
+      "Bash(node scripts/test-assistant-api-shape.mjs)"
     ]
   }
 }

@@ -94,7 +94,19 @@ type 중 정확히 하나 선택: add_transaction, update_transaction, delete_tr
 출력: {"type":"update_transaction","target":{"selector":"last"},"patch":{"amount":15000}}
 
 입력: "방금 거 취소"
-출력: {"type":"delete_transaction","target":{"selector":"last"}}`;
+출력: {"type":"delete_transaction","target":{"selector":"last"}}
+
+입력: "운동 카테고리 지워"
+출력: {"type":"delete_category","data":{"name":"운동"}}
+
+입력: "토스카드 결제수단 지워"
+출력: {"type":"delete_payment_method","data":{"name":"토스카드"}}
+
+입력: "월급 350만 매월 25일"
+출력: {"type":"create_recurring","data":{"type":"income","amount":3500000,"merchant_name":"월급","frequency":"monthly","day_of_month":25,"category_name":"급여","auto_post":false}}
+
+입력: "넷플릭스 17000 매월 5일"
+출력: {"type":"create_recurring","data":{"type":"expense","amount":17000,"merchant_name":"넷플릭스","frequency":"monthly","day_of_month":5,"category_name":"구독/서비스","auto_post":false}}`;
 
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -168,6 +180,87 @@ async function executeUpdateTransaction(userId, intent) {
     .single();
   if (error) throw error;
   return { before: target, after: data };
+}
+
+async function executeDeleteCategory(userId, intent) {
+  if (intent.type !== 'delete_category') return null;
+  const { data: cat } = await admin
+    .from('categories')
+    .select('id, name')
+    .eq('user_id', userId)
+    .ilike('name', intent.data.name)
+    .limit(1)
+    .maybeSingle();
+  if (!cat) throw new Error(`카테고리 "${intent.data.name}" 없음`);
+  const { error } = await admin
+    .from('categories')
+    .delete()
+    .eq('user_id', userId)
+    .eq('id', cat.id);
+  if (error) throw error;
+  return cat;
+}
+
+async function executeDeletePaymentMethod(userId, intent) {
+  if (intent.type !== 'delete_payment_method') return null;
+  const { data: pm } = await admin
+    .from('payment_methods')
+    .select('id, name')
+    .eq('user_id', userId)
+    .ilike('name', intent.data.name)
+    .limit(1)
+    .maybeSingle();
+  if (!pm) throw new Error(`결제수단 "${intent.data.name}" 없음`);
+  const { error } = await admin
+    .from('payment_methods')
+    .delete()
+    .eq('user_id', userId)
+    .eq('id', pm.id);
+  if (error) throw error;
+  return pm;
+}
+
+async function executeCreateRecurring(userId, intent) {
+  if (intent.type !== 'create_recurring') return null;
+  const d = intent.data;
+
+  let category_id = null;
+  if (d.category_name) {
+    const { data } = await admin
+      .from('categories')
+      .select('id')
+      .eq('user_id', userId)
+      .ilike('name', d.category_name)
+      .limit(1)
+      .maybeSingle();
+    category_id = data?.id ?? null;
+  }
+
+  const today = TODAY;
+  const { data, error } = await admin
+    .from('recurring_rules')
+    .insert({
+      user_id: userId,
+      household_id: null,
+      type: d.type,
+      amount: d.amount,
+      merchant_name: d.merchant_name ?? null,
+      description: null,
+      category_id,
+      payment_method_id: null,
+      frequency: d.frequency,
+      day_of_week: d.day_of_week ?? null,
+      day_of_month: d.day_of_month ?? null,
+      month_of_year: d.month_of_year ?? null,
+      start_date: today,
+      active: true,
+      auto_post: d.auto_post ?? false,
+      notify_days_before: 0,
+    })
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data;
 }
 
 async function executeDeleteTransaction(userId, intent) {
@@ -304,6 +397,7 @@ async function fetchUserCategories(userId) {
 async function cleanup(userId) {
   await admin.from('transactions').delete().eq('user_id', userId);
   await admin.from('budgets').delete().eq('user_id', userId);
+  await admin.from('recurring_rules').delete().eq('user_id', userId);
   // 테스트 카테고리 (시드가 아닌 것) + 결제수단 정리
   await admin
     .from('categories')
@@ -376,6 +470,53 @@ const PM_CASES = [
     name: '"현금 결제수단 만들어" → type=cash',
     input: '현금 결제수단 만들어',
     verify: (pm) => pm.name === '현금' && pm.type === 'cash',
+  },
+];
+
+// 엣지 케이스 — 까다로운 입력에서도 안전한가
+const EDGE_CASES = [
+  {
+    name: '"스벅 5천원" (원 단위 명시)',
+    input: '스벅 5천원',
+    verify: (tx) => tx.amount === 5000 && tx.merchant_name === '스타벅스',
+  },
+  {
+    name: '"오늘 점심 12만 5천" (복합 금액)',
+    input: '오늘 점심 12만 5천',
+    verify: (tx) => tx.amount === 125000,
+  },
+  {
+    name: '"이마트 350,000원" (콤마 포함)',
+    input: '이마트 350,000원',
+    verify: (tx) => tx.amount === 350000,
+  },
+  {
+    name: '"택시 12500" (콤마 없는 5자리)',
+    input: '택시 12500',
+    verify: (tx) => tx.amount === 12500,
+  },
+  {
+    name: '"한국전력 38000" (공공요금)',
+    input: '한국전력 38000',
+    verify: (tx) =>
+      tx.amount === 38000 &&
+      (tx.merchant_name?.includes('한국전력') || tx.merchant_name?.includes('한전')),
+  },
+  {
+    name: '"환급 12만" (수입 키워드)',
+    input: '환급 12만',
+    verify: (tx) => tx.type === 'income' && tx.amount === 120000,
+  },
+  {
+    name: '"엄마한테 용돈 5만" (가족 송금 — 수입으로 분류)',
+    input: '엄마한테 용돈 5만 받음',
+    verify: (tx) => tx.type === 'income' && tx.amount === 50000,
+  },
+  {
+    name: '"카카오T 4500" (간편결제 가맹점)',
+    input: '카카오T 4500',
+    verify: (tx) =>
+      tx.amount === 4500 && (tx.merchant_name?.includes('카카오') || tx.merchant_name?.length > 0),
   },
 ];
 
@@ -458,6 +599,62 @@ const DELETE_CASES = [
         .maybeSingle();
       return data === null;
     },
+  },
+];
+
+const DELETE_CAT_CASES = [
+  {
+    name: '"운동 카테고리 지워" → 운동 row 사라짐',
+    setupCreate: { name: '운동', type: 'common', is_default: false },
+    input: '운동 카테고리 지워',
+    verify: async (cat, userId) => {
+      const { data } = await admin
+        .from('categories')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('id', cat.id)
+        .maybeSingle();
+      return data === null;
+    },
+  },
+];
+
+const DELETE_PM_CASES = [
+  {
+    name: '"토스카드 결제수단 지워" → 토스카드 row 사라짐',
+    setupCreate: { name: '토스카드', type: 'card', is_default: false },
+    input: '토스카드 결제수단 지워',
+    verify: async (pm, userId) => {
+      const { data } = await admin
+        .from('payment_methods')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('id', pm.id)
+        .maybeSingle();
+      return data === null;
+    },
+  },
+];
+
+const RECURRING_CASES = [
+  {
+    name: '"월급 350만 매월 25일" → recurring_rules monthly day_of_month=25 income',
+    input: '월급 350만 매월 25일',
+    verify: (r) =>
+      r.frequency === 'monthly' &&
+      r.day_of_month === 25 &&
+      r.type === 'income' &&
+      r.amount === 3500000,
+  },
+  {
+    name: '"넷플릭스 17000 매월 5일" → expense monthly day=5',
+    input: '넷플릭스 17000 매월 5일',
+    verify: (r) =>
+      r.frequency === 'monthly' &&
+      r.day_of_month === 5 &&
+      r.type === 'expense' &&
+      r.amount === 17000 &&
+      (r.merchant_name?.includes('넷플') || r.merchant_name?.includes('Netflix')),
   },
 ];
 
@@ -554,6 +751,33 @@ async function run() {
         pass++;
       } else {
         console.log(`[FAIL] ${c.name}\n       got: ${JSON.stringify({ name: pm.name, type: pm.type })}`);
+        fail++;
+      }
+    } catch (e) {
+      console.log(`[ERR]  ${c.name} — ${e.message}`);
+      fail++;
+    }
+  }
+
+  console.log('\n=== 엣지 케이스 (까다로운 입력) ===');
+  for (const c of EDGE_CASES) {
+    try {
+      const intent = await llm(c.input);
+      if (intent.type !== 'add_transaction') {
+        console.log(`[FAIL] ${c.name}\n       LLM ${intent.type}: ${JSON.stringify(intent)}`);
+        fail++;
+        continue;
+      }
+      const tx = await executeAddTransaction(userId, intent);
+      if (c.verify(tx, intent)) {
+        console.log(
+          `[OK]   ${c.name}\n       AI parsed: amount=${intent.data.amount} merchant="${intent.data.merchant_name}"`,
+        );
+        pass++;
+      } else {
+        console.log(
+          `[FAIL] ${c.name}\n       AI parsed: ${JSON.stringify(intent.data)}\n       DB: ${JSON.stringify({ amount: tx.amount, merchant: tx.merchant_name, type: tx.type })}`,
+        );
         fail++;
       }
     } catch (e) {
@@ -661,6 +885,95 @@ async function run() {
         pass++;
       } else {
         console.log(`[FAIL] ${c.name}\n       삭제됐어야 하는데 row 가 남아있음`);
+        fail++;
+      }
+    } catch (e) {
+      console.log(`[ERR]  ${c.name} — ${e.message}`);
+      fail++;
+    }
+  }
+
+  console.log('\n=== 카테고리 삭제 ===');
+  for (const c of DELETE_CAT_CASES) {
+    try {
+      // 1) 사전 카테고리 생성
+      const { data: created, error: ce } = await admin
+        .from('categories')
+        .insert({ user_id: userId, ...c.setupCreate })
+        .select('*')
+        .single();
+      if (ce) throw ce;
+
+      // 2) 삭제 명령
+      const intent = await llm(c.input);
+      if (intent.type !== 'delete_category') {
+        console.log(`[FAIL] ${c.name}\n       LLM ${intent.type}`);
+        fail++;
+        continue;
+      }
+      const target = await executeDeleteCategory(userId, intent);
+      if (await c.verify(target, userId)) {
+        console.log(`[OK]   ${c.name}\n       → 삭제됨 (${target.id.slice(0, 8)}…)`);
+        pass++;
+      } else {
+        console.log(`[FAIL] ${c.name}\n       row 가 남아있음`);
+        fail++;
+      }
+    } catch (e) {
+      console.log(`[ERR]  ${c.name} — ${e.message}`);
+      fail++;
+    }
+  }
+
+  console.log('\n=== 결제수단 삭제 ===');
+  for (const c of DELETE_PM_CASES) {
+    try {
+      const { data: created, error: ce } = await admin
+        .from('payment_methods')
+        .insert({ user_id: userId, ...c.setupCreate })
+        .select('*')
+        .single();
+      if (ce) throw ce;
+
+      const intent = await llm(c.input);
+      if (intent.type !== 'delete_payment_method') {
+        console.log(`[FAIL] ${c.name}\n       LLM ${intent.type}`);
+        fail++;
+        continue;
+      }
+      const target = await executeDeletePaymentMethod(userId, intent);
+      if (await c.verify(target, userId)) {
+        console.log(`[OK]   ${c.name}\n       → 삭제됨 (${target.id.slice(0, 8)}…)`);
+        pass++;
+      } else {
+        console.log(`[FAIL] ${c.name}\n       row 가 남아있음`);
+        fail++;
+      }
+    } catch (e) {
+      console.log(`[ERR]  ${c.name} — ${e.message}`);
+      fail++;
+    }
+  }
+
+  console.log('\n=== 고정 거래 등록 ===');
+  for (const c of RECURRING_CASES) {
+    try {
+      const intent = await llm(c.input);
+      if (intent.type !== 'create_recurring') {
+        console.log(`[FAIL] ${c.name}\n       LLM ${intent.type}`);
+        fail++;
+        continue;
+      }
+      const r = await executeCreateRecurring(userId, intent);
+      if (c.verify(r)) {
+        console.log(
+          `[OK]   ${c.name}\n       → rule ${r.id.slice(0, 8)}… ${r.frequency} ${r.day_of_month ? `day=${r.day_of_month}` : ''} ${r.amount.toLocaleString('ko-KR')}원`,
+        );
+        pass++;
+      } else {
+        console.log(
+          `[FAIL] ${c.name}\n       got: ${JSON.stringify({ frequency: r.frequency, day_of_month: r.day_of_month, type: r.type, amount: r.amount, merchant: r.merchant_name })}`,
+        );
         fail++;
       }
     } catch (e) {

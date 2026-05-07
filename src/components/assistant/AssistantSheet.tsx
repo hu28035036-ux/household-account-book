@@ -42,7 +42,7 @@ const NAV_DESTINATIONS: Record<string, { path: string; label: string }> = {
 const EXAMPLES = [
   '스벅 5천',
   '방금거 만오천으로',
-  '방금 거 취소',
+  '월급 350만 매월 25일',
   '이번달 예산 80만',
   '운동 카테고리 만들어',
   '이번달 분석',
@@ -54,6 +54,18 @@ type CreatePaymentMethodData = Extract<Intent, { type: 'create_payment_method' }
 type SetBudgetData = Extract<Intent, { type: 'set_budget' }>['data'];
 type UpdateTxIntent = Extract<Intent, { type: 'update_transaction' }>;
 type DeleteTxIntent = Extract<Intent, { type: 'delete_transaction' }>;
+type DeleteCategoryData = Extract<Intent, { type: 'delete_category' }>['data'];
+type DeletePaymentMethodData = Extract<Intent, { type: 'delete_payment_method' }>['data'];
+type CreateRecurringData = Extract<Intent, { type: 'create_recurring' }>['data'];
+
+const FREQUENCY_LABEL: Record<CreateRecurringData['frequency'], string> = {
+  daily: '매일',
+  weekly: '매주',
+  monthly: '매월',
+  yearly: '매년',
+};
+
+const DOW_LABEL = ['일', '월', '화', '수', '목', '금', '토'];
 
 const CATEGORY_TYPE_LABEL: Record<CreateCategoryData['type'], string> = {
   income: '수입',
@@ -193,24 +205,10 @@ export function AssistantSheet() {
       setError(intent.reason || '명령을 이해하지 못했어요.');
       return;
     }
-    if (
-      intent.type === 'add_transaction' ||
-      intent.type === 'create_category' ||
-      intent.type === 'create_payment_method' ||
-      intent.type === 'set_budget' ||
-      intent.type === 'update_transaction' ||
-      intent.type === 'delete_transaction'
-    ) {
-      setPreviewIntent(intent);
-      setPhase('preview');
-      setError(null);
-      return;
-    }
-    // 이후 Phase 에서 enable: recurring / delete_category / delete_payment_method
-    setError(
-      `"${labelOfIntent(intent.type)}" 기능은 곧 추가됩니다. 현재는 페이지 이동·거래 추가/수정/삭제·카테고리/결제수단 생성·예산 설정이 가능해요.`,
-    );
-    pushHistory(cmd, '준비 중', false);
+    // 모든 mutation 의도는 미리보기를 거침
+    setPreviewIntent(intent);
+    setPhase('preview');
+    setError(null);
   }
 
   async function executePreview() {
@@ -368,6 +366,32 @@ export function AssistantSheet() {
                     onConfirm={executePreview}
                     onCancel={cancelPreview}
                   />
+                ) : phase === 'preview' && previewIntent?.type === 'delete_category' ? (
+                  <DeleteCategoryPreview
+                    data={previewIntent.data}
+                    busy={busy}
+                    onConfirm={executePreview}
+                    onCancel={cancelPreview}
+                  />
+                ) : phase === 'preview' && previewIntent?.type === 'delete_payment_method' ? (
+                  <DeletePaymentMethodPreview
+                    data={previewIntent.data}
+                    busy={busy}
+                    onConfirm={executePreview}
+                    onCancel={cancelPreview}
+                  />
+                ) : phase === 'preview' && previewIntent?.type === 'create_recurring' ? (
+                  <CreateRecurringPreview
+                    data={previewIntent.data}
+                    busy={busy}
+                    onConfirm={executePreview}
+                    onCancel={cancelPreview}
+                  />
+                ) : phase === 'preview' && (previewIntent?.type === 'clarify' || previewIntent?.type === 'unknown') ? (
+                  // clarify/unknown 은 setError 로 처리되었어야 함 — fallback
+                  <div className="text-sm text-textMuted">
+                    명령을 이해하지 못했어요. 다시 입력해 주세요.
+                  </div>
                 ) : (
                   <>
                     <form
@@ -448,8 +472,8 @@ export function AssistantSheet() {
                     )}
 
                     <div className="text-[11px] text-textMuted leading-relaxed pt-2 border-t border-borderSoft">
-                      페이지 이동 · 거래 추가/수정/삭제 · 카테고리·결제수단 생성 · 예산 설정이
-                      가능합니다. 고정거래 등록은 곧 추가됩니다. 단축키:{' '}
+                      모든 명령이 활성화됐습니다 — 페이지 이동 · 거래 추가/수정/삭제 ·
+                      카테고리/결제수단 생성/삭제 · 예산 설정 · 고정거래 등록. 단축키:{' '}
                       <kbd className="px-1 bg-sectionBackground rounded text-[10px]">Ctrl</kbd> +{' '}
                       <kbd className="px-1 bg-sectionBackground rounded text-[10px]">K</kbd>.
                     </div>
@@ -919,6 +943,191 @@ function SetBudgetPreview({
   );
 }
 
+function DeleteCategoryPreview({
+  data,
+  busy,
+  onConfirm,
+  onCancel,
+}: {
+  data: DeleteCategoryData;
+  busy: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="rounded-md bg-dangerSoft text-danger px-3 py-2 text-sm flex items-start gap-2">
+        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" strokeWidth={1.75} />
+        <span>이 카테고리를 삭제합니다. 사용 중인 거래의 카테고리는 비워집니다.</span>
+      </div>
+      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
+        <Row icon={<Tag className="h-4 w-4" strokeWidth={1.75} />} label="이름" value={data.name} />
+      </div>
+      <div className="flex items-center justify-end gap-2 pt-1">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={busy}
+          className="h-9 px-3 rounded-md text-sm border border-borderDefault text-textSecondary hover:bg-softPinkBackground disabled:opacity-50"
+        >
+          ✗ 취소
+        </button>
+        <button
+          type="button"
+          onClick={onConfirm}
+          disabled={busy}
+          className="h-9 px-4 rounded-md text-sm bg-danger text-white hover:opacity-90 inline-flex items-center gap-1.5 disabled:opacity-50"
+        >
+          {busy ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
+          ) : (
+            <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
+          )}
+          삭제
+        </button>
+      </div>
+      <p className="text-[11px] text-textMuted">
+        FK 관계: 기존 거래의 category_id 가 NULL 로 자동 변경됩니다 (RLS 보호). 잘못
+        삭제했다면 카테고리 페이지에서 같은 이름으로 다시 만들 수 있어요 — 단, 거래의
+        category_id 는 자동 복원되지 않습니다.
+      </p>
+    </div>
+  );
+}
+
+function DeletePaymentMethodPreview({
+  data,
+  busy,
+  onConfirm,
+  onCancel,
+}: {
+  data: DeletePaymentMethodData;
+  busy: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="rounded-md bg-dangerSoft text-danger px-3 py-2 text-sm flex items-start gap-2">
+        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" strokeWidth={1.75} />
+        <span>이 결제수단을 삭제합니다. 사용 중인 거래의 결제수단은 비워집니다.</span>
+      </div>
+      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
+        <Row
+          icon={<CreditCard className="h-4 w-4" strokeWidth={1.75} />}
+          label="이름"
+          value={data.name}
+        />
+      </div>
+      <div className="flex items-center justify-end gap-2 pt-1">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={busy}
+          className="h-9 px-3 rounded-md text-sm border border-borderDefault text-textSecondary hover:bg-softPinkBackground disabled:opacity-50"
+        >
+          ✗ 취소
+        </button>
+        <button
+          type="button"
+          onClick={onConfirm}
+          disabled={busy}
+          className="h-9 px-4 rounded-md text-sm bg-danger text-white hover:opacity-90 inline-flex items-center gap-1.5 disabled:opacity-50"
+        >
+          {busy ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
+          ) : (
+            <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
+          )}
+          삭제
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CreateRecurringPreview({
+  data,
+  busy,
+  onConfirm,
+  onCancel,
+}: {
+  data: CreateRecurringData;
+  busy: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  let scheduleLabel = FREQUENCY_LABEL[data.frequency];
+  if (data.frequency === 'weekly' && data.day_of_week != null)
+    scheduleLabel = `매주 ${DOW_LABEL[data.day_of_week]}요일`;
+  if (data.frequency === 'monthly' && data.day_of_month != null)
+    scheduleLabel = `매월 ${data.day_of_month}일`;
+  if (data.frequency === 'yearly' && data.month_of_year != null && data.day_of_month != null)
+    scheduleLabel = `매년 ${data.month_of_year}월 ${data.day_of_month}일`;
+
+  const isIncome = data.type === 'income';
+  return (
+    <div className="space-y-3">
+      <div className="text-xs text-textSecondary">
+        아래 고정 거래를 등록할까요? 매월 동일 날에 자동/수동으로 거래에 들어갑니다.
+      </div>
+      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
+        <Row
+          icon={<Coins className="h-4 w-4" strokeWidth={1.75} />}
+          label="종류"
+          value={isIncome ? '수입' : data.type === 'transfer' ? '이체' : '지출'}
+        />
+        <Row
+          icon={<Store className="h-4 w-4" strokeWidth={1.75} />}
+          label="가맹점"
+          value={data.merchant_name || '—'}
+        />
+        <Row
+          icon={<Coins className="h-4 w-4" strokeWidth={1.75} />}
+          label="금액"
+          valueNode={
+            <span
+              className={`font-semibold ${isIncome ? 'text-success' : 'text-textPrimary'}`}
+            >
+              {(isIncome ? '+' : '-') + data.amount.toLocaleString('ko-KR')}원
+            </span>
+          }
+        />
+        <Row
+          icon={<Calendar className="h-4 w-4" strokeWidth={1.75} />}
+          label="반복"
+          valueNode={
+            <span className="inline-flex items-center gap-1.5">
+              <span className="text-textPrimary font-medium">{scheduleLabel}</span>
+              <span
+                className={`text-[10px] font-normal px-1.5 py-0.5 rounded ${
+                  data.auto_post
+                    ? 'bg-primaryPinkSoft text-textPinkStrong'
+                    : 'bg-sectionBackground text-textSecondary'
+                }`}
+              >
+                {data.auto_post ? '자동 등록' : '수동 등록'}
+              </span>
+            </span>
+          }
+        />
+        {data.category_name && (
+          <Row
+            icon={<Tag className="h-4 w-4" strokeWidth={1.75} />}
+            label="카테고리"
+            value={data.category_name}
+          />
+        )}
+      </div>
+      <ConfirmRow busy={busy} onConfirm={onConfirm} onCancel={onCancel} confirmLabel="등록" />
+      <p className="text-[11px] text-textMuted">
+        자동 등록은 GitHub Actions cron 으로 매일 새벽 실행됩니다. 등록 후 고정 거래 페이지에서
+        활성/비활성·날짜·금액 모두 변경할 수 있어요.
+      </p>
+    </div>
+  );
+}
+
 function ConfirmRow({
   busy,
   onConfirm,
@@ -1004,29 +1213,4 @@ function resolveYmHint(hint: string): string | null {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
   }
   return null;
-}
-
-function labelOfIntent(t: Intent['type']): string {
-  switch (t) {
-    case 'add_transaction':
-      return '거래 추가';
-    case 'update_transaction':
-      return '거래 수정';
-    case 'delete_transaction':
-      return '거래 삭제';
-    case 'create_category':
-      return '카테고리 생성';
-    case 'delete_category':
-      return '카테고리 삭제';
-    case 'create_payment_method':
-      return '결제수단 생성';
-    case 'delete_payment_method':
-      return '결제수단 삭제';
-    case 'set_budget':
-      return '예산 설정';
-    case 'create_recurring':
-      return '고정 거래 등록';
-    default:
-      return t;
-  }
 }
