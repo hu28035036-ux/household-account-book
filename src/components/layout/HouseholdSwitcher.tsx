@@ -11,13 +11,18 @@ export function HouseholdSwitcher() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  // dropdown 은 Portal 로 body 자식이라 ref(button container) 와 별개로 contains 체크 필요
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!open) return;
     function onDoc(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const t = e.target as Node;
+      const insideButton = ref.current?.contains(t) ?? false;
+      const insideDropdown = dropdownRef.current?.contains(t) ?? false;
+      if (!insideButton && !insideDropdown) setOpen(false);
     }
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
@@ -47,6 +52,7 @@ export function HouseholdSwitcher() {
       {mounted && open &&
         createPortal(
           <div
+            ref={dropdownRef}
             role="listbox"
             // 헤더의 backdrop-blur 가 stacking context 를 만들어 dropdown 이 헤더 안에 갇힘.
             // viewport 우상단 기준 fixed 로 고정 — ThemeSwitcher / NotificationBell 과 동일 패턴.

@@ -38,6 +38,8 @@ export function NotificationBell() {
   const [items, setItems] = useState<N[]>([]);
   const [unread, setUnread] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
+  // dropdown Portal 자식 — ref 와 별도 contains 체크 필요
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setMounted(true), []);
 
@@ -61,7 +63,10 @@ export function NotificationBell() {
   useEffect(() => {
     if (!open) return;
     function onDoc(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const t = e.target as Node;
+      const insideButton = ref.current?.contains(t) ?? false;
+      const insideDropdown = dropdownRef.current?.contains(t) ?? false;
+      if (!insideButton && !insideDropdown) setOpen(false);
     }
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
@@ -100,6 +105,7 @@ export function NotificationBell() {
       {mounted && open &&
         createPortal(
           <div
+            ref={dropdownRef}
             className="fixed top-[3.75rem] right-3 w-80 max-w-[calc(100vw-1.5rem)] z-50 rounded-modal bg-pageBackground border border-borderDefault shadow-card overflow-hidden"
           >
             <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-divider">
