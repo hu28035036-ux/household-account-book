@@ -45,7 +45,16 @@
       "Bash(node scripts/test-all-endpoints.mjs)",
       "Bash(node scripts/test-pages-as-user.mjs)",
       "Bash(node scripts/verify-consent-migration.mjs)",
-      "Bash(node scripts/debug-consent.mjs)"
+      "Bash(node scripts/debug-consent.mjs)",
+      "Bash(node -e ' *)",
+      "Bash(vercel.cmd inspect *)",
+      "Bash(vercel.cmd alias *)",
+      "Bash(grep -E \"vercel.app$\")",
+      "Bash(vercel.cmd logs *)",
+      "Bash(cat C:\\\\\\\\Users\\\\\\\\user\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\C--Users-user-Desktop-------\\\\\\\\7d9a4718-0918-4d58-a688-bc0427a9fc8c\\\\\\\\tasks\\\\\\\\bu0t3bo32.output)",
+      "Bash(curl -sI https://household-account-book-5vgz.vercel.app)",
+      "Bash(curl -sI https://household-account-book-5vgz.vercel.app/api/me)",
+      "Bash(curl -sI https://household-account-book-5vgz.vercel.app/api/ai-status)"
     ]
   }
 }

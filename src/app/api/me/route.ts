@@ -22,48 +22,43 @@ const PatchBody = z.object({
 });
 
 export async function GET() {
-  const supabase = createSupabaseServerClient();
-  const { data: u } = await supabase.auth.getUser();
-  if (!u.user) return fail('UNAUTHORIZED', '로그인이 필요합니다.');
+  try {
+    const supabase = createSupabaseServerClient();
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return fail('UNAUTHORIZED', '로그인이 필요합니다.');
 
-  // 컬럼 누락(마이그레이션 미적용) 환경에서도 깨지지 않도록 try/catch 로 fallback
-  let privacy_consent_at: string | null = null;
-  let privacy_consent_version: string | null = null;
-  let baseSelect = 'username, full_name, birthdate, nickname, display_name, created_at';
-  let extendedSelect = baseSelect + ', privacy_consent_at, privacy_consent_version';
-  let profile: Record<string, unknown> | null = null;
+    // 컬럼 누락 / PostgREST schema cache 미반영 환경에서도 절대 throw 안 되도록 보호.
+    // 항상 '*' 로 SELECT — 컬럼이 있으면 자동 포함, 없으면 그냥 빠질 뿐 throw 안 함.
+    let profile: Record<string, unknown> | null = null;
+    try {
+      const r = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', u.user.id)
+        .maybeSingle();
+      profile = (r.data as Record<string, unknown> | null) ?? null;
+    } catch (e) {
+      // 어떤 이유로든 SELECT 가 throw 하면 profile=null 로 진행
+      console.warn('[api/me] profiles select failed:', e);
+      profile = null;
+    }
 
-  const ext = await supabase
-    .from('profiles')
-    .select(extendedSelect)
-    .eq('user_id', u.user.id)
-    .maybeSingle();
-  if (ext.error) {
-    // privacy_consent_* 컬럼 부재 → fallback
-    const base = await supabase
-      .from('profiles')
-      .select(baseSelect)
-      .eq('user_id', u.user.id)
-      .maybeSingle();
-    profile = base.data as Record<string, unknown> | null;
-  } else {
-    profile = ext.data as Record<string, unknown> | null;
-    privacy_consent_at = (profile?.privacy_consent_at as string | null) ?? null;
-    privacy_consent_version = (profile?.privacy_consent_version as string | null) ?? null;
+    return ok({
+      id: u.user.id,
+      email: u.user.email,
+      created_at: u.user.created_at,
+      username: (profile?.username as string | null) ?? null,
+      full_name: (profile?.full_name as string | null) ?? null,
+      birthdate: (profile?.birthdate as string | null) ?? null,
+      nickname: (profile?.nickname as string | null) ?? null,
+      display_name: (profile?.display_name as string | null) ?? null,
+      privacy_consent_at: (profile?.privacy_consent_at as string | null) ?? null,
+      privacy_consent_version: (profile?.privacy_consent_version as string | null) ?? null,
+    });
+  } catch (e) {
+    // production 에서 전체 함수가 throw → MIDDLEWARE/RUNTIME 500 노출 방지
+    return fail('INTERNAL', e instanceof Error ? e.message : 'me 조회 실패');
   }
-
-  return ok({
-    id: u.user.id,
-    email: u.user.email,
-    created_at: u.user.created_at,
-    username: (profile?.username as string | null) ?? null,
-    full_name: (profile?.full_name as string | null) ?? null,
-    birthdate: (profile?.birthdate as string | null) ?? null,
-    nickname: (profile?.nickname as string | null) ?? null,
-    display_name: (profile?.display_name as string | null) ?? null,
-    privacy_consent_at,
-    privacy_consent_version,
-  });
 }
 
 export async function PATCH(req: NextRequest) {
