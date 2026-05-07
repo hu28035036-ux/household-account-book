@@ -12,7 +12,14 @@
     "test:watch": "vitest",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
-    "e2e:install": "playwright install --with-deps chromium"
+    "e2e:install": "playwright install --with-deps chromium",
+    "verify": "npm run typecheck && npm test && npm run build",
+    "smoke:auth": "node scripts/test-all-endpoints.mjs",
+    "smoke:pages": "node scripts/test-pages-as-user.mjs",
+    "smoke:content": "node scripts/test-pages-content.mjs",
+    "smoke:mutation": "node scripts/test-mutation-apis.mjs",
+    "smoke:assistant": "node scripts/test-assistant-e2e.mjs",
+    "smoke:all": "node scripts/run-smoke.mjs"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
