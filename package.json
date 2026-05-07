@@ -19,6 +19,7 @@
     "smoke:content": "node scripts/test-pages-content.mjs",
     "smoke:mutation": "node scripts/test-mutation-apis.mjs",
     "smoke:assistant": "node scripts/test-assistant-e2e.mjs",
+    "smoke:rls": "node scripts/audit-rls.mjs",
     "smoke:all": "node scripts/run-smoke.mjs"
   },
   "dependencies": {

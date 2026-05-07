@@ -55,7 +55,8 @@
       "Bash(curl -sI https://household-account-book-5vgz.vercel.app)",
       "Bash(curl -sI https://household-account-book-5vgz.vercel.app/api/me)",
       "Bash(curl -sI https://household-account-book-5vgz.vercel.app/api/ai-status)",
-      "Bash(awk ' *)"
+      "Bash(awk ' *)",
+      "Bash(node scripts/audit-rls.mjs)"
     ]
   }
 }
