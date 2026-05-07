@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="375" height="650" fill="#FFF7FA"/>
+  <text x="20" y="19" font-size="13" font-weight="600" fill="#1F2937">9:41</text>
+  <rect x="0" y="28" width="375" height="56" fill="#FFFFFF"/>
+  <line x1="0" y1="84" x2="375" y2="84" stroke="#F3D4E3"/>
+  <text x="20" y="63" font-size="17" font-weight="600" fill="#1F2937">예산</text>
+
+  <g transform="translate(20,108)">
+    <text x="0" y="0" font-size="11" font-weight="600" fill="#BE185D" letter-spacing="1">2026 · 5월</text>
+
+    <!-- big total card -->
+    <g transform="translate(0,16)">
+      <rect width="335" height="180" rx="14" fill="#FFFFFF" stroke="#F3D4E3"/>
+      <text x="20" y="32" font-size="13" font-weight="600" fill="#1F2937">전체 예산</text>
+      <text x="315" y="32" text-anchor="end" font-size="11" fill="#9CA3AF">한도 800,000원</text>
+
+      <!-- big number -->
+      <text x="20" y="78" font-size="32" font-weight="700" fill="#1F2937">324,500</text>
+      <text x="170" y="78" font-size="14" fill="#6B7280">/ 800,000원 사용</text>
+
+      <text x="20" y="100" font-size="12" font-weight="600" fill="#10B981">남은 475,500원</text>
+      <text x="120" y="100" font-size="11" fill="#9CA3AF">· 22일 동안 약 21,613원/일</text>
+
+      <!-- progress bar (40.6%) -->
+      <g transform="translate(20,118)">
+        <rect width="295" height="14" rx="7" fill="#FCE7F3"/>
+        <rect width="120" height="14" rx="7" fill="#F472B6"/>
+      </g>
+      <text x="20" y="156" font-size="11" fill="#6B7280">40% 사용 — 80% 도달 시 알림이 옵니다</text>
+    </g>
+
+    <!-- per category -->
+    <text x="0" y="220" font-size="13" font-weight="600" fill="#1F2937">카테고리별</text>
+
+    <g transform="translate(0,234)">
+      <rect width="335" height="58" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+      <text x="16" y="22" font-size="12" font-weight="500" fill="#1F2937">식비</text>
+      <text x="319" y="22" text-anchor="end" font-size="11" fill="#6B7280">312,000 / 350,000</text>
+      <g transform="translate(16,32)">
+        <rect width="303" height="8" rx="4" fill="#FCE7F3"/>
+        <rect width="270" height="8" rx="4" fill="#F472B6"/>
+      </g>
+      <text x="319" y="54" text-anchor="end" font-size="10" fill="#9CA3AF">89%</text>
+    </g>
+
+    <g transform="translate(0,302)">
+      <rect width="335" height="58" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+      <text x="16" y="22" font-size="12" font-weight="500" fill="#1F2937">카페/간식</text>
+      <text x="319" y="22" text-anchor="end" font-size="11" fill="#6B7280">87,500 / 100,000</text>
+      <g transform="translate(16,32)">
+        <rect width="303" height="8" rx="4" fill="#FCE7F3"/>
+        <rect width="265" height="8" rx="4" fill="#F472B6"/>
+      </g>
+      <text x="319" y="54" text-anchor="end" font-size="10" fill="#F59E0B">⚠ 87%</text>
+    </g>
+
+    <g transform="translate(0,370)">
+      <rect width="335" height="58" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+      <text x="16" y="22" font-size="12" font-weight="500" fill="#1F2937">교통</text>
+      <text x="319" y="22" text-anchor="end" font-size="11" fill="#6B7280">68,400 / 80,000</text>
+      <g transform="translate(16,32)">
+        <rect width="303" height="8" rx="4" fill="#FCE7F3"/>
+        <rect width="259" height="8" rx="4" fill="#F472B6"/>
+      </g>
+      <text x="319" y="54" text-anchor="end" font-size="10" fill="#9CA3AF">85%</text>
+    </g>
+
+    <!-- AI assistant hint -->
+    <g transform="translate(0,448)">
+      <rect width="335" height="48" rx="10" fill="#FCE7F3"/>
+      <text x="16" y="22" font-size="12" font-weight="600" fill="#BE185D">✨ AI 입력으로 한 줄에</text>
+      <text x="16" y="40" font-size="11" fill="#374151">"이번달 식비 30만으로" / "이번달 예산 80만"</text>
+    </g>
+  </g>
+</svg>

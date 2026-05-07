@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="375" height="650" fill="#FFF7FA"/>
+  <text x="20" y="19" font-size="13" font-weight="600" fill="#1F2937">9:41</text>
+  <rect x="0" y="28" width="375" height="56" fill="#FFFFFF"/>
+  <line x1="0" y1="84" x2="375" y2="84" stroke="#F3D4E3"/>
+  <text x="20" y="63" font-size="17" font-weight="600" fill="#1F2937">거래내역</text>
+
+  <g transform="translate(20,108)">
+    <text x="0" y="0" font-size="22" font-weight="700" fill="#1F2937">"이 정도는 됐지"의 함정</text>
+    <text x="0" y="22" font-size="12" fill="#6B7280">5월 1주차 — 작아 보이지만 누적된 5천원 미만 거래</text>
+
+    <!-- list of small txns -->
+    <g transform="translate(0,42)" font-size="12">
+      <g>
+        <rect width="335" height="40" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="16" y="18" font-weight="500" fill="#1F2937">GS25</text>
+        <text x="16" y="33" font-size="10" fill="#9CA3AF">5/1 · 편의점</text>
+        <text x="319" y="26" text-anchor="end" font-weight="600" fill="#1F2937">-1,500</text>
+      </g>
+      <g transform="translate(0,46)">
+        <rect width="335" height="40" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="16" y="18" font-weight="500" fill="#1F2937">자판기</text>
+        <text x="16" y="33" font-size="10" fill="#9CA3AF">5/2 · 카페/간식</text>
+        <text x="319" y="26" text-anchor="end" font-weight="600" fill="#1F2937">-700</text>
+      </g>
+      <g transform="translate(0,92)">
+        <rect width="335" height="40" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="16" y="18" font-weight="500" fill="#1F2937">메가커피</text>
+        <text x="16" y="33" font-size="10" fill="#9CA3AF">5/3 · 카페/간식</text>
+        <text x="319" y="26" text-anchor="end" font-weight="600" fill="#1F2937">-2,500</text>
+      </g>
+      <g transform="translate(0,138)">
+        <rect width="335" height="40" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="16" y="18" font-weight="500" fill="#1F2937">CU 편의점</text>
+        <text x="16" y="33" font-size="10" fill="#9CA3AF">5/3 · 편의점</text>
+        <text x="319" y="26" text-anchor="end" font-weight="600" fill="#1F2937">-1,800</text>
+      </g>
+      <g transform="translate(0,184)">
+        <rect width="335" height="40" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="16" y="18" font-weight="500" fill="#1F2937">버스</text>
+        <text x="16" y="33" font-size="10" fill="#9CA3AF">5/4 · 교통</text>
+        <text x="319" y="26" text-anchor="end" font-weight="600" fill="#1F2937">-1,250</text>
+      </g>
+      <g transform="translate(0,230)">
+        <rect width="335" height="40" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="16" y="18" font-weight="500" fill="#1F2937">이디야</text>
+        <text x="16" y="33" font-size="10" fill="#9CA3AF">5/4 · 카페/간식</text>
+        <text x="319" y="26" text-anchor="end" font-weight="600" fill="#1F2937">-3,500</text>
+      </g>
+      <g transform="translate(0,276)">
+        <rect width="335" height="40" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="16" y="18" font-weight="500" fill="#1F2937">GS25</text>
+        <text x="16" y="33" font-size="10" fill="#9CA3AF">5/5 · 편의점</text>
+        <text x="319" y="26" text-anchor="end" font-weight="600" fill="#1F2937">-2,800</text>
+      </g>
+    </g>
+
+    <!-- summary highlight -->
+    <g transform="translate(0,338)">
+      <rect width="335" height="100" rx="14" fill="#FCE7F3" stroke="#F472B6" stroke-width="1.5"/>
+      <text x="20" y="28" font-size="11" font-weight="600" fill="#BE185D" letter-spacing="1">한 주 누적</text>
+      <text x="20" y="60" font-size="28" font-weight="700" fill="#BE185D">14,050원</text>
+      <text x="20" y="82" font-size="11" fill="#374151">한 달이면 약 56,000원 · 1년이면 약 68만원</text>
+    </g>
+
+    <g transform="translate(0,452)">
+      <rect width="335" height="48" rx="10" fill="#FFF1F5"/>
+      <text x="16" y="22" font-size="12" font-weight="600" fill="#BE185D">💡 영수증만 모아도 OK</text>
+      <text x="16" y="40" font-size="11" fill="#374151">바로 적기 어려우면 일주일 모아서 일요일 저녁에</text>
+    </g>
+  </g>
+</svg>

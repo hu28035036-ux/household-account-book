@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="375" height="650" fill="#FFF7FA"/>
+  <text x="20" y="19" font-size="13" font-weight="600" fill="#1F2937">9:41</text>
+  <rect x="0" y="28" width="375" height="56" fill="#FFFFFF"/>
+  <line x1="0" y1="84" x2="375" y2="84" stroke="#F3D4E3"/>
+  <text x="20" y="63" font-size="17" font-weight="600" fill="#1F2937">통계</text>
+
+  <g transform="translate(20,108)">
+    <text x="0" y="0" font-size="22" font-weight="700" fill="#1F2937">고정 vs 변동</text>
+    <text x="0" y="22" font-size="12" fill="#6B7280">줄일 수 있는 건 거의 항상 변동 쪽</text>
+
+    <!-- two columns side by side -->
+    <g transform="translate(0,46)">
+      <!-- Fixed column -->
+      <g>
+        <rect width="158" height="280" rx="12" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <rect width="158" height="36" rx="12" fill="#E0E7FF"/>
+        <text x="79" y="23" text-anchor="middle" font-size="13" font-weight="700" fill="#3730A3">🔒 고정 지출</text>
+
+        <g transform="translate(12,46)" font-size="11">
+          <text y="14" fill="#1F2937" font-weight="500">월세</text>
+          <text x="134" y="14" text-anchor="end" fill="#1F2937">500,000</text>
+
+          <line y1="22" x2="134" y2="22" stroke="#F3F4F6"/>
+
+          <text y="36" fill="#1F2937" font-weight="500">통신</text>
+          <text x="134" y="36" text-anchor="end" fill="#1F2937">52,000</text>
+
+          <line y1="44" x2="134" y2="44" stroke="#F3F4F6"/>
+
+          <text y="58" fill="#1F2937" font-weight="500">넷플릭스</text>
+          <text x="134" y="58" text-anchor="end" fill="#1F2937">17,000</text>
+
+          <line y1="66" x2="134" y2="66" stroke="#F3F4F6"/>
+
+          <text y="80" fill="#1F2937" font-weight="500">유튭 프리미엄</text>
+          <text x="134" y="80" text-anchor="end" fill="#1F2937">14,900</text>
+
+          <line y1="88" x2="134" y2="88" stroke="#F3F4F6"/>
+
+          <text y="102" fill="#1F2937" font-weight="500">전기·가스</text>
+          <text x="134" y="102" text-anchor="end" fill="#1F2937">68,000</text>
+
+          <line y1="110" x2="134" y2="110" stroke="#F3F4F6"/>
+
+          <text y="124" fill="#1F2937" font-weight="500">헬스장</text>
+          <text x="134" y="124" text-anchor="end" fill="#1F2937">55,000</text>
+
+          <line y1="142" x2="134" y2="142" stroke="#3730A3" stroke-width="1.5"/>
+
+          <text y="160" fill="#3730A3" font-weight="700">합계</text>
+          <text x="134" y="160" text-anchor="end" fill="#3730A3" font-weight="700">706,900</text>
+
+          <text y="186" font-size="10" fill="#9CA3AF">→ 줄이려면 계약을</text>
+          <text y="200" font-size="10" fill="#9CA3AF">변경해야 함</text>
+        </g>
+      </g>
+
+      <!-- Variable column -->
+      <g transform="translate(177,0)">
+        <rect width="158" height="280" rx="12" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <rect width="158" height="36" rx="12" fill="#FCE7F3"/>
+        <text x="79" y="23" text-anchor="middle" font-size="13" font-weight="700" fill="#BE185D">🌊 변동 지출</text>
+
+        <g transform="translate(12,46)" font-size="11">
+          <text y="14" fill="#1F2937" font-weight="500">식비</text>
+          <text x="134" y="14" text-anchor="end" fill="#1F2937">312,000</text>
+
+          <line y1="22" x2="134" y2="22" stroke="#F3F4F6"/>
+
+          <text y="36" fill="#1F2937" font-weight="500">카페/간식</text>
+          <text x="134" y="36" text-anchor="end" fill="#1F2937">87,500</text>
+
+          <line y1="44" x2="134" y2="44" stroke="#F3F4F6"/>
+
+          <text y="58" fill="#1F2937" font-weight="500">교통</text>
+          <text x="134" y="58" text-anchor="end" fill="#1F2937">68,400</text>
+
+          <line y1="66" x2="134" y2="66" stroke="#F3F4F6"/>
+
+          <text y="80" fill="#1F2937" font-weight="500">쇼핑</text>
+          <text x="134" y="80" text-anchor="end" fill="#1F2937">125,000</text>
+
+          <line y1="88" x2="134" y2="88" stroke="#F3F4F6"/>
+
+          <text y="102" fill="#1F2937" font-weight="500">여가</text>
+          <text x="134" y="102" text-anchor="end" fill="#1F2937">42,000</text>
+
+          <line y1="110" x2="134" y2="110" stroke="#F3F4F6"/>
+
+          <text y="124" fill="#1F2937" font-weight="500">기타</text>
+          <text x="134" y="124" text-anchor="end" fill="#1F2937">19,500</text>
+
+          <line y1="142" x2="134" y2="142" stroke="#BE185D" stroke-width="1.5"/>
+
+          <text y="160" fill="#BE185D" font-weight="700">합계</text>
+          <text x="134" y="160" text-anchor="end" fill="#BE185D" font-weight="700">654,400</text>
+
+          <text y="186" font-size="10" fill="#10B981" font-weight="600">→ 여기서 줄이기 가능</text>
+          <text y="200" font-size="10" fill="#9CA3AF">절약의 80%는 여기서</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- bottom hint -->
+    <g transform="translate(0,348)">
+      <rect width="335" height="48" rx="10" fill="#FFF1F5"/>
+      <text x="16" y="22" font-size="12" font-weight="600" fill="#BE185D">💡 매월 같은 금액인지 확인</text>
+      <text x="16" y="40" font-size="11" fill="#374151">매월 ±5% 안 흔들리면 고정, 그 이상이면 변동</text>
+    </g>
+  </g>
+</svg>

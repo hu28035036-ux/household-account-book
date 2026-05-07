@@ -5,7 +5,7 @@ import { ImageIcon, BookOpen } from 'lucide-react';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 
 // 가계부 "작성 요령" — 사용자가 따라할 좋은 습관 + 예시 이미지.
-// 이미지 파일은 /public/guide/01-daily.png … 09-review.png 형태로 추가하면 자동 표시.
+// 이미지 파일은 /public/guide/01-purpose.svg … 09-review.svg (SVG mockup).
 // 파일이 없으면 회색 placeholder 가 보임. 이미지 추가 후 새로고침만 하면 됨.
 
 type GuideStep = {
@@ -21,63 +21,63 @@ const STEPS: GuideStep[] = [
     title: '왜 쓰는지 한 가지를 정하기',
     caption:
       '"저축을 늘리고 싶어서" "외식비가 너무 많아서" 같은 구체적인 이유 한 줄을 먼저 정하세요. 목적이 흐릿하면 한 달 만에 손에서 놓게 됩니다. 가계부는 기록이 목표가 아니라 "내 돈이 어디로 가는지 알아보기" 위한 도구입니다.',
-    image: '/guide/01-purpose.png',
+    image: '/guide/01-purpose.svg',
   },
   {
     no: 2,
     title: '매일 1번, 짧게라도 적는 습관',
     caption:
       '일주일에 한 번 몰아서 적으려고 하면 60%는 떠오르지 않습니다. 잠들기 전 1~2분이 가장 좋은 타이밍 — 영수증이 없어도, 기억나는 만큼이라도 그날 적는 게 훨씬 정확합니다.',
-    image: '/guide/02-daily.png',
+    image: '/guide/02-daily.svg',
   },
   {
     no: 3,
     title: '수입과 지출을 같은 곳에 적기',
     caption:
       '지출만 적으면 "왜 통장이 이러지" 하게 됩니다. 들어온 돈(월급·용돈·환급 등)과 나간 돈을 같은 페이지에 함께 적어야 "이번 달 +X원 / -Y원 = 잔액 Z원" 흐름이 한눈에 보입니다.',
-    image: '/guide/03-income-expense.png',
+    image: '/guide/03-income-expense.svg',
   },
   {
     no: 4,
     title: '분류(카테고리)는 처음에 정하고 일관되게',
     caption:
       '"커피값"을 어떤 날은 식비, 어떤 날은 카페로 적으면 한 달 후 통계가 의미를 잃습니다. 처음에 8~12개 정도(식비·교통·주거·통신·여가·의류·의료·기타 등) 정해두고, 그 안에서만 분류하세요. 한 번 정한 분류는 바꾸지 않는 게 핵심.',
-    image: '/guide/04-category.png',
+    image: '/guide/04-category.svg',
   },
   {
     no: 5,
     title: '고정 지출과 변동 지출을 나눠보기',
     caption:
       '월세·통신비·구독료처럼 매월 거의 같은 금액인 "고정 지출" 과, 식비·여가·쇼핑처럼 매번 다른 "변동 지출" 을 따로 보세요. 줄일 수 있는 건 거의 항상 변동 지출 쪽입니다. 고정은 줄이려면 계약을 바꿔야 하니까요.',
-    image: '/guide/05-fixed-variable.png',
+    image: '/guide/05-fixed-variable.svg',
   },
   {
     no: 6,
     title: '월초에 예산(한도)을 정하기',
     caption:
       '"이번 달은 변동 지출 80만원 안에서" 같은 한도를 매월 1일에 정하세요. 한도가 없으면 자연스럽게 통장 잔액 끝까지 쓰게 됩니다. 처음에는 지난 두세 달 평균 × 0.9 정도가 현실적.',
-    image: '/guide/06-budget.png',
+    image: '/guide/06-budget.svg',
   },
   {
     no: 7,
     title: '작은 지출도 빼먹지 않기',
     caption:
       '편의점 1,500원, 자판기 700원, 1,000원짜리 간식… "이 정도는 됐지" 가 가계부의 가장 큰 적입니다. 한 달이면 5~10만원, 1년이면 100만원 차이가 납니다. 적기 귀찮으면 영수증만 모아 일주일에 한 번이라도 정리해 보세요.',
-    image: '/guide/07-small.png',
+    image: '/guide/07-small.svg',
   },
   {
     no: 8,
     title: '결제수단(현금/체크/신용/이체)을 구분',
     caption:
       '같은 5만원이라도 신용카드면 다음 달 청구, 체크카드면 즉시 출금, 현금이면 흔적이 남지 않습니다. 결제수단을 구분해 적으면 "어디서 새는지" 보입니다 — 신용카드만 항상 한도 가까이 차오르면 그게 신호.',
-    image: '/guide/08-payment.png',
+    image: '/guide/08-payment.svg',
   },
   {
     no: 9,
     title: '월말 한 번, 5분만 돌아보기',
     caption:
       '한 달 끝에 가장 많이 쓴 카테고리 1~2개를 골라 "다음 달에 어디를 줄일까" 한 가지만 정하세요. 모든 걸 줄이려 하면 실패합니다. 그리고 다음 달 예산에 그 결심을 반영 — 이게 가계부가 살아있는 도구가 되는 유일한 방법입니다.',
-    image: '/guide/09-review.png',
+    image: '/guide/09-review.svg',
   },
 ];
 

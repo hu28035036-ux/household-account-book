@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="375" height="650" fill="#FFF7FA"/>
+  <text x="20" y="19" font-size="13" font-weight="600" fill="#1F2937">9:41</text>
+  <rect x="0" y="28" width="375" height="56" fill="#FFFFFF"/>
+  <line x1="0" y1="84" x2="375" y2="84" stroke="#F3D4E3"/>
+  <text x="20" y="63" font-size="17" font-weight="600" fill="#1F2937">월 캘린더</text>
+
+  <!-- summary card -->
+  <g transform="translate(20,108)">
+    <rect width="335" height="160" rx="14" fill="#FFFFFF" stroke="#F3D4E3"/>
+    <text x="20" y="28" font-size="11" font-weight="600" fill="#BE185D" letter-spacing="1">2026 · 5월 합계</text>
+
+    <!-- 3 columns -->
+    <g transform="translate(20,46)">
+      <text x="0" y="14" font-size="11" fill="#6B7280">수입</text>
+      <text x="0" y="38" font-size="18" font-weight="700" fill="#10B981">+3,500,000</text>
+    </g>
+    <line x1="125" y1="50" x2="125" y2="118" stroke="#F3D4E3"/>
+    <g transform="translate(140,46)">
+      <text x="0" y="14" font-size="11" fill="#6B7280">지출</text>
+      <text x="0" y="38" font-size="18" font-weight="700" fill="#1F2937">-1,250,000</text>
+    </g>
+    <line x1="245" y1="50" x2="245" y2="118" stroke="#F3D4E3"/>
+    <g transform="translate(260,46)">
+      <text x="0" y="14" font-size="11" fill="#6B7280">잔액</text>
+      <text x="0" y="38" font-size="18" font-weight="700" fill="#BE185D">+2,250,000</text>
+    </g>
+
+    <!-- progress mini -->
+    <g transform="translate(20,108)">
+      <rect width="295" height="6" rx="3" fill="#FCE7F3"/>
+      <rect width="106" height="6" rx="3" fill="#F472B6"/>
+    </g>
+    <text x="20" y="138" font-size="11" fill="#6B7280">예산 800,000원 중 36% 사용</text>
+  </g>
+
+  <!-- transaction list (mixed income/expense) -->
+  <g transform="translate(20,288)">
+    <text x="0" y="0" font-size="13" font-weight="600" fill="#1F2937">최근 거래</text>
+
+    <g transform="translate(0,16)">
+      <rect width="335" height="46" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+      <circle cx="22" cy="23" r="11" fill="#D1FAE5"/>
+      <text x="22" y="27" text-anchor="middle" font-size="11" fill="#10B981">+</text>
+      <text x="44" y="20" font-size="13" font-weight="500" fill="#1F2937">월급</text>
+      <text x="44" y="36" font-size="11" fill="#6B7280">5/1 · 급여</text>
+      <text x="320" y="29" text-anchor="end" font-size="14" font-weight="700" fill="#10B981">+3,500,000</text>
+    </g>
+
+    <g transform="translate(0,68)">
+      <rect width="335" height="46" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+      <circle cx="22" cy="23" r="11" fill="#FEE2E2"/>
+      <text x="22" y="27" text-anchor="middle" font-size="11" fill="#DC2626">-</text>
+      <text x="44" y="20" font-size="13" font-weight="500" fill="#1F2937">스타벅스</text>
+      <text x="44" y="36" font-size="11" fill="#6B7280">5/7 · 카페/간식</text>
+      <text x="320" y="29" text-anchor="end" font-size="14" font-weight="700" fill="#1F2937">-5,000</text>
+    </g>
+
+    <g transform="translate(0,120)">
+      <rect width="335" height="46" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+      <circle cx="22" cy="23" r="11" fill="#FEE2E2"/>
+      <text x="22" y="27" text-anchor="middle" font-size="11" fill="#DC2626">-</text>
+      <text x="44" y="20" font-size="13" font-weight="500" fill="#1F2937">롯데마트</text>
+      <text x="44" y="36" font-size="11" fill="#6B7280">5/6 · 식비</text>
+      <text x="320" y="29" text-anchor="end" font-size="14" font-weight="700" fill="#1F2937">-87,500</text>
+    </g>
+
+    <g transform="translate(0,172)">
+      <rect width="335" height="46" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+      <circle cx="22" cy="23" r="11" fill="#D1FAE5"/>
+      <text x="22" y="27" text-anchor="middle" font-size="11" fill="#10B981">+</text>
+      <text x="44" y="20" font-size="13" font-weight="500" fill="#1F2937">카드 환급</text>
+      <text x="44" y="36" font-size="11" fill="#6B7280">5/5 · 기타</text>
+      <text x="320" y="29" text-anchor="end" font-size="14" font-weight="700" fill="#10B981">+12,500</text>
+    </g>
+  </g>
+
+  <!-- tip strip -->
+  <g transform="translate(20,512)">
+    <rect width="335" height="48" rx="10" fill="#FFF1F5"/>
+    <text x="16" y="22" font-size="12" font-weight="600" fill="#BE185D">💡 한쪽만 보지 말고</text>
+    <text x="16" y="40" font-size="11" fill="#374151">+/- 함께 봐야 "이번 달 +2,250,000" 흐름이 잡힘</text>
+  </g>
+</svg>
