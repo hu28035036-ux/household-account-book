@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Plus, Trash2, Pencil } from 'lucide-react';
+import { Plus, Trash2, Pencil, ChevronDown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Modal } from '@/components/common/Modal';
@@ -20,6 +20,15 @@ type Budget = {
   memo: string | null;
   household_id: string | null;
   categories?: { name: string; color: string | null } | null;
+};
+type ExpandTx = {
+  id: string;
+  transaction_date: string;
+  type: 'income' | 'expense' | 'transfer';
+  amount: number;
+  merchant_name: string | null;
+  category_id: string | null;
+  categories?: { name: string } | null;
 };
 type ProgressItem = {
   category_id: string | null;
@@ -57,6 +66,12 @@ export function BudgetsClient() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
+  // 카드 클릭 시 그 카테고리(또는 전체) 의 이번 달 거래 펼침
+  // 키: 카테고리는 b.id, 전체는 'total'
+  const [expandedKey, setExpandedKey] = useState<string | null>(null);
+  const [txCache, setTxCache] = useState<Record<string, ExpandTx[]>>({});
+  const [txLoading, setTxLoading] = useState<Record<string, boolean>>({});
+
   const load = useCallback(async () => {
     setLoading(true);
     // 서버는 쿠키(active_household_id)로 컨텍스트 인지. activeId 변경 시 reload만 트리거.
@@ -74,7 +89,56 @@ export function BudgetsClient() {
 
   useEffect(() => {
     load();
+    // 월 변경 또는 모임 전환 시 펼침/캐시 초기화
+    setExpandedKey(null);
+    setTxCache({});
+    setTxLoading({});
   }, [load]);
+
+  /**
+   * 카드 클릭 → 거래내역 펼침/접기.
+   * 첫 펼침 시 /api/transactions 호출하여 그 달 + 카테고리 (또는 전체) 거래 list fetch.
+   */
+  function monthRange(ym: string): { from: string; to: string } {
+    const [y, m] = ym.split('-').map(Number);
+    const fromD = new Date(Date.UTC(y, m - 1, 1));
+    const toD = new Date(Date.UTC(y, m, 0)); // 다음달 0일 = 그달 마지막일
+    const fmt = (d: Date) =>
+      `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+    return { from: fmt(fromD), to: fmt(toD) };
+  }
+
+  async function ensureTxLoaded(key: string, categoryId: string | null) {
+    if (txCache[key]) return;
+    setTxLoading((s) => ({ ...s, [key]: true }));
+    try {
+      const { from, to } = monthRange(ym);
+      const params = new URLSearchParams({
+        from,
+        to,
+        type: 'expense',
+        limit: '200',
+      });
+      if (categoryId) params.set('category_id', categoryId);
+      const res = await fetch(`/api/transactions?${params.toString()}`);
+      const json = await res.json();
+      const rows = (json?.data?.rows ?? json?.data ?? []) as ExpandTx[];
+      setTxCache((s) => ({ ...s, [key]: rows }));
+    } catch {
+      setTxCache((s) => ({ ...s, [key]: [] }));
+    } finally {
+      setTxLoading((s) => ({ ...s, [key]: false }));
+    }
+  }
+
+  function toggleExpand(key: string, categoryId: string | null) {
+    if (expandedKey === key) {
+      setExpandedKey(null);
+      return;
+    }
+    setExpandedKey(key);
+    void ensureTxLoaded(key, categoryId);
+  }
 
   const usedCategoryIds = useMemo(
     () => new Set(budgets.filter((b) => b.category_id).map((b) => b.category_id as string)),
@@ -163,10 +227,20 @@ export function BudgetsClient() {
 
       {progressTotal && (
         <Card>
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <CardTitle>이번 달 전체 예산</CardTitle>
+          <button
+            type="button"
+            onClick={() => toggleExpand('total', null)}
+            className="w-full text-left flex items-center justify-between gap-3 flex-wrap hover:opacity-80 transition-opacity"
+          >
+            <CardTitle className="inline-flex items-center gap-1.5">
+              이번 달 전체 예산
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${expandedKey === 'total' ? 'rotate-180' : ''}`}
+                strokeWidth={1.75}
+              />
+            </CardTitle>
             <Badge tone="muted">월 한도 {formatKRW(progressTotal.budget_amount)}</Badge>
-          </div>
+          </button>
           <div className="mt-3">
             <BudgetBar
               name="전체"
@@ -178,6 +252,13 @@ export function BudgetsClient() {
               alertThreshold={progressTotal.alert_threshold}
             />
           </div>
+          {expandedKey === 'total' && (
+            <ExpandedTxList
+              loading={txLoading['total']}
+              rows={txCache['total']}
+              showCategory
+            />
+          )}
         </Card>
       )}
 
@@ -196,18 +277,27 @@ export function BudgetsClient() {
             const prog = b.category_id
               ? progressItems.find((p) => p.category_id === b.category_id)
               : progressTotal;
+            const expanded = expandedKey === b.id;
             return (
               <li key={b.id}>
                 <Card>
                   <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <CardTitle className="truncate">
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(b.id, b.category_id)}
+                      className="min-w-0 text-left flex-1 hover:opacity-80 transition-opacity"
+                    >
+                      <CardTitle className="truncate inline-flex items-center gap-1.5">
                         {b.category_id ? b.categories?.name ?? '카테고리' : '전체'}
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`}
+                          strokeWidth={1.75}
+                        />
                       </CardTitle>
                       <CardSubtle className="mt-0.5">
                         한도 {formatKRW(b.amount)} · 알림 {Math.round(b.alert_threshold * 100)}%
                       </CardSubtle>
-                    </div>
+                    </button>
                     <div className="flex items-center gap-1 shrink-0">
                       <Button size="sm" variant="ghost" onClick={() => startEdit(b)} aria-label="수정">
                         <Pencil className="h-4 w-4" strokeWidth={1.75} />
@@ -232,6 +322,13 @@ export function BudgetsClient() {
                     <CardSubtle className="mt-3">사용 내역이 아직 없어요.</CardSubtle>
                   )}
                   {b.memo && <p className="mt-3 text-xs text-textMuted">{b.memo}</p>}
+                  {expanded && (
+                    <ExpandedTxList
+                      loading={txLoading[b.id]}
+                      rows={txCache[b.id]}
+                      showCategory={!b.category_id}
+                    />
+                  )}
                 </Card>
               </li>
             );
@@ -339,6 +436,68 @@ export function BudgetsClient() {
           </div>
         </div>
       </Modal>
+    </div>
+  );
+}
+
+/**
+ * 카드 펼쳤을 때 표시되는 거래 list.
+ * - loading 중: 스피너
+ * - 빈 결과: 안내문
+ * - rows: 거래내역 (최신순, 그 달 한정)
+ * - showCategory: 전체 예산 카드일 때 카테고리명도 함께 표시
+ */
+function ExpandedTxList({
+  loading,
+  rows,
+  showCategory,
+}: {
+  loading?: boolean;
+  rows?: ExpandTx[];
+  showCategory: boolean;
+}) {
+  if (loading) {
+    return (
+      <div className="mt-4 pt-3 border-t border-borderSoft flex items-center gap-2 text-xs text-textMuted">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.75} />
+        거래 불러오는 중…
+      </div>
+    );
+  }
+  const list = rows ?? [];
+  if (list.length === 0) {
+    return (
+      <div className="mt-4 pt-3 border-t border-borderSoft text-xs text-textMuted text-center py-3">
+        이번 달 거래가 없어요.
+      </div>
+    );
+  }
+  return (
+    <div className="mt-4 pt-3 border-t border-borderSoft">
+      <div className="text-xs text-textSecondary mb-2">
+        이번 달 거래 ({list.length}건)
+      </div>
+      <ul className="space-y-1.5 max-h-[320px] overflow-y-auto">
+        {list.map((t) => (
+          <li
+            key={t.id}
+            className="flex items-center gap-2 text-xs rounded-md bg-pageBackground border border-borderSoft px-2.5 py-1.5"
+          >
+            <span className="text-textMuted shrink-0 w-12">{t.transaction_date.slice(5)}</span>
+            <span className="text-textPrimary font-medium truncate flex-1">
+              {t.merchant_name || '(이름 없음)'}
+            </span>
+            {showCategory && (
+              <span className="text-textMuted shrink-0">
+                {t.categories?.name ?? '미분류'}
+              </span>
+            )}
+            <span className="text-textPrimary font-semibold shrink-0">
+              -{t.amount.toLocaleString('ko-KR')}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
