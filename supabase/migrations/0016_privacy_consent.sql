@@ -18,3 +18,7 @@ comment on column public.profiles.privacy_consent_at is
 
 comment on column public.profiles.privacy_consent_version is
   '동의한 방침의 버전 식별자. 방침이 크게 바뀌면 새 버전으로 갱신 후 재동의 요구.';
+
+-- PostgREST 스키마 캐시 reload — 새 컬럼이 즉시 REST API 응답에 반영되도록.
+-- (없으면 ext SELECT 가 컬럼은 받지만 값이 silent null 로 나옴)
+notify pgrst, 'reload schema';

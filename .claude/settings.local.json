@@ -44,7 +44,8 @@
       "Bash(npx --no-install vitest run)",
       "Bash(node scripts/test-all-endpoints.mjs)",
       "Bash(node scripts/test-pages-as-user.mjs)",
-      "Bash(node scripts/verify-consent-migration.mjs)"
+      "Bash(node scripts/verify-consent-migration.mjs)",
+      "Bash(node scripts/debug-consent.mjs)"
     ]
   }
 }
