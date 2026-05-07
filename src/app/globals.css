@@ -115,3 +115,19 @@ body {
 .tabular {
   font-variant-numeric: tabular-nums;
 }
+
+/* ─── 모바일 안정성 ─────────────────────────────────────────
+ * iOS Safari 는 input/select/textarea 의 font-size 가 16px 미만이면
+ * 포커스 시 자동 확대 (사용자 의도와 무관) — 페이지가 줌인되어 답답.
+ * 모바일 한정으로 16px floor 보장.
+ *
+ * Tailwind 의 text-sm/xs 가 명시된 input 에도 적용하기 위해
+ * 일반 셀렉터 + max-width 미디어쿼리 + !important 로 specificity 우위.
+ */
+@media (max-width: 767px) {
+  input:not([type='checkbox']):not([type='radio']),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
