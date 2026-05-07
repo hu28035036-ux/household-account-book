@@ -25,12 +25,23 @@ type Tx = {
   payment_method_name: string | null;
 };
 
+type CategoryBudget = {
+  category_id: string | null;
+  category_name: string;
+  category_color: string | null;
+  budget_amount: number;
+  spent_amount: number;
+  percent: number;
+  status: 'safe' | 'caution' | 'over';
+};
+
 type Props = {
   yearMonth: string; // YYYY-MM
   daily: DailyBucket[];
   recentByDate: Record<string, Tx[]>;
   totals: { expense: number; income: number; balance: number };
   budget: { total: number; usedPct: number; remaining: number };
+  categoryBudgets: CategoryBudget[];
 };
 
 function pad2(n: number) {
@@ -51,7 +62,14 @@ function todayKSTYMD(): string {
   return fmt.format(new Date());
 }
 
-export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }: Props) {
+export function MonthCalendar({
+  yearMonth,
+  daily,
+  recentByDate,
+  totals,
+  budget,
+  categoryBudgets,
+}: Props) {
   const today = todayKSTYMD();
   const [selected, setSelected] = useState<string | null>(null); // 한 줄 리스트 필터용
 
@@ -173,6 +191,16 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
 
       {/* ② 캘린더 그리드 */}
       <Card className="p-2 sm:p-3">
+        {/* 캘린더 헤더 — 이번 달 총 지출 강조 */}
+        <div className="px-1.5 sm:px-2 pb-2 mb-1.5 border-b border-borderSoft flex items-baseline justify-between gap-2">
+          <div>
+            <span className="text-xs text-textSecondary">이번 달 총 지출</span>
+          </div>
+          <div className="text-lg sm:text-xl font-bold tabular text-expense">
+            -{formatKRW(totals.expense)}
+          </div>
+        </div>
+
         <div className="grid grid-cols-7 text-xs text-textSecondary">
           {['일', '월', '화', '수', '목', '금', '토'].map((d, i) => (
             <div
@@ -194,13 +222,28 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
             const isToday = c.date === today;
             const isSelected = c.date === selected;
             const dow = new Date(c.date + 'T00:00:00Z').getUTCDay();
+
+            // 그날 expense 거래만 추출 → 카테고리별 색 점들 (중복 제거 + 최대 3개)
+            const dayTxs = recentByDate[c.date] ?? [];
+            const expenseColors: string[] = [];
+            const seenColors = new Set<string>();
+            for (const t of dayTxs) {
+              if (t.type !== 'expense') continue;
+              const col = t.category_color ?? '#9CA3AF';
+              if (seenColors.has(col)) continue;
+              seenColors.add(col);
+              expenseColors.push(col);
+            }
+            const totalExpenseCategories = expenseColors.length;
+            const visibleColors = expenseColors.slice(0, 3);
+            const overflow = Math.max(0, totalExpenseCategories - 3);
+
             return (
               <button
                 key={c.date}
                 type="button"
                 onClick={() => setSelected((s) => (s === c.date ? null : c.date!))}
                 className={cn(
-                  // 반응형 3단계 — 모바일 / 태블릿(sm) / 데스크톱(md)
                   'h-20 sm:h-24 md:h-28 p-0.5 sm:p-1 md:p-1.5 rounded-md border text-left flex flex-col gap-0.5 transition-colors overflow-hidden',
                   isSelected
                     ? 'border-primaryPink bg-primaryPinkSoft'
@@ -210,6 +253,7 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
                   (dow === 0 || dow === 6) && !isSelected && 'bg-sectionBackground',
                 )}
               >
+                {/* 1행 — 날짜 + 거래수 */}
                 <div className="flex items-center justify-between">
                   <span
                     className={cn(
@@ -226,13 +270,34 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
                     </span>
                   )}
                 </div>
-                {bucket && bucket.expense > 0 && (
-                  <div className="text-[9px] sm:text-[10px] md:text-[11px] tabular text-expense whitespace-nowrap leading-tight">
+                {/* 2행 — 총 지출 (강조) */}
+                {bucket && bucket.expense > 0 ? (
+                  <div className="text-[10px] sm:text-[11px] md:text-xs tabular font-semibold text-expense whitespace-nowrap leading-tight">
                     -{bucket.expense.toLocaleString('ko-KR')}
                   </div>
+                ) : (
+                  <div className="h-3" />
                 )}
+                {/* 3행 — 카테고리별 색깔 점 (최대 3개 + N) */}
+                {visibleColors.length > 0 && (
+                  <div className="flex items-center gap-0.5 sm:gap-1 mt-auto">
+                    {visibleColors.map((color, i) => (
+                      <span
+                        key={`${color}-${i}`}
+                        className="inline-block h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full shrink-0"
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                    {overflow > 0 && (
+                      <span className="text-[8px] sm:text-[9px] tabular text-textMuted ml-0.5">
+                        +{overflow}
+                      </span>
+                    )}
+                  </div>
+                )}
+                {/* 수입 — 4행 (있을 때만) */}
                 {bucket && bucket.income > 0 && (
-                  <div className="text-[9px] sm:text-[10px] md:text-[11px] tabular text-income whitespace-nowrap leading-tight">
+                  <div className="text-[9px] sm:text-[10px] tabular text-income whitespace-nowrap leading-tight">
                     +{bucket.income.toLocaleString('ko-KR')}
                   </div>
                 )}
@@ -241,6 +306,64 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
           })}
         </div>
       </Card>
+
+      {/* ②-1 카테고리별 예산 진행률 (있을 때만) */}
+      {categoryBudgets.length > 0 && (
+        <Card>
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle>카테고리별 예산</CardTitle>
+            <Link
+              href="/budgets"
+              className="text-xs text-textPinkStrong hover:underline shrink-0"
+            >
+              관리 →
+            </Link>
+          </div>
+          <ul className="mt-3 space-y-2.5">
+            {categoryBudgets.map((c) => {
+              const pct = Math.min(100, c.percent);
+              const overall = c.percent >= 100;
+              const caution = !overall && c.percent >= 80;
+              return (
+                <li key={c.category_id ?? c.category_name}>
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span
+                        className="inline-block h-2 w-2 rounded-full shrink-0"
+                        style={{ backgroundColor: c.category_color ?? '#F472B6' }}
+                      />
+                      <span className="text-textPrimary font-medium truncate">
+                        {c.category_name}
+                      </span>
+                    </div>
+                    <div className="text-textSecondary tabular shrink-0">
+                      {formatKRW(c.spent_amount)} /{' '}
+                      <span className="text-textPrimary">{formatKRW(c.budget_amount)}</span>
+                    </div>
+                  </div>
+                  <div className="mt-1 h-1.5 rounded-full bg-borderSoft overflow-hidden">
+                    <div
+                      className={cn(
+                        'h-full transition-[width]',
+                        overall ? 'bg-danger' : caution ? 'bg-warning' : 'bg-primaryPink',
+                      )}
+                      style={{ width: `${overall ? 100 : pct}%` }}
+                    />
+                  </div>
+                  <div
+                    className={cn(
+                      'mt-0.5 text-[10px] tabular text-right',
+                      overall ? 'text-danger' : caution ? 'text-warning' : 'text-textMuted',
+                    )}
+                  >
+                    {c.percent}%
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
+      )}
 
       {/* ③ 이번 달 수입/지출/잔액 합계 */}
       <Card>
@@ -302,25 +425,34 @@ export function MonthCalendar({ yearMonth, daily, recentByDate, totals, budget }
             {visibleRows.map((t) => (
               <li
                 key={t.id}
-                className="py-1.5 flex items-center gap-3 min-w-0 text-sm"
+                className="py-2 flex items-center gap-2 sm:gap-3 min-w-0 text-sm"
               >
-                <span className="tabular text-xs text-textMuted w-12 shrink-0">{t.date.slice(5)}</span>
-                <span
-                  className="inline-block h-2 w-2 rounded-full shrink-0"
-                  style={{ backgroundColor: t.category_color ?? '#F472B6' }}
-                />
-                <span className="text-textPrimary truncate flex-1">
-                  {t.merchant_name || t.category_name || '거래'}
+                {/* 날짜 */}
+                <span className="tabular text-xs text-textMuted w-10 shrink-0">
+                  {t.date.slice(5)}
                 </span>
-                <span className="text-xs text-textMuted truncate hidden sm:inline max-w-[110px]">
-                  {t.category_name ?? '미지정'}
+                {/* 카테고리 (점 + 이름) — 모바일도 표시 */}
+                <span className="flex items-center gap-1 shrink-0 max-w-[80px] sm:max-w-[110px]">
+                  <span
+                    className="inline-block h-2 w-2 rounded-full shrink-0"
+                    style={{ backgroundColor: t.category_color ?? '#9CA3AF' }}
+                  />
+                  <span className="text-xs text-textMuted truncate">
+                    {t.category_name ?? '미지정'}
+                  </span>
                 </span>
+                {/* 거래내역 (가맹점) */}
+                <span className="text-textPrimary truncate flex-1 min-w-0">
+                  {t.merchant_name || '(가맹점 없음)'}
+                </span>
+                {/* 결제수단 — 데스크톱만 */}
                 <span className="text-xs text-textMuted truncate hidden md:inline max-w-[100px]">
-                  {t.payment_method_name ?? '미지정'}
+                  {t.payment_method_name ?? ''}
                 </span>
+                {/* 금액 */}
                 <span
                   className={cn(
-                    'tabular font-medium whitespace-nowrap min-w-[80px] text-right',
+                    'tabular font-semibold whitespace-nowrap min-w-[80px] text-right',
                     t.type === 'income'
                       ? 'text-income'
                       : t.type === 'transfer'

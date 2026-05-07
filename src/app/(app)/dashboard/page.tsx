@@ -46,6 +46,7 @@ export default async function DashboardPage({
           usedPct: month.budgetUsedPct,
           remaining: month.budgetRemaining,
         }}
+        categoryBudgets={month.categoryBudgets}
       />
     </div>
   );

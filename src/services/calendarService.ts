@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { monthRangeKST } from '@/lib/formatting/date';
+import { getBudgetProgress, type BudgetProgressItem } from './budgetService';
 
 export type DailyBucket = {
   date: string; // YYYY-MM-DD
@@ -15,6 +16,8 @@ export type CalendarMonth = {
   budgetTotal: number;
   budgetUsedPct: number;
   budgetRemaining: number;
+  /** 카테고리별 예산 진행률 (사용량 많은 순) */
+  categoryBudgets: BudgetProgressItem[];
   recentByDate: Record<string, Array<{
     id: string;
     type: 'income' | 'expense' | 'transfer';
@@ -100,6 +103,15 @@ export async function getCalendarMonth(
     budgetTotal > 0 ? Math.min(999, Math.round((totalExpense / budgetTotal) * 100)) : 0;
   const budgetRemaining = budgetTotal > 0 ? budgetTotal - totalExpense : 0;
 
+  // 카테고리별 예산 진행률 (캘린더 아래 카드용)
+  let categoryBudgets: BudgetProgressItem[] = [];
+  try {
+    const prog = await getBudgetProgress(supabase, userId, ym, householdContext);
+    categoryBudgets = prog.items;
+  } catch {
+    categoryBudgets = [];
+  }
+
   return {
     range: { from, to },
     daily: Object.values(byDate),
@@ -107,6 +119,7 @@ export async function getCalendarMonth(
     budgetTotal,
     budgetUsedPct,
     budgetRemaining,
+    categoryBudgets,
     recentByDate,
   };
 }
