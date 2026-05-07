@@ -19,6 +19,7 @@ import {
   History,
   Repeat,
   BookOpen,
+  ShieldCheck,
   ShieldAlert,
   X,
 } from 'lucide-react';
@@ -46,6 +47,7 @@ const MORE = [
   { href: '/files', label: '원본 파일', icon: Files },
   { href: '/guide', label: '가계부 작성 가이드', icon: BookOpen },
   { href: '/settings', label: '설정', icon: Settings },
+  { href: '/privacy', label: '개인정보처리방침', icon: ShieldCheck },
 ];
 
 const ADMIN_ITEM = { href: '/admin', label: '관리자 (개발자)', icon: ShieldAlert };

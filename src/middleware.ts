@@ -20,6 +20,7 @@ const PROTECTED_PREFIXES = [
   '/recurring',
   '/banking',
   '/guide',
+  '/privacy',
   '/admin',
 ];
 const PUBLIC_ONLY = ['/login', '/signup'];
