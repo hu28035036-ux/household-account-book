@@ -48,13 +48,22 @@ function fmtSize(bytes?: number | null) {
 export function FilesClient() {
   const [rows, setRows] = useState<FileRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await fetch('/api/files');
-    const json = await res.json();
-    setRows(json?.data ?? []);
-    setLoading(false);
+    setError(null);
+    try {
+      const res = await fetch('/api/files');
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error?.message ?? '파일 목록을 불러오지 못했습니다.');
+      setRows(json?.data ?? []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '파일 목록을 불러오지 못했습니다.');
+      setRows([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -63,15 +72,29 @@ export function FilesClient() {
 
   async function remove(row: FileRow) {
     if (!confirm(`'${row.file_name}'을(를) 삭제할까요? Storage에서도 함께 제거됩니다.`)) return;
-    const res = await fetch(`/api/files/${row.id}`, { method: 'DELETE' });
-    if (res.ok) load();
+    try {
+      const res = await fetch(`/api/files/${row.id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json?.error?.message ?? '삭제 실패');
+      }
+      load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '삭제 실패');
+    }
   }
 
   async function preview(row: FileRow) {
-    const res = await fetch(`/api/files/${row.id}`);
-    const json = await res.json();
-    const url = json?.data?.signed_url;
-    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+    try {
+      const res = await fetch(`/api/files/${row.id}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error?.message ?? '미리보기 URL을 받지 못했습니다.');
+      const url = json?.data?.signed_url;
+      if (url) window.open(url, '_blank', 'noopener,noreferrer');
+      else throw new Error('미리보기 URL이 없습니다.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '미리보기 실패');
+    }
   }
 
   return (
@@ -80,6 +103,10 @@ export function FilesClient() {
         <h2 className="text-2xl font-semibold text-textPrimary">원본 파일</h2>
         <Badge tone="muted">총 {rows.length}건</Badge>
       </div>
+
+      {error && (
+        <div className="rounded-md bg-dangerSoft text-danger px-3 py-2 text-sm">{error}</div>
+      )}
 
       {loading ? (
         <Card>

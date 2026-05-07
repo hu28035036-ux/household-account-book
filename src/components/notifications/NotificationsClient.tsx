@@ -47,13 +47,22 @@ export function NotificationsClient() {
   const [scope, setScope] = useState<'all' | 'unread'>('all');
   const [loading, setLoading] = useState(true);
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/notifications?scope=${scope}&limit=200`);
-    const json = await res.json();
-    setItems(json?.data?.items ?? []);
-    setLoading(false);
+    setError(null);
+    try {
+      const res = await fetch(`/api/notifications?scope=${scope}&limit=200`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error?.message ?? '알림을 불러오지 못했습니다.');
+      setItems(json?.data?.items ?? []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '알림을 불러오지 못했습니다.');
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
   }, [scope]);
 
   useEffect(() => {
@@ -62,25 +71,49 @@ export function NotificationsClient() {
 
   async function readOne(n: N) {
     if (n.read_at) return;
-    await fetch(`/api/notifications/${n.id}/read`, { method: 'POST' });
-    load();
+    try {
+      const res = await fetch(`/api/notifications/${n.id}/read`, { method: 'POST' });
+      if (!res.ok) throw new Error('읽음 처리 실패');
+      load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '읽음 처리 실패');
+    }
   }
   async function readAll() {
     setPending(true);
-    await fetch('/api/notifications/read-all', { method: 'POST' });
-    setPending(false);
-    load();
+    setError(null);
+    try {
+      const res = await fetch('/api/notifications/read-all', { method: 'POST' });
+      if (!res.ok) throw new Error('모두 읽음 처리 실패');
+      load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '모두 읽음 처리 실패');
+    } finally {
+      setPending(false);
+    }
   }
   async function remove(n: N) {
     if (!confirm('이 알림을 삭제할까요?')) return;
-    await fetch(`/api/notifications/${n.id}`, { method: 'DELETE' });
-    load();
+    try {
+      const res = await fetch(`/api/notifications/${n.id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('삭제 실패');
+      load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '삭제 실패');
+    }
   }
   async function checkNow() {
     setPending(true);
-    await fetch('/api/notifications/check-budgets', { method: 'POST' });
-    setPending(false);
-    load();
+    setError(null);
+    try {
+      const res = await fetch('/api/notifications/check-budgets', { method: 'POST' });
+      if (!res.ok) throw new Error('지금 점검 실패');
+      load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '지금 점검 실패');
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -96,6 +129,10 @@ export function NotificationsClient() {
           </Button>
         </div>
       </div>
+
+      {error && (
+        <div className="rounded-md bg-dangerSoft text-danger px-3 py-2 text-sm">{error}</div>
+      )}
 
       <Card className="p-3">
         <div className="flex items-center gap-2">
