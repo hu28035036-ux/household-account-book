@@ -18,6 +18,8 @@ const PROTECTED_PREFIXES = [
   '/files',
   '/ai-history',
   '/recurring',
+  '/banking',
+  '/guide',
   '/admin',
 ];
 const PUBLIC_ONLY = ['/login', '/signup'];

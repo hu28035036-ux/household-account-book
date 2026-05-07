@@ -18,6 +18,7 @@ import {
   Settings,
   History,
   Repeat,
+  BookOpen,
   ShieldAlert,
   X,
 } from 'lucide-react';
@@ -43,6 +44,7 @@ const MORE = [
   { href: '/candidates', label: '분석 후보', icon: ListChecks },
   { href: '/ai-history', label: 'AI 기록', icon: History },
   { href: '/files', label: '원본 파일', icon: Files },
+  { href: '/guide', label: '가계부 작성 가이드', icon: BookOpen },
   { href: '/settings', label: '설정', icon: Settings },
 ];
 
