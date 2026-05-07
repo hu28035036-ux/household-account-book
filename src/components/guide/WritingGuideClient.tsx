@@ -103,6 +103,57 @@ export function WritingGuideClient() {
         ))}
       </div>
 
+      <Card className="bg-softPinkBackground/50 border-primaryPinkSoft">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center justify-center h-6 w-6 rounded-md bg-primaryPink text-textOnPink text-xs font-bold">
+            ✨
+          </span>
+          <CardTitle>매일 적기 부담될 때 — AI 입력으로 한 줄</CardTitle>
+        </div>
+        <CardSubtle className="mt-2 leading-relaxed">
+          위의 9가지 원칙 중 가장 중요한 건 <b className="text-textPrimary">매일 짧게라도 적는 습관</b>인데,
+          이게 의외로 가장 어렵습니다. 이 앱에는{' '}
+          <b className="text-textPrimary">화면 우상단의 ✨ AI 입력</b> 기능이 있어요. 거기에 한 줄만
+          툭 넣으면 됩니다.
+        </CardSubtle>
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          <div className="rounded-md bg-white border border-borderSoft px-2.5 py-2">
+            <div className="text-textPinkStrong font-medium mb-1">📝 거래 한 줄로</div>
+            <div className="space-y-0.5 text-textSecondary">
+              <div>
+                <code>스벅 5천</code>
+              </div>
+              <div>
+                <code>오늘 점심 8천</code>
+              </div>
+              <div>
+                <code>월급 350만 받음</code>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-md bg-white border border-borderSoft px-2.5 py-2">
+            <div className="text-textPinkStrong font-medium mb-1">🧭 페이지도 한 줄로</div>
+            <div className="space-y-0.5 text-textSecondary">
+              <div>
+                <code>이번달 분석</code>
+              </div>
+              <div>
+                <code>예산 페이지</code>
+              </div>
+              <div>
+                <code>후보 검토</code>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p className="mt-3 text-[11px] text-textMuted leading-relaxed">
+          단축키:{' '}
+          <kbd className="px-1 bg-white border border-borderSoft rounded text-[10px]">Ctrl</kbd> +{' '}
+          <kbd className="px-1 bg-white border border-borderSoft rounded text-[10px]">K</kbd>{' '}
+          어디서든 1초 만에 열림. 거래 추가는 미리보기 후 [✓ 추가] 눌러야 저장됩니다.
+        </p>
+      </Card>
+
       <Card className="bg-pageBackground border-borderSoft">
         <CardTitle>마지막으로 — 너무 완벽하게 쓰려고 하지 마세요</CardTitle>
         <CardSubtle className="mt-1 leading-relaxed">

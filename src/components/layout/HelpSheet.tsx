@@ -16,6 +16,7 @@ import {
   BarChart3,
   Users,
   Download,
+  Sparkles,
 } from 'lucide-react';
 
 const STORAGE_KEY = 'help-seen';
@@ -103,6 +104,48 @@ export function HelpSheet({ autoOnFirstVisit = true }: { autoOnFirstVisit?: bool
             </div>
 
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5 text-sm leading-relaxed">
+              {/* ✨ AI 입력 — 모든 화면에서 쓸 수 있는 빠른 입력 */}
+              <section className="rounded-modal border border-primaryPinkSoft bg-softPinkBackground/50 px-3.5 py-3">
+                <div className="flex items-center gap-2 text-textPrimary font-semibold">
+                  <Sparkles className="h-4 w-4 text-textPinkStrong" strokeWidth={1.75} />
+                  <span>✨ AI 입력 — 한 줄로 빠르게</span>
+                  <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-primaryPink text-textOnPink">
+                    NEW
+                  </span>
+                </div>
+                <p className="mt-1.5 text-textSecondary">
+                  헤더 우상단의 <b className="text-textPrimary">✨ 버튼</b> (또는 단축키{' '}
+                  <kbd className="px-1 bg-white border border-borderSoft rounded text-[10px]">
+                    Ctrl
+                  </kbd>{' '}
+                  +{' '}
+                  <kbd className="px-1 bg-white border border-borderSoft rounded text-[10px]">
+                    K
+                  </kbd>
+                  ) 을 누르고 자연어로 한 줄 입력하면 자동으로 분석합니다.
+                </p>
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
+                  <div className="rounded-md bg-white border border-borderSoft px-2.5 py-1.5">
+                    <div className="text-textPinkStrong font-medium">📝 거래 추가</div>
+                    <div className="text-textSecondary mt-0.5">
+                      <code>스벅 5천</code> · <code>오늘 점심 8천</code> · <code>월급 350만</code>
+                    </div>
+                  </div>
+                  <div className="rounded-md bg-white border border-borderSoft px-2.5 py-1.5">
+                    <div className="text-textPinkStrong font-medium">🧭 페이지 이동</div>
+                    <div className="text-textSecondary mt-0.5">
+                      <code>통계</code> · <code>이번달 분석</code> · <code>예산</code> ·{' '}
+                      <code>후보</code>
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-2 text-[11px] text-textMuted leading-relaxed">
+                  거래 추가는 미리보기 카드에서 [✓ 추가] 를 눌러야 실제로 저장됩니다.
+                  <br />
+                  카테고리·예산 설정·고정거래 등록 등은 단계적으로 추가 예정.
+                </p>
+              </section>
+
               {/* 큰 흐름 */}
               <section>
                 <div className="flex items-center gap-2 text-textPrimary font-semibold">
