@@ -36,13 +36,17 @@ describe('parseExtractionLoose', () => {
     expect(out.document_type).toBe('sms');
   });
 
-  it('잘못된 type은 거부', () => {
+  it('잘못된 type은 expense 로 fallback (관대 모드)', () => {
+    // 스키마의 type 필드는 .catch('expense') — 잘못된 값은 expense 로 안전 변환.
+    // 거래는 throw 하지 않고 type 만 정정되어 보존됨.
     const raw = JSON.stringify({
       document_type: 'receipt',
       transactions: [{ type: 'unknown', confidence: 0.5 }],
       global_warnings: [],
     });
-    expect(() => parseExtractionLoose(raw)).toThrow();
+    const out = parseExtractionLoose(raw);
+    expect(out.transactions).toHaveLength(1);
+    expect(out.transactions[0].type).toBe('expense');
   });
 
   it('빈 transactions 허용 + 기본값', () => {
