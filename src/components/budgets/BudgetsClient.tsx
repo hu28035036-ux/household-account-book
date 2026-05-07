@@ -225,42 +225,12 @@ export function BudgetsClient() {
         </div>
       </div>
 
-      {progressTotal && (
-        <Card>
-          <button
-            type="button"
-            onClick={() => toggleExpand('total', null)}
-            className="w-full text-left flex items-center justify-between gap-3 flex-wrap hover:opacity-80 transition-opacity"
-          >
-            <CardTitle className="inline-flex items-center gap-1.5">
-              이번 달 전체 예산
-              <ChevronDown
-                className={`h-4 w-4 transition-transform ${expandedKey === 'total' ? 'rotate-180' : ''}`}
-                strokeWidth={1.75}
-              />
-            </CardTitle>
-            <Badge tone="muted">월 한도 {formatKRW(progressTotal.budget_amount)}</Badge>
-          </button>
-          <div className="mt-3">
-            <BudgetBar
-              name="전체"
-              color={null}
-              spent={progressTotal.spent_amount}
-              budget={progressTotal.budget_amount}
-              percent={progressTotal.percent}
-              status={progressTotal.status}
-              alertThreshold={progressTotal.alert_threshold}
-            />
-          </div>
-          {expandedKey === 'total' && (
-            <ExpandedTxList
-              loading={txLoading['total']}
-              rows={txCache['total']}
-              showCategory
-            />
-          )}
-        </Card>
-      )}
+      {/*
+       * 큰 '이번 달 전체 예산' 카드는 의도적으로 제거.
+       * 사유: 월 캘린더(/dashboard) 의 KPI 영역에 전체 예산·남은 예산이 이미 노출되어
+       *       이 페이지에서 중복 노출되는 게 잡음. 카테고리별 진행률에 집중하기 위함.
+       * 전체 예산 관리 UI 는 아래 grid 의 '전체' 카드 + '+ 예산 추가' 모달에서 그대로 가능.
+       */}
 
       {loading ? (
         <Card>
