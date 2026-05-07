@@ -1,19 +1,9 @@
-import { redirect } from 'next/navigation';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { AppShell } from '@/components/layout/AppShell';
-import { isAdminEmail } from '@/lib/admin/isAdmin';
 import { WritingGuideClient } from '@/components/guide/WritingGuideClient';
 
 export const dynamic = 'force-dynamic';
 
-export default async function GuidePage() {
-  const supabase = createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-
-  return (
-    <AppShell title="가계부 작성 가이드" userEmail={user.email} isAdmin={isAdminEmail(user.email)}>
-      <WritingGuideClient />
-    </AppShell>
-  );
+// AppShell 은 (app)/layout.tsx 에서 한 번만 감쌈 — 페이지에서 다시 감싸면 헤더·사이드바
+// 이중 노출됨. 페이지는 그냥 본문만 렌더한다.
+export default function GuidePage() {
+  return <WritingGuideClient />;
 }
