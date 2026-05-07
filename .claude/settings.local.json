@@ -43,7 +43,8 @@
       "Bash(node scripts/test-assistant-api-shape.mjs)",
       "Bash(npx --no-install vitest run)",
       "Bash(node scripts/test-all-endpoints.mjs)",
-      "Bash(node scripts/test-pages-as-user.mjs)"
+      "Bash(node scripts/test-pages-as-user.mjs)",
+      "Bash(node scripts/verify-consent-migration.mjs)"
     ]
   }
 }

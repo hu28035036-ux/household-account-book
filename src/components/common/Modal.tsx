@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
@@ -12,20 +13,41 @@ type Props = {
   className?: string;
 };
 
+/**
+ * 공통 모달.
+ *
+ * 항상 createPortal 로 document.body 에 렌더 — 헤더의 backdrop-blur 등
+ * stacking context 안에 갇혀 모달이 화면 밖으로 잘리는 문제를 차단.
+ * (NotificationBell / HouseholdSwitcher 와 동일 패턴.)
+ */
 export function Modal({ open, onClose, title, children, className }: Props) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    // body 스크롤 잠금
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!mounted || !open) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" role="dialog" aria-modal="true">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="absolute inset-0 bg-black/30" onClick={onClose} aria-hidden />
       <div
         className={cn(
@@ -47,6 +69,7 @@ export function Modal({ open, onClose, title, children, className }: Props) {
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
