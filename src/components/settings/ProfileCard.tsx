@@ -62,14 +62,20 @@ export function ProfileCard() {
     setOkMsg(null);
     setPending(true);
     try {
+      // 빈 값은 PATCH body 에서 제외 — server validation 의 min(1) 에 걸리지 않게.
+      // (별명만 수정하려는데 본명이 처음부터 비어있는 케이스 등)
+      const trimmedName = fullName.trim();
+      const trimmedNickname = nickname.trim();
+      const body: Record<string, unknown> = {
+        nickname: trimmedNickname || null, // 빈 별명은 명시적으로 null (지우기 동작)
+      };
+      if (trimmedName) body.full_name = trimmedName;
+      if (birthdate) body.birthdate = birthdate;
+
       const res = await fetch('/api/me', {
         method: 'PATCH',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          full_name: fullName.trim(),
-          birthdate: birthdate || null,
-          nickname: nickname.trim() || null,
-        }),
+        body: JSON.stringify(body),
       });
       const j = await res.json();
       if (!res.ok) throw new Error(j?.error?.message ?? '저장 실패');

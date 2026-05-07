@@ -67,9 +67,11 @@ export async function PATCH(req: NextRequest) {
   if (!u.user) return fail('UNAUTHORIZED', '로그인이 필요합니다.');
   try {
     const raw = (await req.json()) as Record<string, unknown>;
-    // 빈 문자열은 null 로 정규화 (nickname / birthdate 둘 다)
+    // 빈 문자열은 의미별로 정규화 — nickname/birthdate 는 빈값=지우기(null),
+    // full_name 은 min(1) 이라 빈문자열은 아예 키 제거 (변경 안 함 의도)
     if (raw.nickname === '') raw.nickname = null;
     if (raw.birthdate === '') raw.birthdate = null;
+    if (raw.full_name === '' || raw.full_name == null) delete raw.full_name;
     const input = PatchBody.parse(raw);
 
     const { data, error } = await supabase
