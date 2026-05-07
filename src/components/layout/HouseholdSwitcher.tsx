@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, User, Users, Check } from 'lucide-react';
 import { useActiveHousehold } from '@/lib/active-household';
 import { cn } from '@/lib/utils/cn';
@@ -8,7 +9,10 @@ import { cn } from '@/lib/utils/cn';
 export function HouseholdSwitcher() {
   const { activeId, households, setActive } = useActiveHousehold();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!open) return;
@@ -40,37 +44,41 @@ export function HouseholdSwitcher() {
         <span className="max-w-[120px] truncate">{active ? `${active.name} 모임` : '개인 가계부'}</span>
         <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.75} />
       </button>
-      {open && (
-        <div
-          role="listbox"
-          className="absolute right-0 mt-2 w-56 z-30 rounded-modal bg-pageBackground border border-borderDefault shadow-card overflow-hidden"
-        >
-          <Item
-            icon={<User className="h-4 w-4" strokeWidth={1.75} />}
-            label="개인 가계부"
-            sub="나만 보기"
-            selected={!activeId}
-            onClick={() => {
-              setActive(null);
-              setOpen(false);
-            }}
-          />
-          <div className="border-t border-divider" />
-          {households.map((h) => (
+      {mounted && open &&
+        createPortal(
+          <div
+            role="listbox"
+            // 헤더의 backdrop-blur 가 stacking context 를 만들어 dropdown 이 헤더 안에 갇힘.
+            // viewport 우상단 기준 fixed 로 고정 — ThemeSwitcher / NotificationBell 과 동일 패턴.
+            className="fixed top-[3.75rem] right-3 w-56 max-w-[calc(100vw-1.5rem)] z-50 rounded-modal bg-pageBackground border border-borderDefault shadow-card overflow-hidden"
+          >
             <Item
-              key={h.id}
-              icon={<Users className="h-4 w-4" strokeWidth={1.75} />}
-              label={h.name}
-              sub={h.is_owner ? 'owner' : 'member'}
-              selected={activeId === h.id}
+              icon={<User className="h-4 w-4" strokeWidth={1.75} />}
+              label="개인 가계부"
+              sub="나만 보기"
+              selected={!activeId}
               onClick={() => {
-                setActive(h.id);
+                setActive(null);
                 setOpen(false);
               }}
             />
-          ))}
-        </div>
-      )}
+            <div className="border-t border-divider" />
+            {households.map((h) => (
+              <Item
+                key={h.id}
+                icon={<Users className="h-4 w-4" strokeWidth={1.75} />}
+                label={h.name}
+                sub={h.is_owner ? 'owner' : 'member'}
+                selected={activeId === h.id}
+                onClick={() => {
+                  setActive(h.id);
+                  setOpen(false);
+                }}
+              />
+            ))}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

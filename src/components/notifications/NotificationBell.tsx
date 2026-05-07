@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { Bell, AlertTriangle, AlertOctagon, Info } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
@@ -33,9 +34,12 @@ function Icon({ type }: { type: N['type'] }) {
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [items, setItems] = useState<N[]>([]);
   const [unread, setUnread] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => setMounted(true), []);
 
   const load = useCallback(async () => {
     try {
@@ -93,51 +97,72 @@ export function NotificationBell() {
         )}
       </button>
 
-      {open && (
-        <div className="absolute right-0 mt-2 w-80 max-w-[92vw] z-30 rounded-modal bg-pageBackground border border-borderDefault shadow-card overflow-hidden">
-          <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-divider">
-            <span className="text-sm font-semibold text-textPrimary">알림</span>
-            <div className="flex items-center gap-2 text-xs">
-              <button onClick={readAll} className="text-textSecondary hover:text-textPinkStrong">
-                모두 읽음
-              </button>
-              <Link href="/notifications" className="text-textPinkStrong" onClick={() => setOpen(false)}>
-                전체 보기
-              </Link>
+      {mounted && open &&
+        createPortal(
+          <div
+            className="fixed top-[3.75rem] right-3 w-80 max-w-[calc(100vw-1.5rem)] z-50 rounded-modal bg-pageBackground border border-borderDefault shadow-card overflow-hidden"
+          >
+            <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-divider">
+              <span className="text-sm font-semibold text-textPrimary">알림</span>
+              <div className="flex items-center gap-2 text-xs">
+                <button
+                  onClick={readAll}
+                  className="text-textSecondary hover:text-textPinkStrong"
+                >
+                  모두 읽음
+                </button>
+                <Link
+                  href="/notifications"
+                  className="text-textPinkStrong"
+                  onClick={() => setOpen(false)}
+                >
+                  전체 보기
+                </Link>
+              </div>
             </div>
-          </div>
-          <div className="max-h-[60vh] overflow-y-auto">
-            {items.length === 0 ? (
-              <div className="px-3 py-6 text-sm text-textSecondary text-center">알림이 없습니다.</div>
-            ) : (
-              <ul className="divide-y divide-divider">
-                {items.map((n) => (
-                  <li
-                    key={n.id}
-                    className={cn(
-                      'px-3 py-2 cursor-pointer hover:bg-softPinkBackground',
-                      !n.read_at && 'bg-primaryPinkSoft/40',
-                    )}
-                    onClick={() => readOne(n.id)}
-                  >
-                    <div className="flex items-start gap-2">
-                      <span className="mt-0.5">
-                        <Icon type={n.type} />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium text-textPrimary truncate">{n.title}</div>
-                        <div className="text-xs text-textSecondary line-clamp-2 mt-0.5">{n.body}</div>
-                        <div className="text-[10px] text-textMuted mt-1">{formatDateKST(n.created_at)}</div>
+            <div className="max-h-[60vh] overflow-y-auto">
+              {items.length === 0 ? (
+                <div className="px-3 py-6 text-sm text-textSecondary text-center">
+                  알림이 없습니다.
+                </div>
+              ) : (
+                <ul className="divide-y divide-divider">
+                  {items.map((n) => (
+                    <li
+                      key={n.id}
+                      className={cn(
+                        'px-3 py-2 cursor-pointer hover:bg-softPinkBackground',
+                        !n.read_at && 'bg-primaryPinkSoft/40',
+                      )}
+                      onClick={() => readOne(n.id)}
+                    >
+                      <div className="flex items-start gap-2">
+                        <span className="mt-0.5">
+                          <Icon type={n.type} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-medium text-textPrimary truncate">
+                            {n.title}
+                          </div>
+                          <div className="text-xs text-textSecondary line-clamp-2 mt-0.5">
+                            {n.body}
+                          </div>
+                          <div className="text-[10px] text-textMuted mt-1">
+                            {formatDateKST(n.created_at)}
+                          </div>
+                        </div>
+                        {!n.read_at && (
+                          <span className="mt-1.5 inline-block h-1.5 w-1.5 rounded-full bg-primaryPink shrink-0" />
+                        )}
                       </div>
-                      {!n.read_at && <span className="mt-1.5 inline-block h-1.5 w-1.5 rounded-full bg-primaryPink shrink-0" />}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
