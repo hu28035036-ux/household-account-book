@@ -13,10 +13,33 @@ const withPWA = withPWAInit({
     disableDevLogs: true,
     // SSR/auth-aware 페이지는 캐시 X — 항상 네트워크 우선
     runtimeCaching: [
+      // /api/* — 절대 캐시 X
       {
         urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
         handler: 'NetworkOnly',
       },
+      // /auth/* (로그인 콜백) — 캐시 X
+      {
+        urlPattern: ({ url }) => url.pathname.startsWith('/auth/'),
+        handler: 'NetworkOnly',
+      },
+      // 인증 진입 페이지 — 항상 최신. stale 폼은 OAuth 토큰 깨짐 위험.
+      {
+        urlPattern: ({ url }) => /^\/(login|signup)(\/|$)/.test(url.pathname),
+        handler: 'NetworkOnly',
+      },
+      // /privacy — 공개 정적, 1주일 캐시 (잘 안 바뀜)
+      {
+        urlPattern: ({ url }) => url.pathname === '/privacy',
+        handler: 'StaleWhileRevalidate',
+        options: {
+          cacheName: 'public-pages',
+          expiration: { maxEntries: 4, maxAgeSeconds: 7 * 24 * 60 * 60 },
+        },
+      },
+      // 그 외 HTML 문서 — NetworkFirst, 짧은 캐시 (1시간)
+      // 24시간이면 새 빌드 배포 후에도 SW 미갱신 사용자가 stale 페이지 볼 수 있음.
+      // SwUpdatePrompt 가 5분 폴링 + skip-waiting 처리하므로 1시간이면 충분히 안전.
       {
         urlPattern: ({ request }) =>
           request.destination === 'document' ||
@@ -25,9 +48,10 @@ const withPWA = withPWAInit({
         options: {
           cacheName: 'pages',
           networkTimeoutSeconds: 4,
-          expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 },
+          expiration: { maxEntries: 32, maxAgeSeconds: 60 * 60 },
         },
       },
+      // CSS/JS/Worker/Font — SWR (해시된 URL 이라 stale 위험 X)
       {
         urlPattern: ({ request }) =>
           ['style', 'script', 'worker', 'font'].includes(request.destination),
@@ -37,6 +61,7 @@ const withPWA = withPWAInit({
           expiration: { maxEntries: 64, maxAgeSeconds: 7 * 24 * 60 * 60 },
         },
       },
+      // 이미지 — SWR, 30일 (재방문 빠름)
       {
         urlPattern: ({ request }) => request.destination === 'image',
         handler: 'StaleWhileRevalidate',
