@@ -136,6 +136,30 @@ export function InstallGuide() {
         한 번 설치하면 카톡 옆에 아이콘으로 등장합니다. 풀스크린 + 빠른 접속 + 알림 가능.
       </CardSubtle>
 
+      {/* 권장 브라우저 안내 — 화면 확대·축소 차이 때문 */}
+      <div className="mt-3 rounded-md bg-primaryPinkSoft border border-primaryPinkBorder px-3 py-2 text-xs leading-relaxed">
+        <div className="font-semibold text-textPinkStrong">📌 권장 브라우저</div>
+        <ul className="mt-1 space-y-0.5 text-textPrimary">
+          <li>
+            <b>Android</b> — <b>Chrome</b> (또는 Edge)
+          </li>
+          <li>
+            <b>iOS</b> — <b>Safari</b>
+          </li>
+        </ul>
+        <p className="mt-1.5 text-textMuted">
+          삼성 인터넷·기타 브라우저는 화면 확대 잠금이 일부 무시될 수 있어요. 위 권장 브라우저로
+          설치하면 의도된 모바일 디자인이 정확히 적용됩니다.
+        </p>
+      </div>
+
+      {browser === 'samsung' && (
+        <div className="mt-2 rounded-md bg-warningSoft border border-warning/30 px-3 py-2 text-xs text-warning leading-relaxed">
+          <b>지금 삼성 인터넷으로 보고 있어요.</b> 화면 핀치 확대를 쓰지 않으시려면 <b>Chrome</b>
+          으로 다시 열어 설치하시는 걸 권장합니다.
+        </div>
+      )}
+
       {/* 자체 설치 버튼 */}
       <div className="mt-3">
         <Button onClick={handleInstall} fullWidth size="lg">

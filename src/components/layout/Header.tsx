@@ -19,9 +19,9 @@ export function Header({ title, userEmail }: Props) {
   }
 
   return (
-    <header className="sticky top-0 z-20 bg-pageBackground/90 backdrop-blur border-b border-borderDefault">
-      <div className="flex items-center justify-between px-4 sm:px-6 h-14 gap-3">
-        <h1 className="text-base sm:text-lg font-semibold text-textPrimary truncate min-w-0">{title ?? ''}</h1>
+    <header className="sticky top-0 z-20 bg-pageBackground/90 backdrop-blur border-b border-borderDefault overflow-hidden">
+      <div className="flex items-center justify-between px-4 sm:px-6 h-14 gap-3 max-w-full">
+        <h1 className="text-base sm:text-lg font-semibold text-textPrimary truncate min-w-0 flex-1">{title ?? ''}</h1>
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <HelpSheet />
           <AssistantSheet />

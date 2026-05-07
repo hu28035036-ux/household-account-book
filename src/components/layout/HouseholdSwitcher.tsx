@@ -53,7 +53,10 @@ export function HouseholdSwitcher() {
         aria-expanded={open}
       >
         {active ? <Users className="h-4 w-4" strokeWidth={1.75} /> : <User className="h-4 w-4" strokeWidth={1.75} />}
-        <span className="max-w-[120px] truncate">{active ? `${active.name} 모임` : '개인 가계부'}</span>
+        {/* 모바일은 아이콘만 — 가로폭 절약 (헤더 가로 스크롤 방지) */}
+        <span className="hidden sm:inline max-w-[120px] truncate">
+          {active ? `${active.name} 모임` : '개인 가계부'}
+        </span>
         <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.75} />
       </button>
       {mounted && open &&

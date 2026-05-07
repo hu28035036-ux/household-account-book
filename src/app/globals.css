@@ -112,6 +112,8 @@ html, body {
   overscroll-behavior-y: contain;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
+  /* 모바일에서 의도치 않은 가로 스크롤 차단 (헤더 길이 초과 시 등) */
+  overflow-x: hidden;
 }
 
 body {
