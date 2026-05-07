@@ -104,16 +104,26 @@ html[data-theme='mocha'] {
 html, body {
   background-color: var(--app-bg);
   color: var(--text-primary);
-  /* 모든 브라우저 (크롬·삼성인터넷·사파리·파이어폭스) 공통:
-   * - 더블탭 자동 줌 차단 (touch-action: manipulation)
-   * - 핀치 줌은 viewport meta 의 user-scalable=no 로 차단
-   * - iOS pull-to-refresh 의도치 않은 발생 차단 (overscroll-behavior) */
+  /* 더블탭 자동 줌 차단 (스크롤·팬은 영향 없음) */
   touch-action: manipulation;
-  overscroll-behavior-y: contain;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
-  /* 모바일에서 의도치 않은 가로 스크롤 차단 (헤더 길이 초과 시 등) */
-  overflow-x: hidden;
+}
+
+/* html 에 overflow-x: hidden 을 두면 일부 모바일에서 세로 스크롤도 같이 막히는
+ * 브라우저 버그 — body 에서만, 그것도 'hidden' 대신 'clip' 으로 안전 차단.
+ * 'clip' 미지원 브라우저는 fallback 으로 hidden 적용 + overflow-y: auto 명시.
+ * iOS pull-to-refresh 우발은 overscroll-behavior-y: contain 으로 따로. */
+body {
+  overflow-x: clip;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+@supports not (overflow-x: clip) {
+  body {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
 }
 
 body {
