@@ -104,6 +104,14 @@ html[data-theme='mocha'] {
 html, body {
   background-color: var(--app-bg);
   color: var(--text-primary);
+  /* 모든 브라우저 (크롬·삼성인터넷·사파리·파이어폭스) 공통:
+   * - 더블탭 자동 줌 차단 (touch-action: manipulation)
+   * - 핀치 줌은 viewport meta 의 user-scalable=no 로 차단
+   * - iOS pull-to-refresh 의도치 않은 발생 차단 (overscroll-behavior) */
+  touch-action: manipulation;
+  overscroll-behavior-y: contain;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
 }
 
 body {
