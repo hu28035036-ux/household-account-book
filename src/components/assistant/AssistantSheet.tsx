@@ -3,7 +3,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { Sparkles, X, Loader2, ArrowRight, AlertCircle } from 'lucide-react';
+import {
+  Sparkles,
+  X,
+  Loader2,
+  ArrowRight,
+  AlertCircle,
+  CheckCircle2,
+  Calendar,
+  Store,
+  Coins,
+  Tag,
+  CreditCard,
+  TrendingUp,
+  TrendingDown,
+} from 'lucide-react';
 import type { Intent } from '@/lib/ai/assistantSchema';
 
 const NAV_DESTINATIONS: Record<string, { path: string; label: string }> = {
@@ -23,13 +37,15 @@ const NAV_DESTINATIONS: Record<string, { path: string; label: string }> = {
 };
 
 const EXAMPLES = [
+  '스벅 5천',
+  '오늘 점심 8천',
+  '월급 350만',
   '통계 보여줘',
   '이번달 분석',
-  '거래내역 열어',
   '예산 페이지',
-  '캘린더로',
-  '후보 검토',
 ];
+
+type AddTxData = Extract<Intent, { type: 'add_transaction' }>['data'];
 
 type HistoryItem = {
   id: number;
@@ -37,6 +53,8 @@ type HistoryItem = {
   result: string;
   ok: boolean;
 };
+
+type Phase = 'idle' | 'preview' | 'success';
 
 export function AssistantSheet() {
   const router = useRouter();
@@ -46,6 +64,9 @@ export function AssistantSheet() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [phase, setPhase] = useState<Phase>('idle');
+  const [previewIntent, setPreviewIntent] = useState<Intent | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => setMounted(true), []);
@@ -124,9 +145,52 @@ export function AssistantSheet() {
       setError(intent.reason || '명령을 이해하지 못했어요.');
       return;
     }
-    // 그 외 의도 (add_transaction, set_budget 등) — 다음 Phase 에서 활성화
-    setError(`"${labelOfIntent(intent.type)}" 기능은 곧 추가됩니다. 지금은 페이지 이동만 가능해요.`);
+    if (intent.type === 'add_transaction') {
+      setPreviewIntent(intent);
+      setPhase('preview');
+      setError(null);
+      return;
+    }
+    // Phase 3+ 에서 enable: update/delete/category/pm/budget/recurring
+    setError(`"${labelOfIntent(intent.type)}" 기능은 곧 추가됩니다. 현재는 페이지 이동·거래 추가만 가능해요.`);
     pushHistory(cmd, '준비 중', false);
+  }
+
+  async function executePreview() {
+    if (!previewIntent) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/assistant/execute', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ intent: previewIntent }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error?.message ?? '실행 실패');
+      const message = json.data?.message ?? '완료';
+      pushHistory(command, message, true);
+      setSuccessMessage(message);
+      setPhase('success');
+      setPreviewIntent(null);
+      setCommand('');
+      // 1.5초 후 닫기
+      setTimeout(() => {
+        setPhase('idle');
+        setSuccessMessage(null);
+      }, 1500);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '실행 실패');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function cancelPreview() {
+    setPreviewIntent(null);
+    setPhase('idle');
+    setError(null);
+    setTimeout(() => inputRef.current?.focus(), 50);
   }
 
   function pushHistory(command: string, result: string, ok: boolean) {
@@ -190,85 +254,107 @@ export function AssistantSheet() {
               </div>
 
               <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    submit();
-                  }}
-                >
-                  <div className="relative">
-                    <input
-                      ref={inputRef}
-                      value={command}
-                      onChange={(e) => setCommand(e.target.value)}
-                      placeholder="예: 통계 보여줘 / 이번달 분석"
-                      disabled={busy}
-                      className="w-full h-12 pr-10 px-3 rounded-md border border-borderDefault bg-white text-sm text-textPrimary placeholder:text-textMuted focus:outline-none focus:ring-2 focus:ring-primaryPinkSoft"
-                    />
-                    {busy && (
-                      <Loader2
-                        className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-textPinkStrong"
-                        strokeWidth={1.75}
-                      />
+                {phase === 'success' && successMessage && (
+                  <div className="rounded-md bg-successSoft text-success px-3 py-2 text-sm flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" strokeWidth={1.75} />
+                    <span>{successMessage}</span>
+                  </div>
+                )}
+
+                {phase === 'preview' && previewIntent?.type === 'add_transaction' ? (
+                  <AddTransactionPreview
+                    data={previewIntent.data}
+                    busy={busy}
+                    onConfirm={executePreview}
+                    onCancel={cancelPreview}
+                  />
+                ) : (
+                  <>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        submit();
+                      }}
+                    >
+                      <div className="relative">
+                        <input
+                          ref={inputRef}
+                          value={command}
+                          onChange={(e) => setCommand(e.target.value)}
+                          placeholder="예: 스벅 5천 / 통계 보여줘"
+                          disabled={busy}
+                          className="w-full h-12 pr-10 px-3 rounded-md border border-borderDefault bg-white text-sm text-textPrimary placeholder:text-textMuted focus:outline-none focus:ring-2 focus:ring-primaryPinkSoft"
+                        />
+                        {busy && (
+                          <Loader2
+                            className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-textPinkStrong"
+                            strokeWidth={1.75}
+                          />
+                        )}
+                      </div>
+                    </form>
+
+                    {error && (
+                      <div className="rounded-md bg-warningSoft text-warning px-3 py-2 text-sm flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" strokeWidth={1.75} />
+                        <span>{error}</span>
+                      </div>
                     )}
-                  </div>
-                </form>
 
-                {error && (
-                  <div className="rounded-md bg-warningSoft text-warning px-3 py-2 text-sm flex items-start gap-2">
-                    <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" strokeWidth={1.75} />
-                    <span>{error}</span>
-                  </div>
-                )}
-
-                <section>
-                  <div className="text-xs text-textSecondary mb-1.5">💡 이렇게 입력해 보세요</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {EXAMPLES.map((ex) => (
-                      <button
-                        key={ex}
-                        type="button"
-                        onClick={() => {
-                          setCommand(ex);
-                          submit(ex);
-                        }}
-                        disabled={busy}
-                        className="text-xs px-2.5 h-7 rounded-full border border-borderDefault text-textSecondary hover:bg-softPinkBackground"
-                      >
-                        {ex}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-
-                {history.length > 0 && (
-                  <section>
-                    <div className="text-xs text-textSecondary mb-1.5">최근 입력</div>
-                    <ul className="space-y-1">
-                      {history.map((h) => (
-                        <li
-                          key={h.id}
-                          className="flex items-center gap-2 text-xs text-textPrimary"
-                        >
-                          <span className="font-medium truncate min-w-0 flex-1">{h.command}</span>
-                          <ArrowRight className="h-3 w-3 text-textMuted shrink-0" />
-                          <span
-                            className={`shrink-0 ${
-                              h.ok ? 'text-success' : 'text-textMuted'
-                            }`}
+                    <section>
+                      <div className="text-xs text-textSecondary mb-1.5">
+                        💡 이렇게 입력해 보세요
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {EXAMPLES.map((ex) => (
+                          <button
+                            key={ex}
+                            type="button"
+                            onClick={() => {
+                              setCommand(ex);
+                              submit(ex);
+                            }}
+                            disabled={busy}
+                            className="text-xs px-2.5 h-7 rounded-full border border-borderDefault text-textSecondary hover:bg-softPinkBackground"
                           >
-                            {h.result}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                )}
+                            {ex}
+                          </button>
+                        ))}
+                      </div>
+                    </section>
 
-                <div className="text-[11px] text-textMuted leading-relaxed pt-2 border-t border-borderSoft">
-                  현재 단계에서는 페이지 이동만 가능합니다. 거래 추가·예산 설정·카테고리 생성
-                  등은 곧 단계적으로 추가됩니다. 단축키: <kbd className="px-1 bg-sectionBackground rounded text-[10px]">Ctrl</kbd> + <kbd className="px-1 bg-sectionBackground rounded text-[10px]">K</kbd>.
-                </div>
+                    {history.length > 0 && (
+                      <section>
+                        <div className="text-xs text-textSecondary mb-1.5">최근 입력</div>
+                        <ul className="space-y-1">
+                          {history.map((h) => (
+                            <li
+                              key={h.id}
+                              className="flex items-center gap-2 text-xs text-textPrimary"
+                            >
+                              <span className="font-medium truncate min-w-0 flex-1">
+                                {h.command}
+                              </span>
+                              <ArrowRight className="h-3 w-3 text-textMuted shrink-0" />
+                              <span
+                                className={`shrink-0 ${h.ok ? 'text-success' : 'text-textMuted'}`}
+                              >
+                                {h.result}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    )}
+
+                    <div className="text-[11px] text-textMuted leading-relaxed pt-2 border-t border-borderSoft">
+                      페이지 이동 · 거래 추가가 가능합니다. 예산·카테고리 등은 곧 추가됩니다.
+                      단축키:{' '}
+                      <kbd className="px-1 bg-sectionBackground rounded text-[10px]">Ctrl</kbd> +{' '}
+                      <kbd className="px-1 bg-sectionBackground rounded text-[10px]">K</kbd>.
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>,
@@ -276,6 +362,128 @@ export function AssistantSheet() {
         )}
     </>
   );
+}
+
+function AddTransactionPreview({
+  data,
+  busy,
+  onConfirm,
+  onCancel,
+}: {
+  data: AddTxData;
+  busy: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const isIncome = data.type === 'income';
+  const TypeIcon = isIncome ? TrendingUp : TrendingDown;
+  const typeColor = isIncome ? 'text-success' : 'text-textPrimary';
+  return (
+    <div className="space-y-3">
+      <div className="text-xs text-textSecondary">아래 내용으로 추가할까요?</div>
+      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
+        <Row
+          icon={<Calendar className="h-4 w-4" strokeWidth={1.75} />}
+          label="날짜"
+          value={formatYmd(data.date)}
+        />
+        <Row
+          icon={<Store className="h-4 w-4" strokeWidth={1.75} />}
+          label="가맹점"
+          value={data.merchant_name || '—'}
+        />
+        <Row
+          icon={<Coins className="h-4 w-4" strokeWidth={1.75} />}
+          label="금액"
+          valueNode={
+            <div className={`flex items-center gap-1.5 font-semibold ${typeColor}`}>
+              <TypeIcon className="h-4 w-4" strokeWidth={2} />
+              <span>
+                {(isIncome ? '+' : '-') + data.amount.toLocaleString('ko-KR')}원
+              </span>
+              <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-sectionBackground text-textSecondary">
+                {isIncome ? '수입' : data.type === 'transfer' ? '이체' : '지출'}
+              </span>
+            </div>
+          }
+        />
+        <Row
+          icon={<Tag className="h-4 w-4" strokeWidth={1.75} />}
+          label="카테고리"
+          value={data.category_name || '미정'}
+          muted={!data.category_name}
+        />
+        <Row
+          icon={<CreditCard className="h-4 w-4" strokeWidth={1.75} />}
+          label="결제수단"
+          value={data.payment_method_name || '미정'}
+          muted={!data.payment_method_name}
+        />
+      </div>
+
+      <div className="flex items-center justify-end gap-2 pt-1">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={busy}
+          className="h-9 px-3 rounded-md text-sm border border-borderDefault text-textSecondary hover:bg-softPinkBackground disabled:opacity-50"
+        >
+          ✗ 취소
+        </button>
+        <button
+          type="button"
+          onClick={onConfirm}
+          disabled={busy}
+          className="h-9 px-4 rounded-md text-sm bg-primaryPink text-textOnPink hover:bg-primaryPinkHover inline-flex items-center gap-1.5 disabled:opacity-50"
+        >
+          {busy ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
+          ) : (
+            <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
+          )}
+          추가
+        </button>
+      </div>
+
+      <p className="text-[11px] text-textMuted">
+        틀린 내용이 있다면 [취소] 후 다시 입력해 주세요. 카테고리/결제수단은 추가 후 거래내역
+        페이지에서 변경할 수 있어요.
+      </p>
+    </div>
+  );
+}
+
+function Row({
+  icon,
+  label,
+  value,
+  valueNode,
+  muted,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value?: string;
+  valueNode?: React.ReactNode;
+  muted?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-2 text-sm">
+      <span className="h-4 w-4 text-textPinkStrong shrink-0 inline-flex items-center justify-center">
+        {icon}
+      </span>
+      <span className="text-xs text-textSecondary w-16 shrink-0">{label}</span>
+      {valueNode ?? (
+        <span className={muted ? 'text-textMuted' : 'text-textPrimary font-medium'}>{value}</span>
+      )}
+    </div>
+  );
+}
+
+function formatYmd(ymd: string): string {
+  const [y, m, d] = ymd.split('-').map(Number);
+  if (!y || !m || !d) return ymd;
+  const dow = ['일', '월', '화', '수', '목', '금', '토'][new Date(y, m - 1, d).getDay()];
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} (${dow})`;
 }
 
 function resolveYmHint(hint: string): string | null {

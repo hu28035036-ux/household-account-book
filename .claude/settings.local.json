@@ -30,7 +30,9 @@
       "PowerShell(Set-Clipboard *)",
       "Bash(node -e \"require\\('dotenv'\\).config\\({path:'.env.local'}\\); console.log\\('openai:', process.env.OPENAI_API_KEY?'set \\('+process.env.OPENAI_API_KEY.length+' chars\\)':'missing'\\); console.log\\('ollama:', process.env.OLLAMA_API_BASE_URL || 'missing'\\)\")",
       "Bash(npx --no-install vitest run src/tests/unit/assistantSchema.test.ts)",
-      "Bash(node scripts/test-assistant-llm.mjs)"
+      "Bash(node scripts/test-assistant-llm.mjs)",
+      "Bash(npx --no-install vitest run src/tests/unit/assistantExecute.test.ts)",
+      "Bash(npx --no-install vitest run src/tests/unit/assistantExecute.test.ts src/tests/unit/assistantSchema.test.ts)"
     ]
   }
 }
