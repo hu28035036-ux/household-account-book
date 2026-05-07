@@ -17,6 +17,7 @@ import {
   CreditCard,
   TrendingUp,
   TrendingDown,
+  PiggyBank,
 } from 'lucide-react';
 import type { Intent } from '@/lib/ai/assistantSchema';
 
@@ -38,16 +39,17 @@ const NAV_DESTINATIONS: Record<string, { path: string; label: string }> = {
 
 const EXAMPLES = [
   '스벅 5천',
-  '오늘 점심 8천',
   '월급 350만',
+  '이번달 예산 80만',
+  '식비 예산 30만',
   '운동 카테고리 만들어',
-  '토스카드 결제수단 추가',
   '이번달 분석',
 ];
 
 type AddTxData = Extract<Intent, { type: 'add_transaction' }>['data'];
 type CreateCategoryData = Extract<Intent, { type: 'create_category' }>['data'];
 type CreatePaymentMethodData = Extract<Intent, { type: 'create_payment_method' }>['data'];
+type SetBudgetData = Extract<Intent, { type: 'set_budget' }>['data'];
 
 const CATEGORY_TYPE_LABEL: Record<CreateCategoryData['type'], string> = {
   income: '수입',
@@ -164,16 +166,17 @@ export function AssistantSheet() {
     if (
       intent.type === 'add_transaction' ||
       intent.type === 'create_category' ||
-      intent.type === 'create_payment_method'
+      intent.type === 'create_payment_method' ||
+      intent.type === 'set_budget'
     ) {
       setPreviewIntent(intent);
       setPhase('preview');
       setError(null);
       return;
     }
-    // 이후 Phase 에서 enable: update/delete/budget/recurring
+    // 이후 Phase 에서 enable: update/delete/recurring/delete_category/delete_payment_method
     setError(
-      `"${labelOfIntent(intent.type)}" 기능은 곧 추가됩니다. 현재는 페이지 이동·거래 추가·카테고리/결제수단 생성만 가능해요.`,
+      `"${labelOfIntent(intent.type)}" 기능은 곧 추가됩니다. 현재는 페이지 이동·거래 추가·카테고리/결제수단 생성·예산 설정만 가능해요.`,
     );
     pushHistory(cmd, '준비 중', false);
   }
@@ -299,6 +302,13 @@ export function AssistantSheet() {
                   />
                 ) : phase === 'preview' && previewIntent?.type === 'create_payment_method' ? (
                   <CreatePaymentMethodPreview
+                    data={previewIntent.data}
+                    busy={busy}
+                    onConfirm={executePreview}
+                    onCancel={cancelPreview}
+                  />
+                ) : phase === 'preview' && previewIntent?.type === 'set_budget' ? (
+                  <SetBudgetPreview
                     data={previewIntent.data}
                     busy={busy}
                     onConfirm={executePreview}
@@ -553,6 +563,68 @@ function CreatePaymentMethodPreview({
       <ConfirmRow busy={busy} onConfirm={onConfirm} onCancel={onCancel} confirmLabel="만들기" />
       <p className="text-[11px] text-textMuted">
         결제수단 페이지에서 카드번호 끝 4자리 등 추가 정보를 나중에 입력할 수 있어요.
+      </p>
+    </div>
+  );
+}
+
+function SetBudgetPreview({
+  data,
+  busy,
+  onConfirm,
+  onCancel,
+}: {
+  data: SetBudgetData;
+  busy: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const [y, m] = data.year_month.split('-');
+  const monthLabel = `${y}년 ${Number(m)}월`;
+  const isAll = !data.category_name;
+  return (
+    <div className="space-y-3">
+      <div className="text-xs text-textSecondary">
+        아래 예산을 설정할까요? 같은 기간·카테고리에 이미 예산이 있으면 덮어씁니다.
+      </div>
+      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
+        <Row
+          icon={<Calendar className="h-4 w-4" strokeWidth={1.75} />}
+          label="기간"
+          value={monthLabel}
+        />
+        <Row
+          icon={<Tag className="h-4 w-4" strokeWidth={1.75} />}
+          label="범위"
+          valueNode={
+            <span className={isAll ? 'text-textPrimary font-medium' : 'text-textPrimary font-medium'}>
+              {isAll ? (
+                <span className="inline-flex items-center gap-1.5">
+                  전체 예산
+                  <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-sectionBackground text-textSecondary">
+                    카테고리 무관
+                  </span>
+                </span>
+              ) : (
+                data.category_name
+              )}
+            </span>
+          }
+        />
+        <Row
+          icon={<PiggyBank className="h-4 w-4" strokeWidth={1.75} />}
+          label="한도"
+          valueNode={
+            <span className="text-textPrimary font-semibold">
+              {data.amount.toLocaleString('ko-KR')}원
+            </span>
+          }
+        />
+      </div>
+      <ConfirmRow busy={busy} onConfirm={onConfirm} onCancel={onCancel} confirmLabel="설정" />
+      <p className="text-[11px] text-textMuted">
+        예산은 월 단위입니다. 80% 도달 시 알림이 발송돼요. 카테고리 이름이 정확히 일치하지
+        않으면 전체 예산으로 적용됩니다.
       </p>
     </div>
   );

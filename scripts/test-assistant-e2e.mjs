@@ -82,7 +82,13 @@ type 중 정확히 하나 선택: add_transaction, update_transaction, delete_tr
 출력: {"type":"create_payment_method","data":{"name":"토스카드","type":"card"}}
 
 입력: "현금 결제수단 만들어"
-출력: {"type":"create_payment_method","data":{"name":"현금","type":"cash"}}`;
+출력: {"type":"create_payment_method","data":{"name":"현금","type":"cash"}}
+
+입력: "이번달 예산 80만"
+출력: {"type":"set_budget","data":{"year_month":"${TODAY.slice(0, 7)}","amount":800000,"category_name":null}}
+
+입력: "식비 예산 30만"
+출력: {"type":"set_budget","data":{"year_month":"${TODAY.slice(0, 7)}","amount":300000,"category_name":"식비"}}`;
 
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -120,6 +126,60 @@ async function executeCreatePaymentMethod(userId, intent) {
   const { data, error } = await admin
     .from('payment_methods')
     .insert({ user_id: userId, name: d.name, type: d.type, is_default: false })
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+async function executeSetBudget(userId, intent) {
+  if (intent.type !== 'set_budget') return null;
+  const d = intent.data;
+  const month_start = `${d.year_month}-01`;
+
+  let category_id = null;
+  if (d.category_name) {
+    const { data: cat } = await admin
+      .from('categories')
+      .select('id')
+      .eq('user_id', userId)
+      .ilike('name', d.category_name)
+      .limit(1)
+      .maybeSingle();
+    category_id = cat?.id ?? null;
+  }
+
+  // 기존 row check
+  let exQ = admin
+    .from('budgets')
+    .select('id')
+    .eq('user_id', userId)
+    .is('household_id', null)
+    .eq('month_start', month_start);
+  if (category_id) exQ = exQ.eq('category_id', category_id);
+  else exQ = exQ.is('category_id', null);
+  const { data: existing } = await exQ.maybeSingle();
+
+  if (existing) {
+    const { data, error } = await admin
+      .from('budgets')
+      .update({ amount: d.amount, alert_threshold: 0.8 })
+      .eq('id', existing.id)
+      .select('*')
+      .single();
+    if (error) throw error;
+    return data;
+  }
+  const { data, error } = await admin
+    .from('budgets')
+    .insert({
+      user_id: userId,
+      category_id,
+      month_start,
+      amount: d.amount,
+      alert_threshold: 0.8,
+      household_id: null,
+    })
     .select('*')
     .single();
   if (error) throw error;
@@ -184,6 +244,7 @@ async function fetchUserCategories(userId) {
 
 async function cleanup(userId) {
   await admin.from('transactions').delete().eq('user_id', userId);
+  await admin.from('budgets').delete().eq('user_id', userId);
   // 테스트 카테고리 (시드가 아닌 것) + 결제수단 정리
   await admin
     .from('categories')
@@ -256,6 +317,25 @@ const PM_CASES = [
     name: '"현금 결제수단 만들어" → type=cash',
     input: '현금 결제수단 만들어',
     verify: (pm) => pm.name === '현금' && pm.type === 'cash',
+  },
+];
+
+const BUDGET_CASES = [
+  {
+    name: '"이번달 예산 80만" → 전체 예산 800,000원',
+    input: '이번달 예산 80만',
+    verify: (b) =>
+      b.amount === 800000 &&
+      b.category_id === null &&
+      b.month_start === `${TODAY.slice(0, 7)}-01`,
+  },
+  {
+    name: '"이번달 식비 30만으로" → 식비 카테고리 예산 300,000원',
+    input: '이번달 식비 30만으로',
+    verify: (b) =>
+      b.amount === 300000 &&
+      b.category_id !== null &&
+      b.month_start === `${TODAY.slice(0, 7)}-01`,
   },
 ];
 
@@ -333,6 +413,33 @@ async function run() {
         pass++;
       } else {
         console.log(`[FAIL] ${c.name}\n       got: ${JSON.stringify({ name: pm.name, type: pm.type })}`);
+        fail++;
+      }
+    } catch (e) {
+      console.log(`[ERR]  ${c.name} — ${e.message}`);
+      fail++;
+    }
+  }
+
+  console.log('\n=== 예산 설정 ===');
+  for (const c of BUDGET_CASES) {
+    try {
+      const intent = await llm(c.input);
+      if (intent.type !== 'set_budget') {
+        console.log(`[FAIL] ${c.name}\n       LLM 이 ${intent.type} 응답`);
+        fail++;
+        continue;
+      }
+      const b = await executeSetBudget(userId, intent);
+      if (c.verify(b, intent)) {
+        console.log(
+          `[OK]   ${c.name} → budget ${b.id.slice(0, 8)}… ${b.amount.toLocaleString('ko-KR')}원 (${b.category_id ? '카테고리별' : '전체'})`,
+        );
+        pass++;
+      } else {
+        console.log(
+          `[FAIL] ${c.name}\n       got: ${JSON.stringify({ amount: b.amount, category_id: b.category_id, month_start: b.month_start })}`,
+        );
         fail++;
       }
     } catch (e) {
