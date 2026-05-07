@@ -10,9 +10,10 @@ export const runtime = 'nodejs';
  * 한글 컬럼 폭 자동 적용. 가져오기(import) 호환 헤더와 짝맞춤.
  */
 export async function GET() {
-  const supabase = createSupabaseServerClient();
-  const { data: u } = await supabase.auth.getUser();
-  if (!u.user) return fail('UNAUTHORIZED', '로그인이 필요합니다.');
+  try {
+    const supabase = createSupabaseServerClient();
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return fail('UNAUTHORIZED', '로그인이 필요합니다.');
 
   const { data } = await supabase
     .from('transactions')
@@ -65,12 +66,15 @@ export async function GET() {
   const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
   const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
   const today = new Date().toISOString().slice(0, 10);
-  return new Response(ab, {
-    status: 200,
-    headers: {
-      'content-type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'content-disposition': `attachment; filename="transactions-${today}.xlsx"`,
-      'content-length': String(ab.byteLength),
-    },
-  });
+    return new Response(ab, {
+      status: 200,
+      headers: {
+        'content-type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'content-disposition': `attachment; filename="transactions-${today}.xlsx"`,
+        'content-length': String(ab.byteLength),
+      },
+    });
+  } catch (e) {
+    return fail('INTERNAL', e instanceof Error ? e.message : '거래 XLSX 내보내기 실패');
+  }
 }

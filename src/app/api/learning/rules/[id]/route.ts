@@ -32,14 +32,18 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createSupabaseServerClient();
-  const { data: u } = await supabase.auth.getUser();
-  if (!u.user) return fail('UNAUTHORIZED', '로그인이 필요합니다.');
-  const { error } = await supabase
-    .from('user_learning_rules')
-    .delete()
-    .eq('user_id', u.user.id)
-    .eq('id', params.id);
-  if (error) return fail('INTERNAL', error.message);
-  return ok({ id: params.id });
+  try {
+    const supabase = createSupabaseServerClient();
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return fail('UNAUTHORIZED', '로그인이 필요합니다.');
+    const { error } = await supabase
+      .from('user_learning_rules')
+      .delete()
+      .eq('user_id', u.user.id)
+      .eq('id', params.id);
+    if (error) return fail('INTERNAL', error.message);
+    return ok({ id: params.id });
+  } catch (e) {
+    return fail('INTERNAL', e instanceof Error ? e.message : '학습 규칙 삭제 실패');
+  }
 }

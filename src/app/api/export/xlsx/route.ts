@@ -11,10 +11,11 @@ export const runtime = 'nodejs';
  *   ocr_results, ai_extraction_jobs 등)은 JSON 내보내기에서만 제공.
  */
 export async function GET() {
-  const supabase = createSupabaseServerClient();
-  const { data: u } = await supabase.auth.getUser();
-  if (!u.user) return fail('UNAUTHORIZED', '로그인이 필요합니다.');
-  const userId = u.user.id;
+  try {
+    const supabase = createSupabaseServerClient();
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return fail('UNAUTHORIZED', '로그인이 필요합니다.');
+    const userId = u.user.id;
 
   const TYPE_KR: Record<string, string> = { income: '수입', expense: '지출', transfer: '이체' };
 
@@ -201,12 +202,15 @@ export async function GET() {
   const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
   const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
   const today = new Date().toISOString().slice(0, 10);
-  return new Response(ab, {
-    status: 200,
-    headers: {
-      'content-type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'content-disposition': `attachment; filename="ledger-export-${today}.xlsx"`,
-      'content-length': String(ab.byteLength),
-    },
-  });
+    return new Response(ab, {
+      status: 200,
+      headers: {
+        'content-type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'content-disposition': `attachment; filename="ledger-export-${today}.xlsx"`,
+        'content-length': String(ab.byteLength),
+      },
+    });
+  } catch (e) {
+    return fail('INTERNAL', e instanceof Error ? e.message : '전체 XLSX 내보내기 실패');
+  }
 }

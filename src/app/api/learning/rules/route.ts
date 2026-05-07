@@ -15,17 +15,21 @@ const CreateInput = z.object({
 });
 
 export async function GET() {
-  const supabase = createSupabaseServerClient();
-  const { data: u } = await supabase.auth.getUser();
-  if (!u.user) return fail('UNAUTHORIZED', '로그인이 필요합니다.');
-  const { data, error } = await supabase
-    .from('user_learning_rules')
-    .select('*')
-    .eq('user_id', u.user.id)
-    .order('match_count', { ascending: false })
-    .limit(200);
-  if (error) return fail('INTERNAL', error.message);
-  return ok(data);
+  try {
+    const supabase = createSupabaseServerClient();
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return fail('UNAUTHORIZED', '로그인이 필요합니다.');
+    const { data, error } = await supabase
+      .from('user_learning_rules')
+      .select('*')
+      .eq('user_id', u.user.id)
+      .order('match_count', { ascending: false })
+      .limit(200);
+    if (error) return fail('INTERNAL', error.message);
+    return ok(data);
+  } catch (e) {
+    return fail('INTERNAL', e instanceof Error ? e.message : '학습 규칙 조회 실패');
+  }
 }
 
 export async function POST(req: NextRequest) {
