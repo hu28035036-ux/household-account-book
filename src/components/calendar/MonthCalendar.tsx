@@ -285,21 +285,16 @@ export function MonthCalendar({
                   <div className="h-3" />
                 )}
 
-                {/* 카테고리별 지출 금액 — 모바일 1개, 태블릿+ 2개, 그 이상 +N */}
+                {/* 카테고리별 지출 금액 — 점 없음, 숫자가 카테고리 색깔로 표시 */}
                 {/* 모바일 */}
                 <div className="sm:hidden flex flex-col gap-0.5 mt-auto">
                   {mobileVisible.map((c2) => (
                     <div
                       key={c2.name}
-                      className="flex items-center gap-1 leading-tight"
+                      className="text-[9px] tabular font-medium whitespace-nowrap truncate leading-tight"
+                      style={{ color: c2.color }}
                     >
-                      <span
-                        className="inline-block h-1.5 w-1.5 rounded-full shrink-0"
-                        style={{ backgroundColor: c2.color }}
-                      />
-                      <span className="text-[9px] tabular text-textMuted whitespace-nowrap truncate">
-                        {__numFmt(c2.amount)}
-                      </span>
+                      {__numFmt(c2.amount)}
                     </div>
                   ))}
                   {mobileOverflow > 0 && (
@@ -313,18 +308,11 @@ export function MonthCalendar({
                   {smVisible.map((c2) => (
                     <div
                       key={c2.name}
-                      className="flex items-center gap-1 leading-tight"
+                      className="flex items-center gap-1 leading-tight tabular text-[10px] md:text-[11px] font-medium"
+                      style={{ color: c2.color }}
                     >
-                      <span
-                        className="inline-block h-2 w-2 rounded-full shrink-0"
-                        style={{ backgroundColor: c2.color }}
-                      />
-                      <span className="text-[10px] md:text-[11px] tabular text-textSecondary truncate">
-                        {c2.name}
-                      </span>
-                      <span className="text-[10px] md:text-[11px] tabular text-textMuted ml-auto whitespace-nowrap">
-                        {__numFmt(c2.amount)}
-                      </span>
+                      <span className="truncate">{c2.name}</span>
+                      <span className="ml-auto whitespace-nowrap">{__numFmt(c2.amount)}</span>
                     </div>
                   ))}
                   {smOverflow > 0 && (
