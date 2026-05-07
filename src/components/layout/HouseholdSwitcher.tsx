@@ -24,8 +24,15 @@ export function HouseholdSwitcher() {
       const insideDropdown = dropdownRef.current?.contains(t) ?? false;
       if (!insideButton && !insideDropdown) setOpen(false);
     }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
     document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
   }, [open]);
 
   if (households.length === 0) return null;

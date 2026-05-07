@@ -68,8 +68,15 @@ export function NotificationBell() {
       const insideDropdown = dropdownRef.current?.contains(t) ?? false;
       if (!insideButton && !insideDropdown) setOpen(false);
     }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
     document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
   }, [open]);
 
   async function readOne(id: string) {

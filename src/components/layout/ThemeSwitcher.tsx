@@ -38,14 +38,21 @@ export function ThemeSwitcher() {
     }
   }, []);
 
-  // 바깥 클릭 시 닫기
+  // 바깥 클릭 + Esc 닫기
   useEffect(() => {
     if (!open) return;
     function onDoc(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
     document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
   }, [open]);
 
   function pick(t: ThemeId) {
