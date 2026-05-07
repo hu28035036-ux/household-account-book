@@ -52,20 +52,9 @@ function ymOffset(ym: string, deltaMonths: number): string {
   const d = new Date(Date.UTC(y, m - 1 + deltaMonths, 1));
   return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}`;
 }
-/**
- * 셀 안 좁은 폭에 맞춘 금액 축약 — 1만 미만은 그대로, 1만 이상은 'X.X만'.
- *  - 5,000   → "5,000"
- *  - 32,500  → "3.2만"
- *  - 320,000 → "32만"
- *  - 1,200,000 → "120만"
- */
-function compactKRW(n: number): string {
-  if (n < 10000) return n.toLocaleString('ko-KR');
-  const v = n / 10000;
-  if (v >= 100) return Math.round(v).toLocaleString('ko-KR') + '만';
-  // 소수점 1자리 (10만 미만)
-  const fixed = v.toFixed(v < 10 ? 1 : 0);
-  return fixed.replace(/\.0$/, '') + '만';
+/** 셀 안 금액은 천 단위 콤마 숫자로만 표시 — '만' 같은 한글 단위 X (사용자 요구) */
+function __numFmt(n: number): string {
+  return n.toLocaleString('ko-KR');
 }
 
 function todayKSTYMD(): string {
@@ -290,7 +279,7 @@ export function MonthCalendar({
                 {/* 2행 — 총 지출 (강조) */}
                 {bucket && bucket.expense > 0 ? (
                   <div className="text-[10px] sm:text-[11px] md:text-xs tabular font-semibold text-expense whitespace-nowrap leading-tight">
-                    -{compactKRW(bucket.expense)}
+                    -{__numFmt(bucket.expense)}
                   </div>
                 ) : (
                   <div className="h-3" />
@@ -309,7 +298,7 @@ export function MonthCalendar({
                         style={{ backgroundColor: c2.color }}
                       />
                       <span className="text-[9px] tabular text-textMuted whitespace-nowrap truncate">
-                        {compactKRW(c2.amount)}
+                        {__numFmt(c2.amount)}
                       </span>
                     </div>
                   ))}
@@ -334,7 +323,7 @@ export function MonthCalendar({
                         {c2.name}
                       </span>
                       <span className="text-[10px] md:text-[11px] tabular text-textMuted ml-auto whitespace-nowrap">
-                        {compactKRW(c2.amount)}
+                        {__numFmt(c2.amount)}
                       </span>
                     </div>
                   ))}
@@ -348,7 +337,7 @@ export function MonthCalendar({
                 {/* 수입 — 마지막 줄 (있을 때만) */}
                 {bucket && bucket.income > 0 && (
                   <div className="text-[9px] sm:text-[10px] tabular text-income whitespace-nowrap leading-tight">
-                    +{compactKRW(bucket.income)}
+                    +{__numFmt(bucket.income)}
                   </div>
                 )}
               </button>
