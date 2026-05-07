@@ -249,6 +249,18 @@ async function executeAddTransaction(userId, intent) {
     category_id = data?.id ?? null;
   }
 
+  let payment_method_id = null;
+  if (d.payment_method_name) {
+    const { data } = await admin
+      .from('payment_methods')
+      .select('id')
+      .eq('user_id', userId)
+      .ilike('name', d.payment_method_name)
+      .limit(1)
+      .maybeSingle();
+    payment_method_id = data?.id ?? null;
+  }
+
   const { data: tx, error } = await admin
     .from('transactions')
     .insert({
@@ -259,7 +271,7 @@ async function executeAddTransaction(userId, intent) {
       merchant_name: d.merchant_name ?? null,
       description: d.description ?? '',
       category_id,
-      payment_method_id: null,
+      payment_method_id,
       source_type: 'manual',
       is_ai_generated: false,
       is_confirmed: true,
@@ -364,6 +376,58 @@ const PM_CASES = [
     name: '"현금 결제수단 만들어" → type=cash',
     input: '현금 결제수단 만들어',
     verify: (pm) => pm.name === '현금' && pm.type === 'cash',
+  },
+];
+
+// AI 가 분석한 결과를 사용자가 미리보기에서 편집하는 시나리오
+// (UI 편집 = previewIntent.data 의 일부 필드를 변경한 후 execute)
+const EDIT_PREVIEW_CASES = [
+  {
+    name: '"스벅 5천" 분석 후 사용자가 카테고리를 "식비"로 수정 → DB 에도 식비',
+    input: '스벅 5천',
+    edit: { category_name: '식비' },
+    verify: async (tx, userId) => {
+      // tx.category_id 가 식비 카테고리의 id 와 일치해야 함
+      const { data: cat } = await admin
+        .from('categories')
+        .select('id')
+        .eq('user_id', userId)
+        .ilike('name', '식비')
+        .maybeSingle();
+      return tx.category_id === cat?.id;
+    },
+  },
+  {
+    name: '"커피 3천" 분석 후 사용자가 금액을 4500원으로 수정 → DB 에도 4500',
+    input: '커피 3천',
+    edit: { amount: 4500 },
+    verify: async (tx) => tx.amount === 4500,
+  },
+  {
+    name: '"GS 2천" 분석 후 사용자가 가맹점을 "GS25 강남점"으로 수정',
+    input: 'GS 2천',
+    edit: { merchant_name: 'GS25 강남점' },
+    verify: async (tx) => tx.merchant_name === 'GS25 강남점',
+  },
+  {
+    name: '"점심 만원" 분석 후 사용자가 결제수단을 "현금"으로 추가',
+    input: '점심 만원',
+    edit: { payment_method_name: '현금' },
+    verify: async (tx, userId) => {
+      const { data: pm } = await admin
+        .from('payment_methods')
+        .select('id')
+        .eq('user_id', userId)
+        .ilike('name', '현금')
+        .maybeSingle();
+      return tx.payment_method_id === pm?.id;
+    },
+  },
+  {
+    name: '"용돈 5만 받음" 분석 후 사용자가 type 을 expense 로 변경 (오타 수정)',
+    input: '용돈 5만 받음',
+    edit: { type: 'expense' },
+    verify: async (tx) => tx.type === 'expense' && tx.amount === 50000,
   },
 ];
 
@@ -490,6 +554,42 @@ async function run() {
         pass++;
       } else {
         console.log(`[FAIL] ${c.name}\n       got: ${JSON.stringify({ name: pm.name, type: pm.type })}`);
+        fail++;
+      }
+    } catch (e) {
+      console.log(`[ERR]  ${c.name} — ${e.message}`);
+      fail++;
+    }
+  }
+
+  console.log('\n=== 미리보기 편집 (AI 결과 직접 수정) ===');
+  for (const c of EDIT_PREVIEW_CASES) {
+    try {
+      // 1) AI 가 분석 (실 LLM 호출)
+      const intent = await llm(c.input);
+      if (intent.type !== 'add_transaction') {
+        console.log(`[FAIL] ${c.name}\n       LLM ${intent.type}`);
+        fail++;
+        continue;
+      }
+      // 2) 사용자가 미리보기에서 편집 (UI 의 onChange 시뮬레이션)
+      const editedIntent = {
+        ...intent,
+        data: { ...intent.data, ...c.edit },
+      };
+      // 3) execute 호출 (편집 후 값으로)
+      const tx = await executeAddTransaction(userId, editedIntent);
+
+      const ok = await c.verify(tx, userId);
+      if (ok) {
+        console.log(
+          `[OK]   ${c.name}\n       AI: ${JSON.stringify(intent.data)} → 편집 후: ${JSON.stringify(c.edit)} → DB: ${JSON.stringify({ amount: tx.amount, merchant: tx.merchant_name, type: tx.type })}`,
+        );
+        pass++;
+      } else {
+        console.log(
+          `[FAIL] ${c.name}\n       got: ${JSON.stringify({ amount: tx.amount, merchant: tx.merchant_name, type: tx.type, category_id: tx.category_id, payment_method_id: tx.payment_method_id })}`,
+        );
         fail++;
       }
     } catch (e) {

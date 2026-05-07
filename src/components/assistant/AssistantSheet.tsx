@@ -78,6 +78,13 @@ type HistoryItem = {
 
 type Phase = 'idle' | 'preview' | 'success';
 
+type CategoryOption = { id: string; name: string; type: 'income' | 'expense' | 'common' };
+type PaymentMethodOption = {
+  id: string;
+  name: string;
+  type: 'card' | 'bank' | 'cash' | 'pay' | 'other';
+};
+
 export function AssistantSheet() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -89,6 +96,8 @@ export function AssistantSheet() {
   const [phase, setPhase] = useState<Phase>('idle');
   const [previewIntent, setPreviewIntent] = useState<Intent | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodOption[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => setMounted(true), []);
@@ -116,6 +125,23 @@ export function AssistantSheet() {
       document.body.style.overflow = prev;
     };
   }, [open]);
+
+  // 시트 첫 열림에 카테고리/결제수단 목록 캐시 (편집용)
+  useEffect(() => {
+    if (!open) return;
+    if (categories.length > 0 || paymentMethods.length > 0) return;
+    Promise.all([
+      fetch('/api/categories', { cache: 'no-store' }).then((r) => r.json()),
+      fetch('/api/payment-methods', { cache: 'no-store' }).then((r) => r.json()),
+    ])
+      .then(([catRes, pmRes]) => {
+        if (Array.isArray(catRes?.data)) setCategories(catRes.data);
+        if (Array.isArray(pmRes?.data)) setPaymentMethods(pmRes.data);
+      })
+      .catch(() => {
+        // 무시 — 편집 dropdown 이 빈 채로 보일 뿐
+      });
+  }, [open, categories.length, paymentMethods.length]);
 
   async function submit(rawCmd?: string) {
     const cmd = (rawCmd ?? command).trim();
@@ -295,9 +321,17 @@ export function AssistantSheet() {
                 {phase === 'preview' && previewIntent?.type === 'add_transaction' ? (
                   <AddTransactionPreview
                     data={previewIntent.data}
+                    categories={categories}
+                    paymentMethods={paymentMethods}
                     busy={busy}
                     onConfirm={executePreview}
                     onCancel={cancelPreview}
+                    onChange={(patch) =>
+                      setPreviewIntent({
+                        ...previewIntent,
+                        data: { ...previewIntent.data, ...patch },
+                      })
+                    }
                   />
                 ) : phase === 'preview' && previewIntent?.type === 'create_category' ? (
                   <CreateCategoryPreview
@@ -432,59 +466,146 @@ export function AssistantSheet() {
 
 function AddTransactionPreview({
   data,
+  categories,
+  paymentMethods,
   busy,
   onConfirm,
   onCancel,
+  onChange,
 }: {
   data: AddTxData;
+  categories: CategoryOption[];
+  paymentMethods: PaymentMethodOption[];
   busy: boolean;
   onConfirm: () => void;
   onCancel: () => void;
+  onChange: (patch: Partial<AddTxData>) => void;
 }) {
   const isIncome = data.type === 'income';
   const TypeIcon = isIncome ? TrendingUp : TrendingDown;
   const typeColor = isIncome ? 'text-success' : 'text-textPrimary';
+
+  // 타입에 맞는 카테고리만 필터링 (지출은 expense+common, 수입은 income+common)
+  const filteredCats = categories.filter((c) =>
+    isIncome ? c.type !== 'expense' : c.type !== 'income',
+  );
+
   return (
     <div className="space-y-3">
-      <div className="text-xs text-textSecondary">아래 내용으로 추가할까요?</div>
-      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
-        <Row
-          icon={<Calendar className="h-4 w-4" strokeWidth={1.75} />}
-          label="날짜"
-          value={formatYmd(data.date)}
-        />
-        <Row
-          icon={<Store className="h-4 w-4" strokeWidth={1.75} />}
-          label="가맹점"
-          value={data.merchant_name || '—'}
-        />
-        <Row
-          icon={<Coins className="h-4 w-4" strokeWidth={1.75} />}
-          label="금액"
-          valueNode={
-            <div className={`flex items-center gap-1.5 font-semibold ${typeColor}`}>
-              <TypeIcon className="h-4 w-4" strokeWidth={2} />
-              <span>
-                {(isIncome ? '+' : '-') + data.amount.toLocaleString('ko-KR')}원
-              </span>
-              <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-sectionBackground text-textSecondary">
-                {isIncome ? '수입' : data.type === 'transfer' ? '이체' : '지출'}
-              </span>
-            </div>
-          }
-        />
-        <Row
-          icon={<Tag className="h-4 w-4" strokeWidth={1.75} />}
-          label="카테고리"
-          value={data.category_name || '미정'}
-          muted={!data.category_name}
-        />
-        <Row
-          icon={<CreditCard className="h-4 w-4" strokeWidth={1.75} />}
-          label="결제수단"
-          value={data.payment_method_name || '미정'}
-          muted={!data.payment_method_name}
-        />
+      <div className="text-xs text-textSecondary">
+        AI 가 분석한 결과입니다. 틀린 항목은 바로 아래에서 직접 수정할 수 있어요.
+      </div>
+      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-3">
+        {/* 타입 (수입/지출/이체) — 핑크 토글 */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-textSecondary w-16 shrink-0 inline-flex items-center gap-1.5">
+            <Coins className="h-4 w-4 text-textPinkStrong" strokeWidth={1.75} /> 종류
+          </span>
+          <div className="flex gap-1.5 flex-1">
+            {(['expense', 'income', 'transfer'] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => onChange({ type: t })}
+                disabled={busy}
+                className={`text-xs px-2.5 h-7 rounded-full border transition-colors ${
+                  data.type === t
+                    ? 'bg-primaryPinkSoft text-textPinkStrong border-primaryPinkSoft'
+                    : 'border-borderDefault text-textSecondary hover:bg-softPinkBackground'
+                }`}
+              >
+                {t === 'expense' ? '지출' : t === 'income' ? '수입' : '이체'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 날짜 */}
+        <EditableRow icon={<Calendar className="h-4 w-4" strokeWidth={1.75} />} label="날짜">
+          <input
+            type="date"
+            value={data.date}
+            onChange={(e) => onChange({ date: e.target.value })}
+            disabled={busy}
+            className="flex-1 h-8 rounded-md border border-borderDefault bg-white px-2 text-sm text-textPrimary"
+          />
+        </EditableRow>
+
+        {/* 가맹점 */}
+        <EditableRow icon={<Store className="h-4 w-4" strokeWidth={1.75} />} label="가맹점">
+          <input
+            type="text"
+            value={data.merchant_name ?? ''}
+            onChange={(e) => onChange({ merchant_name: e.target.value || null })}
+            disabled={busy}
+            placeholder="가맹점 이름"
+            className="flex-1 h-8 rounded-md border border-borderDefault bg-white px-2 text-sm text-textPrimary"
+          />
+        </EditableRow>
+
+        {/* 금액 */}
+        <EditableRow icon={<Coins className="h-4 w-4" strokeWidth={1.75} />} label="금액">
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step={100}
+            value={data.amount}
+            onChange={(e) => {
+              const n = Math.max(0, Math.floor(Number(e.target.value) || 0));
+              onChange({ amount: n });
+            }}
+            disabled={busy}
+            className="flex-1 h-8 rounded-md border border-borderDefault bg-white px-2 text-sm text-textPrimary text-right font-semibold"
+          />
+          <span className="text-xs text-textMuted shrink-0">원</span>
+        </EditableRow>
+        <div className="ml-[68px] -mt-1 flex items-center gap-1.5 text-xs">
+          <TypeIcon className={`h-3.5 w-3.5 ${typeColor}`} strokeWidth={2} />
+          <span className={`${typeColor} font-medium`}>
+            {(isIncome ? '+' : '-') + data.amount.toLocaleString('ko-KR')}원
+          </span>
+        </div>
+
+        {/* 카테고리 */}
+        <EditableRow icon={<Tag className="h-4 w-4" strokeWidth={1.75} />} label="카테고리">
+          <select
+            value={data.category_name ?? ''}
+            onChange={(e) => onChange({ category_name: e.target.value || null })}
+            disabled={busy}
+            className="flex-1 h-8 rounded-md border border-borderDefault bg-white px-2 text-sm text-textPrimary"
+          >
+            <option value="">— 미정 —</option>
+            {filteredCats.map((c) => (
+              <option key={c.id} value={c.name}>
+                {c.name}
+              </option>
+            ))}
+            {data.category_name &&
+              !filteredCats.some((c) => c.name === data.category_name) && (
+                <option value={data.category_name}>
+                  {data.category_name} (목록에 없음)
+                </option>
+              )}
+          </select>
+        </EditableRow>
+
+        {/* 결제수단 */}
+        <EditableRow icon={<CreditCard className="h-4 w-4" strokeWidth={1.75} />} label="결제수단">
+          <select
+            value={data.payment_method_name ?? ''}
+            onChange={(e) => onChange({ payment_method_name: e.target.value || null })}
+            disabled={busy}
+            className="flex-1 h-8 rounded-md border border-borderDefault bg-white px-2 text-sm text-textPrimary"
+          >
+            <option value="">— 미정 —</option>
+            {paymentMethods.map((p) => (
+              <option key={p.id} value={p.name}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </EditableRow>
       </div>
 
       <div className="flex items-center justify-end gap-2 pt-1">
@@ -499,7 +620,7 @@ function AddTransactionPreview({
         <button
           type="button"
           onClick={onConfirm}
-          disabled={busy}
+          disabled={busy || data.amount <= 0}
           className="h-9 px-4 rounded-md text-sm bg-primaryPink text-textOnPink hover:bg-primaryPinkHover inline-flex items-center gap-1.5 disabled:opacity-50"
         >
           {busy ? (
@@ -510,11 +631,28 @@ function AddTransactionPreview({
           추가
         </button>
       </div>
+    </div>
+  );
+}
 
-      <p className="text-[11px] text-textMuted">
-        틀린 내용이 있다면 [취소] 후 다시 입력해 주세요. 카테고리/결제수단은 추가 후 거래내역
-        페이지에서 변경할 수 있어요.
-      </p>
+function EditableRow({
+  icon,
+  label,
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs text-textSecondary w-16 shrink-0 inline-flex items-center gap-1.5">
+        <span className="h-4 w-4 text-textPinkStrong shrink-0 inline-flex items-center justify-center">
+          {icon}
+        </span>
+        <span>{label}</span>
+      </span>
+      {children}
     </div>
   );
 }
