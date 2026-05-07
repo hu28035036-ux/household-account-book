@@ -52,6 +52,22 @@ function ymOffset(ym: string, deltaMonths: number): string {
   const d = new Date(Date.UTC(y, m - 1 + deltaMonths, 1));
   return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}`;
 }
+/**
+ * 셀 안 좁은 폭에 맞춘 금액 축약 — 1만 미만은 그대로, 1만 이상은 'X.X만'.
+ *  - 5,000   → "5,000"
+ *  - 32,500  → "3.2만"
+ *  - 320,000 → "32만"
+ *  - 1,200,000 → "120만"
+ */
+function compactKRW(n: number): string {
+  if (n < 10000) return n.toLocaleString('ko-KR');
+  const v = n / 10000;
+  if (v >= 100) return Math.round(v).toLocaleString('ko-KR') + '만';
+  // 소수점 1자리 (10만 미만)
+  const fixed = v.toFixed(v < 10 ? 1 : 0);
+  return fixed.replace(/\.0$/, '') + '만';
+}
+
 function todayKSTYMD(): string {
   const fmt = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Seoul',
@@ -223,20 +239,26 @@ export function MonthCalendar({
             const isSelected = c.date === selected;
             const dow = new Date(c.date + 'T00:00:00Z').getUTCDay();
 
-            // 그날 expense 거래만 추출 → 카테고리별 색 점들 (중복 제거 + 최대 3개)
+            // 그날 expense 거래를 카테고리별로 집계 (색깔별 합산)
             const dayTxs = recentByDate[c.date] ?? [];
-            const expenseColors: string[] = [];
-            const seenColors = new Set<string>();
+            const byCat: Record<
+              string,
+              { color: string; name: string; amount: number }
+            > = {};
             for (const t of dayTxs) {
               if (t.type !== 'expense') continue;
-              const col = t.category_color ?? '#9CA3AF';
-              if (seenColors.has(col)) continue;
-              seenColors.add(col);
-              expenseColors.push(col);
+              const color = t.category_color ?? '#9CA3AF';
+              const name = t.category_name ?? '미분류';
+              const key = name + '|' + color;
+              if (!byCat[key]) byCat[key] = { color, name, amount: 0 };
+              byCat[key].amount += Number(t.amount) || 0;
             }
-            const totalExpenseCategories = expenseColors.length;
-            const visibleColors = expenseColors.slice(0, 3);
-            const overflow = Math.max(0, totalExpenseCategories - 3);
+            const catList = Object.values(byCat).sort((a, b) => b.amount - a.amount);
+            // 모바일: 1개 + 2+, 태블릿(sm): 2개 + N
+            const mobileVisible = catList.slice(0, 1);
+            const smVisible = catList.slice(0, 2);
+            const mobileOverflow = Math.max(0, catList.length - mobileVisible.length);
+            const smOverflow = Math.max(0, catList.length - smVisible.length);
 
             return (
               <button
@@ -253,7 +275,7 @@ export function MonthCalendar({
                   (dow === 0 || dow === 6) && !isSelected && 'bg-sectionBackground',
                 )}
               >
-                {/* 1행 — 날짜 + 거래수 */}
+                {/* 1행 — 날짜 (거래수 표시 제거) */}
                 <div className="flex items-center justify-between">
                   <span
                     className={cn(
@@ -264,41 +286,69 @@ export function MonthCalendar({
                   >
                     {c.day}
                   </span>
-                  {bucket && bucket.count > 0 && (
-                    <span className="text-[9px] sm:text-[10px] tabular text-textMuted">
-                      {bucket.count}
-                    </span>
-                  )}
                 </div>
                 {/* 2행 — 총 지출 (강조) */}
                 {bucket && bucket.expense > 0 ? (
                   <div className="text-[10px] sm:text-[11px] md:text-xs tabular font-semibold text-expense whitespace-nowrap leading-tight">
-                    -{bucket.expense.toLocaleString('ko-KR')}
+                    -{compactKRW(bucket.expense)}
                   </div>
                 ) : (
                   <div className="h-3" />
                 )}
-                {/* 3행 — 카테고리별 색깔 점 (최대 3개 + N) */}
-                {visibleColors.length > 0 && (
-                  <div className="flex items-center gap-0.5 sm:gap-1 mt-auto">
-                    {visibleColors.map((color, i) => (
+
+                {/* 카테고리별 지출 금액 — 모바일 1개, 태블릿+ 2개, 그 이상 +N */}
+                {/* 모바일 */}
+                <div className="sm:hidden flex flex-col gap-0.5 mt-auto">
+                  {mobileVisible.map((c2) => (
+                    <div
+                      key={c2.name}
+                      className="flex items-center gap-1 leading-tight"
+                    >
                       <span
-                        key={`${color}-${i}`}
-                        className="inline-block h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full shrink-0"
-                        style={{ backgroundColor: color }}
+                        className="inline-block h-1.5 w-1.5 rounded-full shrink-0"
+                        style={{ backgroundColor: c2.color }}
                       />
-                    ))}
-                    {overflow > 0 && (
-                      <span className="text-[8px] sm:text-[9px] tabular text-textMuted ml-0.5">
-                        +{overflow}
+                      <span className="text-[9px] tabular text-textMuted whitespace-nowrap truncate">
+                        {compactKRW(c2.amount)}
                       </span>
-                    )}
-                  </div>
-                )}
-                {/* 수입 — 4행 (있을 때만) */}
+                    </div>
+                  ))}
+                  {mobileOverflow > 0 && (
+                    <span className="text-[8px] tabular text-textMuted">
+                      +{mobileOverflow}개
+                    </span>
+                  )}
+                </div>
+                {/* 태블릿 / 데스크톱 */}
+                <div className="hidden sm:flex sm:flex-col gap-0.5 mt-auto">
+                  {smVisible.map((c2) => (
+                    <div
+                      key={c2.name}
+                      className="flex items-center gap-1 leading-tight"
+                    >
+                      <span
+                        className="inline-block h-2 w-2 rounded-full shrink-0"
+                        style={{ backgroundColor: c2.color }}
+                      />
+                      <span className="text-[10px] md:text-[11px] tabular text-textSecondary truncate">
+                        {c2.name}
+                      </span>
+                      <span className="text-[10px] md:text-[11px] tabular text-textMuted ml-auto whitespace-nowrap">
+                        {compactKRW(c2.amount)}
+                      </span>
+                    </div>
+                  ))}
+                  {smOverflow > 0 && (
+                    <span className="text-[9px] md:text-[10px] tabular text-textMuted">
+                      +{smOverflow}개
+                    </span>
+                  )}
+                </div>
+
+                {/* 수입 — 마지막 줄 (있을 때만) */}
                 {bucket && bucket.income > 0 && (
                   <div className="text-[9px] sm:text-[10px] tabular text-income whitespace-nowrap leading-tight">
-                    +{bucket.income.toLocaleString('ko-KR')}
+                    +{compactKRW(bucket.income)}
                   </div>
                 )}
               </button>
