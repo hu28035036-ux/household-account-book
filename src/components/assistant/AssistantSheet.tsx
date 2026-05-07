@@ -18,6 +18,8 @@ import {
   TrendingUp,
   TrendingDown,
   PiggyBank,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import type { Intent } from '@/lib/ai/assistantSchema';
 
@@ -39,9 +41,9 @@ const NAV_DESTINATIONS: Record<string, { path: string; label: string }> = {
 
 const EXAMPLES = [
   '스벅 5천',
-  '월급 350만',
+  '방금거 만오천으로',
+  '방금 거 취소',
   '이번달 예산 80만',
-  '식비 예산 30만',
   '운동 카테고리 만들어',
   '이번달 분석',
 ];
@@ -50,6 +52,8 @@ type AddTxData = Extract<Intent, { type: 'add_transaction' }>['data'];
 type CreateCategoryData = Extract<Intent, { type: 'create_category' }>['data'];
 type CreatePaymentMethodData = Extract<Intent, { type: 'create_payment_method' }>['data'];
 type SetBudgetData = Extract<Intent, { type: 'set_budget' }>['data'];
+type UpdateTxIntent = Extract<Intent, { type: 'update_transaction' }>;
+type DeleteTxIntent = Extract<Intent, { type: 'delete_transaction' }>;
 
 const CATEGORY_TYPE_LABEL: Record<CreateCategoryData['type'], string> = {
   income: '수입',
@@ -167,16 +171,18 @@ export function AssistantSheet() {
       intent.type === 'add_transaction' ||
       intent.type === 'create_category' ||
       intent.type === 'create_payment_method' ||
-      intent.type === 'set_budget'
+      intent.type === 'set_budget' ||
+      intent.type === 'update_transaction' ||
+      intent.type === 'delete_transaction'
     ) {
       setPreviewIntent(intent);
       setPhase('preview');
       setError(null);
       return;
     }
-    // 이후 Phase 에서 enable: update/delete/recurring/delete_category/delete_payment_method
+    // 이후 Phase 에서 enable: recurring / delete_category / delete_payment_method
     setError(
-      `"${labelOfIntent(intent.type)}" 기능은 곧 추가됩니다. 현재는 페이지 이동·거래 추가·카테고리/결제수단 생성·예산 설정만 가능해요.`,
+      `"${labelOfIntent(intent.type)}" 기능은 곧 추가됩니다. 현재는 페이지 이동·거래 추가/수정/삭제·카테고리/결제수단 생성·예산 설정이 가능해요.`,
     );
     pushHistory(cmd, '준비 중', false);
   }
@@ -314,6 +320,20 @@ export function AssistantSheet() {
                     onConfirm={executePreview}
                     onCancel={cancelPreview}
                   />
+                ) : phase === 'preview' && previewIntent?.type === 'update_transaction' ? (
+                  <UpdateTransactionPreview
+                    intent={previewIntent}
+                    busy={busy}
+                    onConfirm={executePreview}
+                    onCancel={cancelPreview}
+                  />
+                ) : phase === 'preview' && previewIntent?.type === 'delete_transaction' ? (
+                  <DeleteTransactionPreview
+                    intent={previewIntent}
+                    busy={busy}
+                    onConfirm={executePreview}
+                    onCancel={cancelPreview}
+                  />
                 ) : (
                   <>
                     <form
@@ -394,8 +414,8 @@ export function AssistantSheet() {
                     )}
 
                     <div className="text-[11px] text-textMuted leading-relaxed pt-2 border-t border-borderSoft">
-                      페이지 이동 · 거래 추가 · 카테고리·결제수단 생성이 가능합니다. 예산·고정거래
-                      등은 곧 추가됩니다. 단축키:{' '}
+                      페이지 이동 · 거래 추가/수정/삭제 · 카테고리·결제수단 생성 · 예산 설정이
+                      가능합니다. 고정거래 등록은 곧 추가됩니다. 단축키:{' '}
                       <kbd className="px-1 bg-sectionBackground rounded text-[10px]">Ctrl</kbd> +{' '}
                       <kbd className="px-1 bg-sectionBackground rounded text-[10px]">K</kbd>.
                     </div>
@@ -564,6 +584,137 @@ function CreatePaymentMethodPreview({
       <p className="text-[11px] text-textMuted">
         결제수단 페이지에서 카드번호 끝 4자리 등 추가 정보를 나중에 입력할 수 있어요.
       </p>
+    </div>
+  );
+}
+
+function targetLabel(target: UpdateTxIntent['target'] | DeleteTxIntent['target']): string {
+  if (target.selector === 'last') return '가장 최근에 추가한 거래';
+  if (target.selector === 'duplicate') return '중복 의심 거래';
+  const parts: string[] = [];
+  if (target.date) parts.push(target.date);
+  if (target.merchant_name) parts.push(target.merchant_name);
+  return parts.length > 0 ? `${parts.join(' · ')} 거래` : '조건에 맞는 거래';
+}
+
+function UpdateTransactionPreview({
+  intent,
+  busy,
+  onConfirm,
+  onCancel,
+}: {
+  intent: UpdateTxIntent;
+  busy: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const patch = intent.patch;
+  const changes: { label: string; value: string }[] = [];
+  if (patch.amount != null) changes.push({ label: '금액', value: `${patch.amount.toLocaleString('ko-KR')}원` });
+  if (patch.merchant_name) changes.push({ label: '가맹점', value: patch.merchant_name });
+  if (patch.category_name) changes.push({ label: '카테고리', value: patch.category_name });
+  if (patch.payment_method_name) changes.push({ label: '결제수단', value: patch.payment_method_name });
+  if (patch.date) changes.push({ label: '날짜', value: patch.date });
+
+  return (
+    <div className="space-y-3">
+      <div className="text-xs text-textSecondary">아래 거래를 수정할까요?</div>
+      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-3">
+        <div className="rounded-md bg-sectionBackground px-3 py-2 text-xs">
+          <div className="text-textMuted">대상</div>
+          <div className="text-textPrimary font-medium mt-0.5">{targetLabel(intent.target)}</div>
+        </div>
+
+        <div>
+          <div className="text-xs text-textSecondary mb-1.5 flex items-center gap-1">
+            <Pencil className="h-3 w-3" strokeWidth={2} />
+            <span>변경할 내용</span>
+          </div>
+          {changes.length > 0 ? (
+            <div className="space-y-1.5">
+              {changes.map((c) => (
+                <div
+                  key={c.label}
+                  className="flex items-center gap-2 text-sm rounded-md bg-primaryPinkSoft px-3 py-1.5"
+                >
+                  <span className="text-xs text-textSecondary w-16 shrink-0">{c.label}</span>
+                  <span className="text-textPrimary font-medium">→ {c.value}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-xs text-textMuted">변경할 내용이 없습니다.</div>
+          )}
+        </div>
+      </div>
+      <ConfirmRow busy={busy} onConfirm={onConfirm} onCancel={onCancel} confirmLabel="수정" />
+      <p className="text-[11px] text-textMuted">
+        조건과 일치하는 가장 최근 1건만 수정됩니다. 잘못 매칭됐다면 [취소] 후 더 구체적으로
+        입력해 주세요. (예: "어제 스타벅스 만원으로")
+      </p>
+    </div>
+  );
+}
+
+function DeleteTransactionPreview({
+  intent,
+  busy,
+  onConfirm,
+  onCancel,
+}: {
+  intent: DeleteTxIntent;
+  busy: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="rounded-md bg-dangerSoft text-danger px-3 py-2 text-sm flex items-start gap-2">
+        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" strokeWidth={1.75} />
+        <span>이 거래를 삭제합니다. 되돌릴 수 없습니다.</span>
+      </div>
+      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
+        <Row
+          icon={<Trash2 className="h-4 w-4" strokeWidth={1.75} />}
+          label="대상"
+          value={targetLabel(intent.target)}
+        />
+        {intent.target.selector === 'last' && (
+          <p className="text-[11px] text-textMuted leading-relaxed pt-1 border-t border-borderSoft">
+            가장 최근에 추가된 거래 1건이 삭제됩니다. 방금 잘못 입력한 거래를 되돌리는
+            용도입니다.
+          </p>
+        )}
+        {intent.target.selector !== 'last' && (
+          <p className="text-[11px] text-textMuted leading-relaxed pt-1 border-t border-borderSoft">
+            조건과 일치하는 가장 최근 거래 1건이 삭제됩니다. 여러 건 일괄 삭제는 거래내역
+            페이지에서 직접 선택해 주세요.
+          </p>
+        )}
+      </div>
+      <div className="flex items-center justify-end gap-2 pt-1">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={busy}
+          className="h-9 px-3 rounded-md text-sm border border-borderDefault text-textSecondary hover:bg-softPinkBackground disabled:opacity-50"
+        >
+          ✗ 취소
+        </button>
+        <button
+          type="button"
+          onClick={onConfirm}
+          disabled={busy}
+          className="h-9 px-4 rounded-md text-sm bg-danger text-white hover:opacity-90 inline-flex items-center gap-1.5 disabled:opacity-50"
+        >
+          {busy ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
+          ) : (
+            <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
+          )}
+          삭제
+        </button>
+      </div>
     </div>
   );
 }

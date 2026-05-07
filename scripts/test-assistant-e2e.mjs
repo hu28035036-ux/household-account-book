@@ -88,7 +88,13 @@ type 중 정확히 하나 선택: add_transaction, update_transaction, delete_tr
 출력: {"type":"set_budget","data":{"year_month":"${TODAY.slice(0, 7)}","amount":800000,"category_name":null}}
 
 입력: "식비 예산 30만"
-출력: {"type":"set_budget","data":{"year_month":"${TODAY.slice(0, 7)}","amount":300000,"category_name":"식비"}}`;
+출력: {"type":"set_budget","data":{"year_month":"${TODAY.slice(0, 7)}","amount":300000,"category_name":"식비"}}
+
+입력: "방금거 만오천으로"
+출력: {"type":"update_transaction","target":{"selector":"last"},"patch":{"amount":15000}}
+
+입력: "방금 거 취소"
+출력: {"type":"delete_transaction","target":{"selector":"last"}}`;
 
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -130,6 +136,47 @@ async function executeCreatePaymentMethod(userId, intent) {
     .single();
   if (error) throw error;
   return data;
+}
+
+async function resolveTargetTx(userId, target) {
+  let q = admin
+    .from('transactions')
+    .select('id, transaction_date, merchant_name, amount, type')
+    .eq('user_id', userId);
+  if (target.selector !== 'last' && target.selector !== 'duplicate') {
+    if (target.date) q = q.eq('transaction_date', target.date);
+    if (target.merchant_name) q = q.ilike('merchant_name', `%${target.merchant_name}%`);
+  }
+  const { data } = await q.order('created_at', { ascending: false }).limit(1).maybeSingle();
+  return data;
+}
+
+async function executeUpdateTransaction(userId, intent) {
+  if (intent.type !== 'update_transaction') return null;
+  const target = await resolveTargetTx(userId, intent.target);
+  if (!target) throw new Error('대상 거래 없음');
+  const patch = {};
+  if (intent.patch.amount != null) patch.amount = intent.patch.amount;
+  if (intent.patch.merchant_name != null) patch.merchant_name = intent.patch.merchant_name;
+  if (intent.patch.date != null) patch.transaction_date = intent.patch.date;
+  const { data, error } = await admin
+    .from('transactions')
+    .update(patch)
+    .eq('user_id', userId)
+    .eq('id', target.id)
+    .select('*')
+    .single();
+  if (error) throw error;
+  return { before: target, after: data };
+}
+
+async function executeDeleteTransaction(userId, intent) {
+  if (intent.type !== 'delete_transaction') return null;
+  const target = await resolveTargetTx(userId, intent.target);
+  if (!target) throw new Error('대상 거래 없음');
+  const { error } = await admin.from('transactions').delete().eq('user_id', userId).eq('id', target.id);
+  if (error) throw error;
+  return target;
 }
 
 async function executeSetBudget(userId, intent) {
@@ -320,6 +367,36 @@ const PM_CASES = [
   },
 ];
 
+const UPDATE_CASES = [
+  // 사전 거래 1건 입력 후 "방금거 만오천으로" → 그 거래의 amount 가 15000 이 되어야 함
+  {
+    name: '"방금거 만오천으로" → 가장 최근 거래 amount=15000',
+    setupInput: '커피 5천', // 먼저 5000원 거래 생성
+    input: '방금거 만오천으로',
+    verify: (result) =>
+      result.before.amount !== result.after.amount &&
+      result.after.amount === 15000,
+  },
+];
+
+const DELETE_CASES = [
+  // 사전 거래 1건 입력 후 "방금 거 취소" → 거래 삭제
+  {
+    name: '"방금 거 취소" → 가장 최근 거래 삭제',
+    setupInput: '편의점 1천', // 1000원 거래 생성
+    input: '방금 거 취소',
+    verify: async (target, userId) => {
+      // 그 id 가 더이상 DB 에 존재하지 않아야 함
+      const { data } = await admin
+        .from('transactions')
+        .select('id')
+        .eq('id', target.id)
+        .maybeSingle();
+      return data === null;
+    },
+  },
+];
+
 const BUDGET_CASES = [
   {
     name: '"이번달 예산 80만" → 전체 예산 800,000원',
@@ -413,6 +490,77 @@ async function run() {
         pass++;
       } else {
         console.log(`[FAIL] ${c.name}\n       got: ${JSON.stringify({ name: pm.name, type: pm.type })}`);
+        fail++;
+      }
+    } catch (e) {
+      console.log(`[ERR]  ${c.name} — ${e.message}`);
+      fail++;
+    }
+  }
+
+  console.log('\n=== 거래 수정 ===');
+  for (const c of UPDATE_CASES) {
+    try {
+      // 1) 사전 거래 생성
+      const setup = await llm(c.setupInput);
+      if (setup.type !== 'add_transaction') {
+        console.log(`[FAIL] ${c.name}\n       setup 실패 (LLM ${setup.type})`);
+        fail++;
+        continue;
+      }
+      await executeAddTransaction(userId, setup);
+
+      // 2) 수정 명령
+      const intent = await llm(c.input);
+      if (intent.type !== 'update_transaction') {
+        console.log(`[FAIL] ${c.name}\n       LLM ${intent.type}`);
+        fail++;
+        continue;
+      }
+      const result = await executeUpdateTransaction(userId, intent);
+      if (c.verify(result)) {
+        console.log(
+          `[OK]   ${c.name}\n       → ${result.before.amount.toLocaleString('ko-KR')} → ${result.after.amount.toLocaleString('ko-KR')}원`,
+        );
+        pass++;
+      } else {
+        console.log(`[FAIL] ${c.name}\n       got: ${JSON.stringify(result.after)}`);
+        fail++;
+      }
+    } catch (e) {
+      console.log(`[ERR]  ${c.name} — ${e.message}`);
+      fail++;
+    }
+  }
+
+  console.log('\n=== 거래 삭제 ===');
+  for (const c of DELETE_CASES) {
+    try {
+      // 1) 사전 거래 생성
+      const setup = await llm(c.setupInput);
+      if (setup.type !== 'add_transaction') {
+        console.log(`[FAIL] ${c.name}\n       setup 실패 (LLM ${setup.type})`);
+        fail++;
+        continue;
+      }
+      await executeAddTransaction(userId, setup);
+
+      // 2) 삭제 명령
+      const intent = await llm(c.input);
+      if (intent.type !== 'delete_transaction') {
+        console.log(`[FAIL] ${c.name}\n       LLM ${intent.type}`);
+        fail++;
+        continue;
+      }
+      const target = await executeDeleteTransaction(userId, intent);
+      const ok = await c.verify(target, userId);
+      if (ok) {
+        console.log(
+          `[OK]   ${c.name}\n       → 삭제됨 (${target.amount.toLocaleString('ko-KR')}원, ${target.id.slice(0, 8)}…)`,
+        );
+        pass++;
+      } else {
+        console.log(`[FAIL] ${c.name}\n       삭제됐어야 하는데 row 가 남아있음`);
         fail++;
       }
     } catch (e) {
