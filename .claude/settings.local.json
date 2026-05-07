@@ -32,7 +32,14 @@
       "Bash(npx --no-install vitest run src/tests/unit/assistantSchema.test.ts)",
       "Bash(node scripts/test-assistant-llm.mjs)",
       "Bash(npx --no-install vitest run src/tests/unit/assistantExecute.test.ts)",
-      "Bash(npx --no-install vitest run src/tests/unit/assistantExecute.test.ts src/tests/unit/assistantSchema.test.ts)"
+      "Bash(npx --no-install vitest run src/tests/unit/assistantExecute.test.ts src/tests/unit/assistantSchema.test.ts)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\" http://localhost:3000)",
+      "PowerShell(Get-Process *)",
+      "Bash(npm run *)",
+      "Read(//tmp/**)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:3000/login)",
+      "Bash(node scripts/test-assistant-e2e.mjs)",
+      "Bash(npx --no-install vitest run src/tests/unit/assistantSchema.test.ts src/tests/unit/assistantExecute.test.ts)"
     ]
   }
 }

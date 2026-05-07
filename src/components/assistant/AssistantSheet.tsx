@@ -40,12 +40,28 @@ const EXAMPLES = [
   '스벅 5천',
   '오늘 점심 8천',
   '월급 350만',
-  '통계 보여줘',
+  '운동 카테고리 만들어',
+  '토스카드 결제수단 추가',
   '이번달 분석',
-  '예산 페이지',
 ];
 
 type AddTxData = Extract<Intent, { type: 'add_transaction' }>['data'];
+type CreateCategoryData = Extract<Intent, { type: 'create_category' }>['data'];
+type CreatePaymentMethodData = Extract<Intent, { type: 'create_payment_method' }>['data'];
+
+const CATEGORY_TYPE_LABEL: Record<CreateCategoryData['type'], string> = {
+  income: '수입',
+  expense: '지출',
+  common: '공용',
+};
+
+const PM_TYPE_LABEL: Record<CreatePaymentMethodData['type'], string> = {
+  card: '카드',
+  bank: '계좌',
+  cash: '현금',
+  pay: '간편결제',
+  other: '기타',
+};
 
 type HistoryItem = {
   id: number;
@@ -145,14 +161,20 @@ export function AssistantSheet() {
       setError(intent.reason || '명령을 이해하지 못했어요.');
       return;
     }
-    if (intent.type === 'add_transaction') {
+    if (
+      intent.type === 'add_transaction' ||
+      intent.type === 'create_category' ||
+      intent.type === 'create_payment_method'
+    ) {
       setPreviewIntent(intent);
       setPhase('preview');
       setError(null);
       return;
     }
-    // Phase 3+ 에서 enable: update/delete/category/pm/budget/recurring
-    setError(`"${labelOfIntent(intent.type)}" 기능은 곧 추가됩니다. 현재는 페이지 이동·거래 추가만 가능해요.`);
+    // 이후 Phase 에서 enable: update/delete/budget/recurring
+    setError(
+      `"${labelOfIntent(intent.type)}" 기능은 곧 추가됩니다. 현재는 페이지 이동·거래 추가·카테고리/결제수단 생성만 가능해요.`,
+    );
     pushHistory(cmd, '준비 중', false);
   }
 
@@ -268,6 +290,20 @@ export function AssistantSheet() {
                     onConfirm={executePreview}
                     onCancel={cancelPreview}
                   />
+                ) : phase === 'preview' && previewIntent?.type === 'create_category' ? (
+                  <CreateCategoryPreview
+                    data={previewIntent.data}
+                    busy={busy}
+                    onConfirm={executePreview}
+                    onCancel={cancelPreview}
+                  />
+                ) : phase === 'preview' && previewIntent?.type === 'create_payment_method' ? (
+                  <CreatePaymentMethodPreview
+                    data={previewIntent.data}
+                    busy={busy}
+                    onConfirm={executePreview}
+                    onCancel={cancelPreview}
+                  />
                 ) : (
                   <>
                     <form
@@ -348,8 +384,8 @@ export function AssistantSheet() {
                     )}
 
                     <div className="text-[11px] text-textMuted leading-relaxed pt-2 border-t border-borderSoft">
-                      페이지 이동 · 거래 추가가 가능합니다. 예산·카테고리 등은 곧 추가됩니다.
-                      단축키:{' '}
+                      페이지 이동 · 거래 추가 · 카테고리·결제수단 생성이 가능합니다. 예산·고정거래
+                      등은 곧 추가됩니다. 단축키:{' '}
                       <kbd className="px-1 bg-sectionBackground rounded text-[10px]">Ctrl</kbd> +{' '}
                       <kbd className="px-1 bg-sectionBackground rounded text-[10px]">K</kbd>.
                     </div>
@@ -449,6 +485,113 @@ function AddTransactionPreview({
         틀린 내용이 있다면 [취소] 후 다시 입력해 주세요. 카테고리/결제수단은 추가 후 거래내역
         페이지에서 변경할 수 있어요.
       </p>
+    </div>
+  );
+}
+
+function CreateCategoryPreview({
+  data,
+  busy,
+  onConfirm,
+  onCancel,
+}: {
+  data: CreateCategoryData;
+  busy: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="text-xs text-textSecondary">아래 카테고리를 새로 만들까요?</div>
+      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
+        <Row
+          icon={<Tag className="h-4 w-4" strokeWidth={1.75} />}
+          label="이름"
+          value={data.name}
+        />
+        <Row
+          icon={<Sparkles className="h-4 w-4" strokeWidth={1.75} />}
+          label="용도"
+          value={CATEGORY_TYPE_LABEL[data.type]}
+        />
+      </div>
+      <ConfirmRow busy={busy} onConfirm={onConfirm} onCancel={onCancel} confirmLabel="만들기" />
+      <p className="text-[11px] text-textMuted">
+        같은 이름의 카테고리가 이미 있으면 만들 수 없어요. 카테고리 페이지에서 색상·아이콘은
+        나중에 변경 가능합니다.
+      </p>
+    </div>
+  );
+}
+
+function CreatePaymentMethodPreview({
+  data,
+  busy,
+  onConfirm,
+  onCancel,
+}: {
+  data: CreatePaymentMethodData;
+  busy: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="text-xs text-textSecondary">아래 결제수단을 새로 만들까요?</div>
+      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
+        <Row
+          icon={<CreditCard className="h-4 w-4" strokeWidth={1.75} />}
+          label="이름"
+          value={data.name}
+        />
+        <Row
+          icon={<Sparkles className="h-4 w-4" strokeWidth={1.75} />}
+          label="종류"
+          value={PM_TYPE_LABEL[data.type]}
+        />
+      </div>
+      <ConfirmRow busy={busy} onConfirm={onConfirm} onCancel={onCancel} confirmLabel="만들기" />
+      <p className="text-[11px] text-textMuted">
+        결제수단 페이지에서 카드번호 끝 4자리 등 추가 정보를 나중에 입력할 수 있어요.
+      </p>
+    </div>
+  );
+}
+
+function ConfirmRow({
+  busy,
+  onConfirm,
+  onCancel,
+  confirmLabel,
+}: {
+  busy: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+  confirmLabel: string;
+}) {
+  return (
+    <div className="flex items-center justify-end gap-2 pt-1">
+      <button
+        type="button"
+        onClick={onCancel}
+        disabled={busy}
+        className="h-9 px-3 rounded-md text-sm border border-borderDefault text-textSecondary hover:bg-softPinkBackground disabled:opacity-50"
+      >
+        ✗ 취소
+      </button>
+      <button
+        type="button"
+        onClick={onConfirm}
+        disabled={busy}
+        className="h-9 px-4 rounded-md text-sm bg-primaryPink text-textOnPink hover:bg-primaryPinkHover inline-flex items-center gap-1.5 disabled:opacity-50"
+      >
+        {busy ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
+        ) : (
+          <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
+        )}
+        {confirmLabel}
+      </button>
     </div>
   );
 }
