@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Palette, Check } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
@@ -25,8 +26,12 @@ function applyTheme(t: ThemeId) {
 
 export function ThemeSwitcher() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState<ThemeId>('pink');
   const ref = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => setMounted(true), []);
 
   // 초기 로드 — localStorage 값 복원
   useEffect(() => {
@@ -38,11 +43,14 @@ export function ThemeSwitcher() {
     }
   }, []);
 
-  // 바깥 클릭 + Esc 닫기
+  // 바깥 클릭 + Esc 닫기 — Portal 자식이므로 dropdownRef 별도 contains 검사 필수
   useEffect(() => {
     if (!open) return;
     function onDoc(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const t = e.target as Node;
+      const insideButton = ref.current?.contains(t) ?? false;
+      const insideDropdown = dropdownRef.current?.contains(t) ?? false;
+      if (!insideButton && !insideDropdown) setOpen(false);
     }
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') setOpen(false);
@@ -81,42 +89,46 @@ export function ThemeSwitcher() {
           style={{ backgroundColor: current.dot }}
         />
       </button>
-      {open && (
-        <div
-          role="listbox"
-          aria-label="테마 선택"
-          // ThemeSwitcher 가 헤더 우측 그룹의 좌측 끝에 위치해서 absolute right-0
-          // 으로 펼치면 viewport 좌측으로 192px 밀려 잘리는 경우가 있었다.
-          // viewport 우상단 기준 fixed 로 고정해 어느 폭에서도 화면 안에 들어오도록.
-          className="fixed top-[3.75rem] right-3 w-48 max-w-[calc(100vw-1.5rem)] z-50 rounded-modal bg-pageBackground border border-borderDefault shadow-card overflow-hidden"
-        >
-          {THEMES.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              role="option"
-              aria-selected={active === t.id}
-              onClick={() => pick(t.id)}
-              className={cn(
-                'w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left transition-colors',
-                active === t.id
-                  ? 'bg-primaryPinkSoft text-textPinkStrong'
-                  : 'hover:bg-softPinkBackground text-textPrimary',
-              )}
-            >
-              <span
-                className="inline-block h-4 w-4 rounded-full border border-borderDefault shrink-0"
-                style={{ backgroundColor: t.dot }}
-              />
-              <span className="flex-1 min-w-0">
-                <div className="truncate">{t.label}</div>
-                <div className="text-[11px] text-textMuted">{t.desc}</div>
-              </span>
-              {active === t.id && <Check className="h-4 w-4 ml-1 shrink-0" strokeWidth={1.75} />}
-            </button>
-          ))}
-        </div>
-      )}
+      {mounted && open &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            role="listbox"
+            aria-label="테마 선택"
+            // 헤더 backdrop-blur stacking context 탈출 — Portal + viewport-fixed.
+            // NotificationBell / HouseholdSwitcher 와 동일 패턴.
+            className="fixed top-[3.75rem] right-3 w-48 max-w-[calc(100vw-1.5rem)] z-50 rounded-modal bg-pageBackground border border-borderDefault shadow-card overflow-hidden"
+          >
+            {THEMES.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                role="option"
+                aria-selected={active === t.id}
+                onClick={() => pick(t.id)}
+                className={cn(
+                  'w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left transition-colors',
+                  active === t.id
+                    ? 'bg-primaryPinkSoft text-textPinkStrong'
+                    : 'hover:bg-softPinkBackground text-textPrimary',
+                )}
+              >
+                <span
+                  className="inline-block h-4 w-4 rounded-full border border-borderDefault shrink-0"
+                  style={{ backgroundColor: t.dot }}
+                />
+                <span className="flex-1 min-w-0">
+                  <div className="truncate">{t.label}</div>
+                  <div className="text-[11px] text-textMuted">{t.desc}</div>
+                </span>
+                {active === t.id && (
+                  <Check className="h-4 w-4 ml-1 shrink-0" strokeWidth={1.75} />
+                )}
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
