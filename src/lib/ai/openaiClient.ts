@@ -14,6 +14,11 @@ type GenerateOptions = {
   temperature?: number;
   signal?: AbortSignal;
   maxTokens?: number;
+  /**
+   * 이미지를 함께 전달 (gpt-4o-mini vision). data URL 또는 https URL 배열.
+   * 영수증/카드내역 인식 정확도 큰 폭 향상 — Tesseract OCR 망가져도 이미지로 보강.
+   */
+  imageUrls?: string[];
 };
 
 export class OpenAIUnavailableError extends Error {
@@ -47,7 +52,19 @@ export async function openaiGenerate(opts: GenerateOptions): Promise<LLMResult> 
         model,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: opts.prompt },
+          {
+            role: 'user',
+            content:
+              opts.imageUrls && opts.imageUrls.length > 0
+                ? [
+                    { type: 'text', text: opts.prompt },
+                    ...opts.imageUrls.map((url) => ({
+                      type: 'image_url',
+                      image_url: { url, detail: 'low' as const },
+                    })),
+                  ]
+                : opts.prompt,
+          },
         ],
         temperature: opts.temperature ?? 0.1,
         max_tokens: opts.maxTokens ?? 1500,

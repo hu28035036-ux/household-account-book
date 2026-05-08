@@ -70,7 +70,8 @@
       "Bash(curl -s \"https://household-account-book-5vgz.vercel.app/sw.js\")",
       "Bash(curl -sI \"https://household-account-book-5vgz.vercel.app/privacy\")",
       "Bash(curl -sL \"https://household-account-book-5vgz.vercel.app/privacy\")",
-      "Bash(vercel.cmd --prod --yes)"
+      "Bash(vercel.cmd --prod --yes)",
+      "Bash(curl -s \"https://household-account-book-5vgz.vercel.app/login\")"
     ]
   }
 }

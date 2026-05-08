@@ -21,6 +21,8 @@ export class LLMUnavailableError extends Error {
 export type LLMOptions = {
   prompt: string;
   temperature?: number;
+  /** 영수증 이미지 등을 함께 분석 (vision). https URL 또는 data URL. OpenAI 만 지원 — Ollama fallback 시 무시됨. */
+  imageUrls?: string[];
 };
 
 export async function llmGenerate(opts: LLMOptions): Promise<LLMResult> {
@@ -28,7 +30,11 @@ export async function llmGenerate(opts: LLMOptions): Promise<LLMResult> {
 
   if (process.env.OPENAI_API_KEY) {
     try {
-      return await openaiGenerate({ prompt: opts.prompt, temperature: opts.temperature });
+      return await openaiGenerate({
+        prompt: opts.prompt,
+        temperature: opts.temperature,
+        imageUrls: opts.imageUrls,
+      });
     } catch (e) {
       errs.push(`openai: ${e instanceof Error ? e.message : String(e)}`);
     }
