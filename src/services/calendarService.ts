@@ -89,21 +89,8 @@ export async function getCalendarMonth(
     }
   }
 
-  // 전체 예산 — 컨텍스트와 동일한 범위
-  const monthStart = `${ym}-01`;
-  let budgetQ = supabase.from('budgets').select('amount').is('category_id', null).eq('month_start', monthStart);
-  if (householdContext) {
-    budgetQ = budgetQ.eq('household_id', householdContext);
-  } else {
-    budgetQ = budgetQ.eq('user_id', userId).is('household_id', null);
-  }
-  const { data: totalBudget } = await budgetQ.maybeSingle();
-  const budgetTotal = totalBudget ? Number(totalBudget.amount) : 0;
-  const budgetUsedPct =
-    budgetTotal > 0 ? Math.min(999, Math.round((totalExpense / budgetTotal) * 100)) : 0;
-  const budgetRemaining = budgetTotal > 0 ? budgetTotal - totalExpense : 0;
-
-  // 카테고리별 예산 진행률 (캘린더 아래 카드용)
+  // 카테고리별 예산 진행률 — 월캘린더 헤더의 "전체 예산" 도 이 합산으로 도출 (사용자 명령 2026-05-08).
+  // 별도 전체 예산 row(`category_id IS NULL`) 는 더 이상 조회하지 않는다 — 카테고리 합산이 단일 진실.
   let categoryBudgets: BudgetProgressItem[] = [];
   try {
     const prog = await getBudgetProgress(supabase, userId, ym, householdContext);
@@ -111,6 +98,12 @@ export async function getCalendarMonth(
   } catch {
     categoryBudgets = [];
   }
+
+  const budgetTotal = categoryBudgets.reduce((sum, c) => sum + Number(c.budget_amount || 0), 0);
+  const categorySpent = categoryBudgets.reduce((sum, c) => sum + Number(c.spent_amount || 0), 0);
+  const budgetUsedPct =
+    budgetTotal > 0 ? Math.min(999, Math.round((categorySpent / budgetTotal) * 100)) : 0;
+  const budgetRemaining = budgetTotal > 0 ? budgetTotal - categorySpent : 0;
 
   return {
     range: { from, to },

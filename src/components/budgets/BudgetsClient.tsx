@@ -226,10 +226,11 @@ export function BudgetsClient() {
       </div>
 
       {/*
-       * 큰 '이번 달 전체 예산' 카드는 의도적으로 제거.
-       * 사유: 월 캘린더(/dashboard) 의 KPI 영역에 전체 예산·남은 예산이 이미 노출되어
-       *       이 페이지에서 중복 노출되는 게 잡음. 카테고리별 진행률에 집중하기 위함.
-       * 전체 예산 관리 UI 는 아래 grid 의 '전체' 카드 + '+ 예산 추가' 모달에서 그대로 가능.
+       * 사용자 명령 (2026-05-08): 전체 예산 설정 → 카테고리 합산으로 자동화.
+       *  - 모달의 '전체' 버튼 제거 — 신규 전체 예산 생성 불가.
+       *  - grid 에서 category_id IS NULL 인 row 를 필터링 — 화면에 '전체' 항목 안 보임.
+       *  - 기존 전체 row 는 DB 에 그대로 남지만 calendarService 는 더 이상 조회 안 함.
+       *    필요 시 사용자가 /budgets API 또는 직접 삭제.
        */}
 
       {loading ? (
@@ -243,7 +244,7 @@ export function BudgetsClient() {
         </Card>
       ) : (
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {budgets.map((b) => {
+          {budgets.filter((b) => b.category_id !== null).map((b) => {
             const prog = b.category_id
               ? progressItems.find((p) => p.category_id === b.category_id)
               : progressTotal;
@@ -308,31 +309,12 @@ export function BudgetsClient() {
 
       <Modal open={open} onClose={() => setOpen(false)} title={editingId ? '예산 수정' : '예산 추가'}>
         <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setScope('category')}
-              className={
-                'h-10 px-3 rounded-md text-sm border ' +
-                (scope === 'category'
-                  ? 'bg-primaryPinkSoft text-textPinkStrong border-primaryPinkBorder'
-                  : 'bg-white text-textSecondary border-borderDefault')
-              }
-            >
-              카테고리별
-            </button>
-            <button
-              type="button"
-              onClick={() => setScope('total')}
-              className={
-                'h-10 px-3 rounded-md text-sm border ' +
-                (scope === 'total'
-                  ? 'bg-primaryPinkSoft text-textPinkStrong border-primaryPinkBorder'
-                  : 'bg-white text-textSecondary border-borderDefault')
-              }
-            >
-              전체
-            </button>
+          {/*
+           * scope 토글의 '전체' 버튼 제거 (사용자 명령 2026-05-08).
+           * 신규 예산은 항상 '카테고리별'. 전체 예산은 캘린더에서 카테고리 합산으로 자동.
+           */}
+          <div className="text-xs text-textMuted">
+            카테고리별 예산을 입력하세요. 캘린더 헤더의 전체 예산은 입력값 합산으로 자동 표시됩니다.
           </div>
 
           {scope === 'category' && (
