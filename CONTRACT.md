@@ -252,6 +252,12 @@ rag/**
 영역 에이전트 (ai-extraction / finance-core / collab-security / ux-design / qa-harness) 의 명시 작업 + Sentinel 사전 게이트 + Verifier 사후 게이트 + loop-validator 5회 안정성 통과 후만.
 메타 에이전트 (conductor / orchestrator / sentinel / verifier / loop-validator / curator) 는 본 기능 영역 직접 수정 절대 금지.
 
+**브랜치 컨벤션 (자동 모드 전환)**:
+- `meta/...` (또는 prefix 없음) → 메타 작업. meta-isolation 게이트 strict (변경 시 fail).
+- `ai-extraction/...` / `finance-core/...` / `collab-security/...` / `ux-design/...` / `qa-harness/...` → 영역 작업. 게이트는 *informational* — diff 를 보고만 하고 차단 안 함.
+
+게이트의 상세 동작은 [`harness/test/cases/meta-isolation.mjs`](./harness/test/cases/meta-isolation.mjs) 의 `AREA_PREFIXES` 와 `isAreaBranch()`.
+
 ### 9-B-5. 본 원칙 위반 시
 
 CONTRACT §9-A-3 *"검증 없는 종료"* 와 동격으로 처리. 즉시:
