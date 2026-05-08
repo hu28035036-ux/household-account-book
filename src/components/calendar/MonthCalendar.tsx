@@ -157,9 +157,9 @@ export function MonthCalendar({
                 </div>
               </div>
               <div className="text-right">
-                <CardSubtle>이번 달 지출 / 예산</CardSubtle>
+                <CardSubtle>카테고리 사용 / 합산 예산</CardSubtle>
                 <div className="mt-1 text-sm text-textSecondary tabular">
-                  <span className="text-expense">{formatKRW(totals.expense)}</span>
+                  <span className="text-expense">{formatKRW(budget.total - budget.remaining)}</span>
                   <span className="mx-1 text-textMuted">/</span>
                   <span className="text-textPrimary">{formatKRW(budget.total)}</span>
                 </div>
@@ -186,9 +186,12 @@ export function MonthCalendar({
           </div>
         ) : (
           <div className="mt-4">
-            <CardSubtle>이번 달 예산이 설정되지 않았습니다.</CardSubtle>
+            <CardSubtle>이번 달 카테고리별 예산이 설정되지 않았습니다.</CardSubtle>
+            <p className="mt-1 text-xs text-textMuted">
+              카테고리별로 예산을 설정하면 합산이 자동으로 계산됩니다.
+            </p>
             <Link href="/budgets" className="mt-2 inline-block text-sm text-textPinkStrong hover:underline">
-              예산 설정하기 →
+              카테고리별 예산 설정하기 →
             </Link>
           </div>
         )}
