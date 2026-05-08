@@ -81,13 +81,15 @@ const STEPS: GuideStep[] = [
   },
 ];
 
-export function WritingGuideClient() {
+export function WritingGuideClient({ showHeader = true }: { showHeader?: boolean } = {}) {
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-2">
-        <BookOpen className="h-6 w-6 text-textPinkStrong" strokeWidth={1.75} />
-        <h2 className="text-2xl font-semibold text-textPrimary">가계부 작성 가이드</h2>
-      </div>
+      {showHeader && (
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-6 w-6 text-textPinkStrong" strokeWidth={1.75} />
+          <h2 className="text-2xl font-semibold text-textPrimary">가계부 작성 가이드</h2>
+        </div>
+      )}
 
       <Card className="bg-softPinkBackground/50 border-softPinkBackground">
         <CardSubtle className="leading-relaxed">
