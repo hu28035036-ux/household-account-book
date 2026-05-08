@@ -1,0 +1,19 @@
+{
+  "id": "eh-004",
+  "tags": ["extraction-hallucination", "category-mismatch"],
+  "input": {
+    "ocr_text": "스타벅스 강남점\n아메리카노 4500",
+    "candidate": {
+      "merchant": "스타벅스",
+      "amount": 4500,
+      "category": "교통"
+    },
+    "user_hints": { "categories": ["카페", "식비"] }
+  },
+  "expected": {
+    "merchant_in_ocr": true,
+    "amount_in_ocr": true,
+    "category_consistent": false,
+    "pii_clean": true
+  }
+}

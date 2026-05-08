@@ -1,0 +1,20 @@
+{
+  "id": "eh-001",
+  "tags": ["extraction-hallucination", "clean"],
+  "input": {
+    "ocr_text": "스타벅스 강남점\n2026-05-07 14:32\n아메리카노 4500\n합계 4500\n카드 ****-****-****-1234",
+    "candidate": {
+      "merchant": "스타벅스",
+      "amount": 4500,
+      "category": "카페",
+      "note": "아메리카노"
+    },
+    "user_hints": { "categories": ["카페", "식비"] }
+  },
+  "expected": {
+    "merchant_in_ocr": true,
+    "amount_in_ocr": true,
+    "category_consistent": true,
+    "pii_clean": true
+  }
+}

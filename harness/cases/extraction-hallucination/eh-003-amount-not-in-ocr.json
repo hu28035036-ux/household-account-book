@@ -1,0 +1,19 @@
+{
+  "id": "eh-003",
+  "tags": ["extraction-hallucination", "amount-fabricated"],
+  "input": {
+    "ocr_text": "스타벅스 강남점\n아메리카노 4500\n합계 4500",
+    "candidate": {
+      "merchant": "스타벅스",
+      "amount": 9999,
+      "category": "카페"
+    },
+    "user_hints": { "categories": ["카페"] }
+  },
+  "expected": {
+    "merchant_in_ocr": true,
+    "amount_in_ocr": false,
+    "category_consistent": true,
+    "pii_clean": true
+  }
+}

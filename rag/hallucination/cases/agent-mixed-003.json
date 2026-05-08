@@ -1,0 +1,12 @@
+{
+  "id": "hallucination-003",
+  "tags": ["agent-answer", "mixed", "partial-fail"],
+  "input": {
+    "text": "AGENTS.md 의 §9-A-2 는 진짜이지만, src/lib/imaginary.ts 와 incident-9999 는 가짜다."
+  },
+  "expected": {
+    "total": 4,
+    "ok": 2,
+    "failed_kinds": ["file", "incident"]
+  }
+}

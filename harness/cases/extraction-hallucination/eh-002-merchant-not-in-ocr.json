@@ -1,0 +1,19 @@
+{
+  "id": "eh-002",
+  "tags": ["extraction-hallucination", "merchant-fabricated"],
+  "input": {
+    "ocr_text": "편의점 GS25 강남점\n생수 1500\n합계 1500",
+    "candidate": {
+      "merchant": "이마트24",
+      "amount": 1500,
+      "category": "편의점"
+    },
+    "user_hints": { "categories": ["편의점"] }
+  },
+  "expected": {
+    "merchant_in_ocr": false,
+    "amount_in_ocr": true,
+    "category_consistent": true,
+    "pii_clean": true
+  }
+}

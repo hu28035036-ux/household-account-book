@@ -1,0 +1,116 @@
+{
+  "$comment": "Hallucination patterns observed or expected in 가계부 domain. Add new ones when an incident occurs (see ./incidents.md).",
+  "version": 1,
+  "updated": "2026-05-08",
+  "patterns": [
+    {
+      "id": "extraction-merchant-not-in-ocr",
+      "category": "extraction",
+      "label": "OCR 원문에 없는 가맹점이 후보에 들어감",
+      "trigger": "extracted candidate has merchant string not present in masked OCR text",
+      "severity": "high",
+      "owner": "ai-extraction",
+      "guardrail": "extractionService 의 환각 검증 — confidence 하향 + warning. 100% 일치 검사는 false positive 가 많아 부분 매칭으로.",
+      "regression_case": "harness/cases/hallucination/extraction-merchant.json (예정)"
+    },
+    {
+      "id": "extraction-amount-not-in-ocr",
+      "category": "extraction",
+      "label": "OCR 텍스트에 없는 숫자가 amount 로 들어감",
+      "trigger": "candidate.amount not seen as a number token in raw_text within ±N chars of merchant",
+      "severity": "high",
+      "owner": "ai-extraction",
+      "guardrail": "extractionService 의 환각 검증 — amount 가 OCR 텍스트 어디에도 없으면 reject"
+    },
+    {
+      "id": "extraction-category-vs-learning",
+      "category": "extraction",
+      "label": "사용자 학습 규칙과 정반대 카테고리 추정",
+      "trigger": "predicted category != user's most-common category for same merchant",
+      "severity": "medium",
+      "owner": "ai-extraction",
+      "guardrail": "Learning 힌트 주입 + confidence 하향. 사용자가 직접 재분류 시 correction_logs 누적"
+    },
+    {
+      "id": "extraction-pii-leak-into-candidate",
+      "category": "extraction",
+      "label": "마스킹된 OCR 에서 마스킹 전 원본을 추정해 후보 메모에 채움",
+      "trigger": "candidate.note contains digits matching card/account/phone/RRN format",
+      "severity": "critical",
+      "owner": "collab-security + ai-extraction",
+      "guardrail": "후보 insert 전 서버측 마스킹 한 번 더 적용. CONTRACT §1-1 / §3-1"
+    },
+    {
+      "id": "agent-fake-file-path",
+      "category": "agent-answer",
+      "label": "에이전트 답변에 존재하지 않는 파일경로 인용",
+      "trigger": "answer text contains src/...\\.ts that fs.access fails on",
+      "severity": "high",
+      "owner": "all agents",
+      "guardrail": "verify-citations.mjs 자동 실행. 사용자에게 송출 전 검증 의무 (AGENT_BEHAVIOR §1)"
+    },
+    {
+      "id": "agent-fake-contract-section",
+      "category": "agent-answer",
+      "label": "존재하지 않는 CONTRACT/AGENTS 조항 인용 (§9-A-7 같은)",
+      "trigger": "answer text §N-X-Y not present as heading or §-ref in CONTRACT.md or AGENTS.md",
+      "severity": "high",
+      "owner": "all agents",
+      "guardrail": "verify-citations.mjs"
+    },
+    {
+      "id": "agent-fake-incident",
+      "category": "agent-answer",
+      "label": "존재하지 않는 incident 번호 인용",
+      "trigger": "answer text incident-NNNN not present as heading in runbook.md",
+      "severity": "medium",
+      "owner": "all agents (특히 verifier / curator)",
+      "guardrail": "verify-citations.mjs"
+    },
+    {
+      "id": "agent-fake-commit",
+      "category": "agent-answer",
+      "label": "존재하지 않는 commit hash 인용",
+      "trigger": "'commit <hash>' where git rev-parse fails",
+      "severity": "medium",
+      "owner": "all agents",
+      "guardrail": "verify-citations.mjs (git 환경 한정)"
+    },
+    {
+      "id": "agent-fake-pdf-page",
+      "category": "agent-answer",
+      "label": "PDF 페이지 범위 외 인용 (예: 24p 인데 'p33')",
+      "trigger": "'PDF p<n>' where n out of range",
+      "severity": "low",
+      "owner": "all agents",
+      "guardrail": "verify-citations.mjs"
+    },
+    {
+      "id": "rag-fake-search",
+      "category": "rag",
+      "label": "검색했다고 주장하면서 실제 RAG 호출 안 함",
+      "trigger": "answer contains 'RAG 검색' or 'rag/search.mjs' but no tool call evidence",
+      "severity": "medium",
+      "owner": "all agents",
+      "guardrail": "메타 흐름 [5] verifier 가 영역 에이전트의 작업 로그에서 도구 호출 매칭 (수동 점검)"
+    },
+    {
+      "id": "rag-low-score-citation",
+      "category": "rag",
+      "label": "검색 점수 임계 미달 결과를 1위인 양 인용",
+      "trigger": "search.mjs result with score < 1.0 cited without disclaimer",
+      "severity": "low",
+      "owner": "all agents",
+      "guardrail": "검색 결과 사용 시 점수 표시 권장. 임계는 향후 search.mjs 에 --min-score 옵션 추가 후보"
+    },
+    {
+      "id": "rag-stale-index",
+      "category": "rag",
+      "label": "인덱스 갱신 안 한 채 새 문서 인용 — 결과 stale",
+      "trigger": "rag/index.json builtAt < latest doc mtime",
+      "severity": "medium",
+      "owner": "curator",
+      "guardrail": "Curator 단계 [7] 의무 — 매 작업 종료 시 build.mjs 실행. 점검: 인덱스 mtime vs docs mtime"
+    }
+  ]
+}

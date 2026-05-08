@@ -1,0 +1,12 @@
+{
+  "id": "hallucination-002",
+  "tags": ["agent-answer", "real-citations"],
+  "input": {
+    "text": "AGENTS.md 와 CONTRACT.md §9-A-2, harness/runbook.md 의 incident-0001 참조."
+  },
+  "expected": {
+    "total": 5,
+    "ok": 5,
+    "failed_kinds": []
+  }
+}

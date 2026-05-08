@@ -1,0 +1,10 @@
+// Fixture for anti-pattern self-test: should be flagged as §9-A-2 silent fallback.
+// Not real source — extension is .fixture so it never participates in real builds.
+async function loadThings() {
+  try {
+    const x = await fetch('/api/x');
+    return x.items;
+  } catch (e) {
+    return [];
+  }
+}

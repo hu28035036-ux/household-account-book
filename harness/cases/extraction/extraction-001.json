@@ -1,0 +1,22 @@
+{
+  "id": "extraction-001",
+  "tags": ["receipt", "cafe"],
+  "input": {
+    "text": "스타벅스 강남점\n2026-05-07 14:32\n아메리카노 4500\n합계 4500\n카드 ****-****-****-1234",
+    "user_hints": { "merchants": ["스타벅스"], "categories": ["식비", "카페"] }
+  },
+  "expected": {
+    "candidates": [
+      {
+        "merchant": "스타벅스",
+        "amount": 4500,
+        "category": "카페",
+        "confidence_min": 0.6
+      }
+    ]
+  },
+  "tolerances": {
+    "amount_pct": 0,
+    "merchant_match": "exact-or-alias"
+  }
+}

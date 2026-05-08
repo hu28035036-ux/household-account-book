@@ -1,0 +1,9 @@
+// Fixture: nothing flagged. catch surfaces the error, no silent fallback.
+async function loadThings() {
+  try {
+    const x = await fetch('/api/x');
+    return x.items;
+  } catch (e) {
+    throw new Error('failed to load things: ' + e.message);
+  }
+}

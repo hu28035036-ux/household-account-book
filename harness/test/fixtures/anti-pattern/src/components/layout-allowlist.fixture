@@ -1,0 +1,5 @@
+// Fixture: dangerouslySetInnerHTML in an allowList-matching path.
+// The rule must NOT flag this — controlled inline script.
+export function ThemeInit() {
+  return <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />;
+}
