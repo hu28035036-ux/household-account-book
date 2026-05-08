@@ -8,7 +8,8 @@ import { Badge } from '@/components/common/Badge';
 import { FileText, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Dropzone } from './Dropzone';
 import { OcrPreview } from './OcrPreview';
-import { recognizeImage } from '@/lib/ocr/tesseract';
+// Tesseract.js 미사용 — 이미지는 서버 vision (gpt-4o-mini) 으로 직접 분석.
+// PDF 는 아래 extractPdfText 로 텍스트만 뽑아 LLM 텍스트 모드.
 import { extractPdfText } from '@/lib/pdf/extract';
 import { maskAll } from '@/lib/security/masking';
 import { AiServerStatus } from '@/components/common/StatusBanner';
@@ -59,37 +60,61 @@ export function UploadClient() {
 
   async function runOcr(item: Item) {
     if (!item.uploadedFileId) return;
+    const isPdf = item.file.type === 'application/pdf' || /\.pdf$/i.test(item.file.name);
+    const isImage = item.file.type.startsWith('image/');
+
+    // 이미지 — Tesseract 스킵, 서버 vision 으로 직접 분석. 클라이언트 OCR 단계 X.
+    // OCR record 도 만들 필요 없음 (extractionService 가 이미지면 OCR 없이 진행 가능).
+    if (isImage) {
+      patch(item.localId, {
+        status: 'ocr_done',
+        ocrProgress: 1,
+        ocrText: '',
+        ocrConfidence: 0,
+      });
+      return;
+    }
+
+    // PDF / 그 외 — 텍스트 추출 후 OCR record 저장 (vision 미지원이라 서버 LLM 텍스트 모드)
     patch(item.localId, { status: 'ocr_running', ocrProgress: 0 });
     try {
-      const isPdf = item.file.type === 'application/pdf' || /\.pdf$/i.test(item.file.name);
       let text = '';
       let confidence = 0;
-      let engine: 'tesseract_js' | 'manual' | 'other' = 'tesseract_js';
+      let engine: 'tesseract_js' | 'manual' | 'other' = 'other';
 
       if (isPdf) {
         const r = await extractPdfText(item.file, (p) => patch(item.localId, { ocrProgress: p }));
         text = r.text;
-        // 텍스트가 거의 안 나오면 영수증 사진 PDF일 가능성 → 사용자 안내
         confidence = r.text.replace(/\s/g, '').length > 20 ? 0.85 : 0.2;
         engine = 'other';
       } else {
-        const r = await recognizeImage(item.file, (p) => patch(item.localId, { ocrProgress: p }));
-        text = r.text;
-        confidence = r.confidence;
-        engine = 'tesseract_js';
+        // CSV/XLSX/기타 — 텍스트 추출 안 함, 서버 import 흐름이 따로
+        text = '';
+        confidence = 0;
+        engine = 'manual';
       }
 
       const masked = maskAll(text);
       const res = await fetch(`/api/ocr/${item.uploadedFileId}`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ rawText: text || '(텍스트 없음)', maskedText: masked, confidence, engine }),
+        body: JSON.stringify({
+          rawText: text || '(텍스트 없음)',
+          maskedText: masked,
+          confidence,
+          engine,
+        }),
       });
       if (!res.ok) {
         const j = await res.json();
         throw new Error(j?.error?.message ?? 'OCR 저장 실패');
       }
-      patch(item.localId, { status: 'ocr_done', ocrProgress: 1, ocrText: text, ocrConfidence: confidence });
+      patch(item.localId, {
+        status: 'ocr_done',
+        ocrProgress: 1,
+        ocrText: text,
+        ocrConfidence: confidence,
+      });
     } catch (e) {
       patch(item.localId, { status: 'failed', error: e instanceof Error ? e.message : 'OCR 실패' });
     }
