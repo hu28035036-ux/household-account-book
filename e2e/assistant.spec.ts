@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 
 /**
@@ -17,7 +17,7 @@ const HAS_ENV =
 
 const TEST_USER_TAG = '[E2E_ASSISTANT]'; // 테스트 거래 식별용
 
-async function loginViaMagicLink(page, baseUrl: string, email: string) {
+async function loginViaMagicLink(page: Page, baseUrl: string, email: string) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
@@ -39,7 +39,7 @@ async function loginViaMagicLink(page, baseUrl: string, email: string) {
 
   await page.goto(link.properties.action_link);
   await page.waitForURL(
-    (u) => /\/dashboard/.test(u.toString()) || /\/auth\/callback/.test(u.toString()),
+    (u: URL) => /\/dashboard/.test(u.toString()) || /\/auth\/callback/.test(u.toString()),
     { timeout: 30_000 },
   );
   await page.waitForLoadState('domcontentloaded');
