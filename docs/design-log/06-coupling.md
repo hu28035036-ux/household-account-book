@@ -58,6 +58,7 @@
 | C-11 | PROTECTED_PATHS — CONTRACT §9-B-1 (사람용) ↔ meta-isolation.mjs (코드) | 보호 경로 추가 시 두 곳 동시 갱신 — 누락 시 게이트 의미 없음 |
 | C-12 | runner.mjs dispatch 정책 (folder vs id-prefix) | 작성자가 어느 게 진실인지 추측. 주석 부족. |
 | C-13 | self-test export 명명 컨벤션 (regex) | discover.mjs 정규식에만 박혀 있음. 컨벤션 위반 시 silent fail |
+| C-14 | meta-isolation 게이트가 영역 작업도 차단 | qa-harness/* 같은 영역 브랜치에서 e2e 변경 시 게이트 fail — 정상 영역 작업이 막힘 |
 
 **의도**: 이 표는 "단위화가 *완벽*이 아니다" 를 정직 기록. 단위화 자체가 새 결합점을 만들 수 있음 — CONTRACT §9-A-1 (추상화 과잉 회피) 와 긴장. 모든 신규 결합은 즉시 §3 이력에 해소 작업이 따라야 한다.
 
@@ -141,6 +142,18 @@
 - 목적: 폴더 vs id-prefix 정책 모호함 제거
 - 변경: runner.mjs 의 runCase 상단 주석에 정책 문서화 (PRIMARY = 폴더 / FALLBACK = id-prefix). harness/test/cases/runner.mjs 에 *컴파운드 도메인 dispatch* 회귀 케이스 추가 — `extraction-hallucination` 폴더의 케이스가 extraction 어댑터로 잘못 가지 않음을 매 self-test마다 입증.
 - 결과: 새 컴파운드 도메인 추가 시 정책 의심 0.
+
+### 3-12. C-14 (신규) — meta-isolation 게이트의 영역 작업 차단 해소 (2026-05-08)
+- 발견 시점: PR #3 작업 중 — qa-harness/* 브랜치에서 e2e/assistant.spec.ts 변경 시 메타 격리 게이트가 fail
+- 결합점 본질: 게이트가 *모든* self-test 실행에서 strict 였음. 영역 작업도 차단됨.
+- 단위화: 브랜치 prefix 기반 자동 모드 전환
+  - `meta/*` 또는 prefix 없음 → strict (변경 시 fail)
+  - `<area>/*` (5개 영역 prefix) → informational (변경 보고만, 통과)
+- 코드: `meta-isolation.mjs` 의 `gitCurrentBranch()` + `isAreaBranch()` + `AREA_PREFIXES` 추가
+- 명시: CONTRACT §9-B-4 *브랜치 컨벤션* 단락
+- 결과: 영역 에이전트가 본 시스템 게이트 우회용 환경변수 없이도 작업 가능 + 메타 작업 격리 보장 유지
+
+이건 *단위화 작업* 이라기보다 *원칙(§9-B 격리)의 정밀화* — 실용적으로 결합점 카탈로그에 C-14 로 등록.
 
 ### 3-11. C-13 — self-test 컨벤션 명시 + 회귀 (2026-05-08)
 - 목적: `runXxxCases` 명명 컨벤션이 정규식에만 박혀있어 컨벤션 위반 시 silent fail
