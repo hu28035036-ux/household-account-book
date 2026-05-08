@@ -1,0 +1,12 @@
+{
+  "id": "hallucination-001",
+  "tags": ["agent-answer", "fake-file", "fake-section", "fake-incident"],
+  "input": {
+    "text": "src/lib/budget/calculator.ts 에서 §9-A-77 위반. incident-0042 참고. commit abc1234567890."
+  },
+  "expected": {
+    "total": 4,
+    "ok": 0,
+    "failed_kinds": ["file", "section", "incident", "commit"]
+  }
+}

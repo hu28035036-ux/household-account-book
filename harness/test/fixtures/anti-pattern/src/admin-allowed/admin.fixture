@@ -1,0 +1,3 @@
+// Fixture: SUPABASE_SERVICE_ROLE_KEY referenced inside an excludePaths-matching directory.
+// The rule must NOT flag this — admin.ts wrapper is the one place that may hold the key.
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
