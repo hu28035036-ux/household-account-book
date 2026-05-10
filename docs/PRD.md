@@ -276,13 +276,61 @@ NEXT 의 두 RAG 트랙(외부 노하우 / 개인화) 에 공통으로 적용할
 | 5 | 메타데이터 partial index (lang/domain) | 잡음 ↓ → precision ↑ | 후보 풀 ↓ → latency ↓ | ✅ |
 | 6 | 질의 임베딩 캐시 (Vercel KV) | 같음 | hit 시 ~0ms | ✅ |
 | 7 | halfvec/int8 양자화 | 손실 < 1% | 메모리·캐시 ↑ | ✅ |
-| 8 | Chunk 200~400 token + 10~20% overlap | 도메인 맞춤 | 인덱싱·검색 균형 | ✅ |
+| 8 | Chunk 전략 — 데이터 종류별 분리 + 계층적 chunking | 도메인 맞춤 | 인덱싱·검색 균형 | ✅ (아래 §A.1 참조) |
 | 9 | Streaming + Lazy reranker | 같음 | 체감 latency ↓ | ⏸️ |
 | 10 | Pre-computed FAQ | FAQ 보장 | hit 시 ~0ms | ⏸️ |
 | 11 | Async Background Indexing | 같음 | 페이지 차단 X | ⏸️ |
 
 **측정 기준** — recall@5 ≥ 0.90 / precision@5 ≥ 0.80 / p50 latency ≤ 250ms
 (캐시 hit) 또는 ≤ 600ms (캐시 miss + reranker 포함) / 운영 비용 ≤ $25/월.
+
+### §A.1 — Chunk 전략 (도메인 특화)
+
+chunk 는 RAG 의 *선택* 이 아니라 *전략* 결정. 가계부 도메인은 데이터 종류가
+다르므로 단일 chunk 사이즈 X — 종류별 분리가 정확도+속도 둘 다에 유리.
+
+#### 데이터 종류별 chunk 크기
+
+| 데이터 종류 | chunk 크기 | overlap | 이유 |
+|---|---|---|---|
+| **외부 노하우** (블로그·책 발췌) | 200~400 토큰 | 10~20% | 한 단락 = 한 조언. 작으면 맥락 잘림, 크면 노이즈 ↑ |
+| **사용자 거래** (가맹점·카테고리·메모) | 50~100 토큰 (한 거래 = 한 chunk) | 0% | 거래는 atomic 단위. overlap 의미 없음 |
+| **사용자 월 패턴 회고** | 800~1,200 토큰 (한 달 = 한 chunk) | 0% | "5월 vs 작년 12월" 비슷한 달 검색에 맥락 필요 |
+
+→ 단일 vector 테이블에 `chunk_kind` 컬럼으로 구분, `WHERE chunk_kind = ?` 사전
+필터 + partial HNSW index. 종류별로 평균 chunk 수가 다르니 디스크 효율도 ↑.
+
+#### 계층적 Chunking (Hierarchical) — 외부 노하우 한정
+
+같은 글에서 **큰 chunk (1,000t — 맥락 보존)** + **작은 chunk (200t — 정밀
+매칭)** 둘 다 임베딩 → parent-child 관계로 저장. 검색 시:
+
+1. 작은 chunk (200t) 로 정밀 매칭 → top-K 후보
+2. 후보의 parent (1,000t) 를 가져와 응답 컨텍스트로 사용
+
+**효과**: precision +5~10%, 디스크 1.5배. 비용 대비 효과 ★★★.
+
+#### Sliding window vs Semantic chunking
+
+| 방식 | 정확도 | 인덱싱 비용 | 채택 |
+|---|---|---|---|
+| **Sliding window** (고정 크기 + overlap) | 베이스라인 | 빠름 | ✅ 즉시 |
+| **Semantic chunking** (문장 유사도로 분할) | +5~8% | +30% | ⏸️ 측정 후 도입 |
+
+베이스라인은 sliding window. NEXT 단계 측정에서 정확도가 목표 (recall@5 ≥
+0.90) 미달이면 semantic 도입을 검토.
+
+#### 사용자별 RAG 의 chunk
+
+개인화 RAG (§A-3) 는 **사용자 거래** 와 **월 패턴 회고** 두 종류만 사용 —
+외부 노하우는 cross-user 공유 vector 라 사용자별 격리와 무관. RLS 는 거래·회고
+chunk 에만 적용 (`auth.uid() = user_id`).
+
+| chunk 종류 | RLS 격리 | 인덱스 |
+|---|---|---|
+| 외부 노하우 (작은 + 큰) | X — public read | 단일 HNSW |
+| 사용자 거래 | ✅ | 단일 HNSW + `WHERE user_id = ?` post-filter (사용자당 chunk < 5,000 가정 충분) |
+| 사용자 월 회고 | ✅ | 동일 |
 
 **개인화 RAG** 의 사용자 facing 한 줄 (UI 에 노출 — 코드 용어 X):
 - "비슷한 거래 본 적 있어요"
