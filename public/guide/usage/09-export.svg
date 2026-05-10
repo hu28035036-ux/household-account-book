@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="375" height="650" fill="#FFF7FA"/>
+  <text x="20" y="19" font-size="13" font-weight="600" fill="#1F2937">9:41</text>
+  <rect x="0" y="28" width="375" height="56" fill="#FFFFFF"/>
+  <line x1="0" y1="84" x2="375" y2="84" stroke="#F3D4E3"/>
+  <text x="20" y="63" font-size="17" font-weight="600" fill="#1F2937">백업 · 내보내기</text>
+
+  <g transform="translate(20,108)">
+    <text x="0" y="0" font-size="22" font-weight="700" fill="#1F2937">데이터는 내 것</text>
+    <text x="0" y="22" font-size="12" fill="#6B7280">언제든지 내보내거나 옮길 수 있어요</text>
+
+    <!-- summary -->
+    <g transform="translate(0,42)">
+      <rect width="335" height="64" rx="12" fill="#FFFFFF" stroke="#F3D4E3"/>
+      <text x="14" y="22" font-size="11" fill="#9CA3AF">전체 데이터</text>
+      <text x="14" y="44" font-size="13" fill="#1F2937">거래 <tspan font-weight="700">1,847건</tspan> · 카테고리 12 · 예산 6개월</text>
+      <text x="14" y="58" font-size="10" fill="#9CA3AF">2025.11 — 2026.05</text>
+    </g>
+
+    <!-- options -->
+    <g transform="translate(0,122)">
+      <text x="0" y="0" font-size="13" font-weight="700" fill="#1F2937">내보내기 형식</text>
+
+      <!-- CSV -->
+      <g transform="translate(0,16)">
+        <rect width="335" height="74" rx="12" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <g transform="translate(16,16)">
+          <rect width="40" height="40" rx="8" fill="#F0FDF4"/>
+          <text x="20" y="27" text-anchor="middle" font-size="14" font-weight="700" fill="#10B981">CSV</text>
+        </g>
+        <text x="68" y="34" font-size="13" font-weight="700" fill="#1F2937">거래 CSV</text>
+        <text x="68" y="52" font-size="10" fill="#6B7280">엑셀·다른 가계부에 그대로 붙여넣기 가능</text>
+        <g transform="translate(269,22)">
+          <rect width="50" height="30" rx="6" fill="#F472B6"/>
+          <text x="25" y="20" text-anchor="middle" font-size="11" fill="#FFFFFF" font-weight="700">⬇ 받기</text>
+        </g>
+      </g>
+
+      <!-- XLSX -->
+      <g transform="translate(0,100)">
+        <rect width="335" height="74" rx="12" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <g transform="translate(16,16)">
+          <rect width="40" height="40" rx="8" fill="#FCE7F3"/>
+          <text x="20" y="27" text-anchor="middle" font-size="11" font-weight="700" fill="#BE185D">XLSX</text>
+        </g>
+        <text x="68" y="34" font-size="13" font-weight="700" fill="#1F2937">전체 백업 (7시트)</text>
+        <text x="68" y="52" font-size="10" fill="#6B7280">거래·예산·카테고리·고정·결제수단·모임·통계</text>
+        <g transform="translate(269,22)">
+          <rect width="50" height="30" rx="6" fill="#F472B6"/>
+          <text x="25" y="20" text-anchor="middle" font-size="11" fill="#FFFFFF" font-weight="700">⬇ 받기</text>
+        </g>
+      </g>
+
+      <!-- JSON -->
+      <g transform="translate(0,184)">
+        <rect width="335" height="74" rx="12" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <g transform="translate(16,16)">
+          <rect width="40" height="40" rx="8" fill="#EEF2FF"/>
+          <text x="20" y="27" text-anchor="middle" font-size="11" font-weight="700" fill="#3730A3">JSON</text>
+        </g>
+        <text x="68" y="34" font-size="13" font-weight="700" fill="#1F2937">전체 백업 (JSON)</text>
+        <text x="68" y="52" font-size="10" fill="#6B7280">개발자용·다른 앱으로 가져갈 때 권장</text>
+        <g transform="translate(269,22)">
+          <rect width="50" height="30" rx="6" fill="#FFFFFF" stroke="#F472B6"/>
+          <text x="25" y="20" text-anchor="middle" font-size="11" fill="#BE185D" font-weight="700">⬇ 받기</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- bottom hint -->
+    <g transform="translate(0,400)">
+      <rect width="335" height="48" rx="10" fill="#FCE7F3"/>
+      <text x="16" y="22" font-size="12" font-weight="600" fill="#BE185D">💡 한 달에 한 번 백업이 안전</text>
+      <text x="16" y="40" font-size="11" fill="#374151">설정 → 데이터 → 내보내기</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="375" height="650" fill="#FFF7FA"/>
+  <text x="20" y="19" font-size="13" font-weight="600" fill="#1F2937">9:41</text>
+  <rect x="0" y="28" width="375" height="56" fill="#FFFFFF"/>
+  <line x1="0" y1="84" x2="375" y2="84" stroke="#F3D4E3"/>
+  <text x="20" y="63" font-size="17" font-weight="600" fill="#1F2937">분석 후보</text>
+  <g transform="translate(280,46)"><rect width="40" height="32" rx="8" fill="#F472B6"/><text x="20" y="22" text-anchor="middle" font-size="11" fill="#FFFFFF" font-weight="700">12건</text></g>
+
+  <g transform="translate(20,108)">
+    <text x="0" y="0" font-size="22" font-weight="700" fill="#1F2937">한 번에 일괄 승인</text>
+    <text x="0" y="22" font-size="12" fill="#6B7280">안전한 행은 ✓ / 중복 의심은 ✕</text>
+
+    <!-- bulk action bar -->
+    <g transform="translate(0,42)">
+      <rect width="335" height="44" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+      <rect x="14" y="12" width="20" height="20" rx="4" fill="#F472B6"/>
+      <text x="22" y="27" text-anchor="middle" font-size="14" fill="#FFFFFF" font-weight="700">✓</text>
+      <text x="42" y="27" font-size="12" fill="#1F2937" font-weight="600">전체 선택 (12)</text>
+      <g transform="translate(195,8)">
+        <rect width="60" height="28" rx="6" fill="#10B981"/>
+        <text x="30" y="19" text-anchor="middle" font-size="11" fill="#FFFFFF" font-weight="700">✓ 승인</text>
+      </g>
+      <g transform="translate(263,8)">
+        <rect width="60" height="28" rx="6" fill="#FFFFFF" stroke="#F87171"/>
+        <text x="30" y="19" text-anchor="middle" font-size="11" fill="#F87171" font-weight="700">✕ 거부</text>
+      </g>
+    </g>
+
+    <!-- candidate rows -->
+    <g transform="translate(0,102)">
+      <!-- row 1 — selected, normal -->
+      <rect width="335" height="56" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+      <rect x="12" y="20" width="16" height="16" rx="4" fill="#F472B6"/>
+      <text x="20" y="32" text-anchor="middle" font-size="11" fill="#FFFFFF" font-weight="700">✓</text>
+      <text x="38" y="22" font-size="12" font-weight="600" fill="#1F2937">스타벅스 강남점</text>
+      <text x="38" y="40" font-size="10" fill="#9CA3AF">04/02 · 카페 · 신한카드</text>
+      <text x="323" y="34" text-anchor="end" font-size="13" font-weight="700" fill="#BE185D">-8,300</text>
+
+      <!-- row 2 — selected -->
+      <g transform="translate(0,64)">
+        <rect width="335" height="56" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <rect x="12" y="20" width="16" height="16" rx="4" fill="#F472B6"/>
+        <text x="20" y="32" text-anchor="middle" font-size="11" fill="#FFFFFF" font-weight="700">✓</text>
+        <text x="38" y="22" font-size="12" font-weight="600" fill="#1F2937">CU 편의점</text>
+        <text x="38" y="40" font-size="10" fill="#9CA3AF">04/02 · 식비 · 신한카드</text>
+        <text x="323" y="34" text-anchor="end" font-size="13" font-weight="700" fill="#BE185D">-3,500</text>
+      </g>
+
+      <!-- row 3 — duplicate warning -->
+      <g transform="translate(0,128)">
+        <rect width="335" height="56" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <rect x="12" y="20" width="16" height="16" rx="4" fill="#FFFFFF" stroke="#F87171"/>
+        <text x="38" y="22" font-size="12" font-weight="600" fill="#1F2937">스타벅스 강남점</text>
+        <text x="38" y="40" font-size="10" fill="#DC2626" font-weight="600">⚠ 중복 의심 (04/02 동일 가맹)</text>
+        <text x="323" y="34" text-anchor="end" font-size="13" font-weight="700" fill="#9CA3AF" text-decoration="line-through">-8,300</text>
+      </g>
+
+      <!-- row 4 — selected -->
+      <g transform="translate(0,192)">
+        <rect width="335" height="56" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <rect x="12" y="20" width="16" height="16" rx="4" fill="#F472B6"/>
+        <text x="20" y="32" text-anchor="middle" font-size="11" fill="#FFFFFF" font-weight="700">✓</text>
+        <text x="38" y="22" font-size="12" font-weight="600" fill="#1F2937">올리브영 신촌</text>
+        <text x="38" y="40" font-size="10" fill="#9CA3AF">04/04 · 의류 · 신한카드</text>
+        <text x="323" y="34" text-anchor="end" font-size="13" font-weight="700" fill="#BE185D">-23,400</text>
+      </g>
+    </g>
+
+    <!-- bottom hint -->
+    <g transform="translate(0,400)">
+      <rect width="335" height="48" rx="10" fill="#FCE7F3"/>
+      <text x="16" y="22" font-size="12" font-weight="600" fill="#BE185D">💡 승인된 행만 거래내역에 들어감</text>
+      <text x="16" y="40" font-size="11" fill="#374151">중복은 한 번 ✕ 누르면 다시 안 뜸</text>
+    </g>
+  </g>
+</svg>

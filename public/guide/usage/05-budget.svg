@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="375" height="650" fill="#FFF7FA"/>
+  <text x="20" y="19" font-size="13" font-weight="600" fill="#1F2937">9:41</text>
+  <rect x="0" y="28" width="375" height="56" fill="#FFFFFF"/>
+  <line x1="0" y1="84" x2="375" y2="84" stroke="#F3D4E3"/>
+  <text x="20" y="63" font-size="17" font-weight="600" fill="#1F2937">예산</text>
+
+  <g transform="translate(20,108)">
+    <text x="0" y="0" font-size="22" font-weight="700" fill="#1F2937">한도를 정해야 보입니다</text>
+    <text x="0" y="22" font-size="12" fill="#6B7280">80% 넘으면 색이 바뀝니다</text>
+
+    <!-- total budget summary -->
+    <g transform="translate(0,42)">
+      <rect width="335" height="80" rx="12" fill="#FFFFFF" stroke="#F3D4E3"/>
+      <text x="14" y="22" font-size="11" fill="#9CA3AF">2026년 5월 전체 예산</text>
+      <text x="14" y="46" font-size="22" font-weight="700" fill="#1F2937">800,000<tspan font-size="13" fill="#9CA3AF" font-weight="500">원</tspan></text>
+      <text x="321" y="46" text-anchor="end" font-size="11" font-weight="600" fill="#10B981">61% 사용</text>
+      <rect x="14" y="56" width="307" height="8" rx="4" fill="#F3F4F6"/>
+      <rect x="14" y="56" width="187" height="8" rx="4" fill="#10B981"/>
+    </g>
+
+    <!-- category list -->
+    <g transform="translate(0,138)">
+      <text x="0" y="0" font-size="13" font-weight="700" fill="#1F2937">카테고리별 한도</text>
+
+      <!-- 식비 — 88% (warn) -->
+      <g transform="translate(0,16)">
+        <rect width="335" height="58" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text x="14" y="22" font-size="12" font-weight="700" fill="#1F2937">🍴 식비</text>
+        <text x="321" y="22" text-anchor="end" font-size="11" font-weight="700" fill="#DC2626">88%</text>
+        <text x="14" y="40" font-size="10" fill="#9CA3AF">263,500 / 300,000</text>
+        <rect x="14" y="46" width="307" height="6" rx="3" fill="#FECACA"/>
+        <rect x="14" y="46" width="270" height="6" rx="3" fill="#DC2626"/>
+      </g>
+
+      <!-- 카페 — 65% -->
+      <g transform="translate(0,84)">
+        <rect width="335" height="58" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="14" y="22" font-size="12" font-weight="700" fill="#1F2937">☕ 카페·간식</text>
+        <text x="321" y="22" text-anchor="end" font-size="11" font-weight="700" fill="#10B981">65%</text>
+        <text x="14" y="40" font-size="10" fill="#9CA3AF">65,000 / 100,000</text>
+        <rect x="14" y="46" width="307" height="6" rx="3" fill="#F3F4F6"/>
+        <rect x="14" y="46" width="200" height="6" rx="3" fill="#10B981"/>
+      </g>
+
+      <!-- 교통 — 42% -->
+      <g transform="translate(0,152)">
+        <rect width="335" height="58" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="14" y="22" font-size="12" font-weight="700" fill="#1F2937">🚇 교통</text>
+        <text x="321" y="22" text-anchor="end" font-size="11" font-weight="700" fill="#10B981">42%</text>
+        <text x="14" y="40" font-size="10" fill="#9CA3AF">25,200 / 60,000</text>
+        <rect x="14" y="46" width="307" height="6" rx="3" fill="#F3F4F6"/>
+        <rect x="14" y="46" width="129" height="6" rx="3" fill="#10B981"/>
+      </g>
+
+      <!-- 여가 — 12% -->
+      <g transform="translate(0,220)">
+        <rect width="335" height="58" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="14" y="22" font-size="12" font-weight="700" fill="#1F2937">🎬 여가</text>
+        <text x="321" y="22" text-anchor="end" font-size="11" font-weight="700" fill="#9CA3AF">12%</text>
+        <text x="14" y="40" font-size="10" fill="#9CA3AF">9,500 / 80,000</text>
+        <rect x="14" y="46" width="307" height="6" rx="3" fill="#F3F4F6"/>
+        <rect x="14" y="46" width="37" height="6" rx="3" fill="#10B981"/>
+      </g>
+    </g>
+
+    <!-- bottom hint -->
+    <g transform="translate(0,438)">
+      <rect width="335" height="44" rx="10" fill="#FFF1F5"/>
+      <text x="16" y="20" font-size="12" font-weight="600" fill="#BE185D">💡 처음엔 지난 두 달 평균의 0.9배</text>
+      <text x="16" y="36" font-size="10" fill="#374151">너무 빡빡하면 며칠 만에 포기</text>
+    </g>
+  </g>
+</svg>
