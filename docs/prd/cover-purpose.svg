@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <!-- bg -->
+  <rect width="800" height="420" fill="#FFF7FA"/>
+  <rect x="0" y="0" width="800" height="420" fill="url(#g1)" opacity="0.4"/>
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FCE7F3"/>
+      <stop offset="1" stop-color="#FFF7FA"/>
+    </linearGradient>
+  </defs>
+
+  <!-- top label -->
+  <g transform="translate(400,46)" text-anchor="middle">
+    <rect x="-130" y="-22" width="260" height="36" rx="18" fill="#FFFFFF" stroke="#F9A8D4"/>
+    <text y="3" font-size="14" font-weight="700" fill="#BE185D">PRD · 가계부의 목적과 방향</text>
+  </g>
+  <text x="400" y="98" text-anchor="middle" font-size="11" fill="#9CA3AF">왜 만드는가 (Why) 와 무엇을 해야 하는가 (What) 만 적습니다 — 어떻게(How) 는 별도</text>
+
+  <!-- left card: WHY -->
+  <g transform="translate(70,140)">
+    <rect width="280" height="220" rx="18" fill="#FFFFFF" stroke="#F3D4E3" stroke-width="2"/>
+    <rect width="280" height="56" rx="18" fill="#FCE7F3"/>
+    <rect y="38" width="280" height="18" fill="#FCE7F3"/>
+    <text x="20" y="36" font-size="13" fill="#BE185D" font-weight="700" letter-spacing="2">WHY</text>
+    <text x="20" y="80" font-size="20" font-weight="800" fill="#1F2937">기록은 목적이 아니라</text>
+    <text x="20" y="106" font-size="20" font-weight="800" fill="#1F2937">"내 돈 흐름" 보는 거울</text>
+
+    <!-- bullets -->
+    <g transform="translate(20,134)" font-size="12" fill="#374151">
+      <circle cx="6" cy="6" r="3" fill="#F472B6"/>
+      <text x="18" y="10">매일 1분, 부담 없는 입력 (✨ AI 한 줄)</text>
+      <circle cx="6" cy="34" r="3" fill="#F472B6"/>
+      <text x="18" y="38">AI 는 "후보" 만 — 승인은 사용자</text>
+      <circle cx="6" cy="62" r="3" fill="#F472B6"/>
+      <text x="18" y="66">데이터 소유권 (CSV/XLSX/JSON 백업)</text>
+      <circle cx="6" cy="90" r="3" fill="#F472B6"/>
+      <text x="18" y="94">가족·룸메이트와 모임 단위 공유</text>
+    </g>
+  </g>
+
+  <!-- right card: WHAT -->
+  <g transform="translate(450,140)">
+    <rect width="280" height="220" rx="18" fill="#FFFFFF" stroke="#F3D4E3" stroke-width="2"/>
+    <rect width="280" height="56" rx="18" fill="#E0E7FF"/>
+    <rect y="38" width="280" height="18" fill="#E0E7FF"/>
+    <text x="20" y="36" font-size="13" fill="#3730A3" font-weight="700" letter-spacing="2">WHAT</text>
+    <text x="20" y="80" font-size="20" font-weight="800" fill="#1F2937">12개월간 만들 가치</text>
+
+    <g transform="translate(20,108)" font-size="12" fill="#374151">
+      <circle cx="6" cy="6" r="3" fill="#6366F1"/>
+      <text x="18" y="10">영수증·은행파일 → 후보 자동 생성</text>
+      <circle cx="6" cy="30" r="3" fill="#6366F1"/>
+      <text x="18" y="34">매일 캘린더 + 카테고리 합산 예산</text>
+      <circle cx="6" cy="54" r="3" fill="#6366F1"/>
+      <text x="18" y="58">월말 AI 회고 + 절약 제안</text>
+      <circle cx="6" cy="78" r="3" fill="#6366F1"/>
+      <text x="18" y="82">고정거래 자동 입력 + 사전 알림</text>
+      <circle cx="6" cy="102" r="3" fill="#6366F1"/>
+      <text x="18" y="106">모임 RLS 격리 + 컨텍스트 전환</text>
+    </g>
+  </g>
+
+  <!-- center hand picking arrow -->
+  <g transform="translate(370,240)">
+    <text x="30" y="0" text-anchor="middle" font-size="32" fill="#F472B6">✦</text>
+    <text x="30" y="36" text-anchor="middle" font-size="11" fill="#BE185D" font-weight="700">동시에</text>
+    <text x="30" y="50" text-anchor="middle" font-size="11" fill="#BE185D" font-weight="700">두 카드</text>
+  </g>
+
+  <!-- footer -->
+  <g transform="translate(400,394)" text-anchor="middle">
+    <text font-size="11" fill="#9CA3AF">household-account-book · v1.0 (1차 배포 후 후속 PRD) · 2026.05</text>
+  </g>
+</svg>

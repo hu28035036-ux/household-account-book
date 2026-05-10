@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="800" height="480" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="800" height="480" fill="#FFF7FA"/>
+
+  <!-- title -->
+  <g transform="translate(400,46)" text-anchor="middle">
+    <rect x="-150" y="-22" width="300" height="36" rx="18" fill="#FFFFFF" stroke="#F9A8D4"/>
+    <text y="3" font-size="14" font-weight="700" fill="#BE185D">로드맵 — Now / Next / Later</text>
+  </g>
+  <text x="400" y="98" text-anchor="middle" font-size="11" fill="#9CA3AF">분기 대신 우선순위로. 사용자 피드백·실제 사용 데이터에 따라 Next/Later 는 매월 재조정</text>
+
+  <!-- timeline track -->
+  <line x1="60" y1="160" x2="740" y2="160" stroke="#F3D4E3" stroke-width="3"/>
+
+  <!-- 3 dots on track -->
+  <g>
+    <circle cx="160" cy="160" r="14" fill="#F472B6" stroke="#FFFFFF" stroke-width="3"/>
+    <text x="160" y="165" text-anchor="middle" font-size="11" font-weight="800" fill="#FFFFFF">1</text>
+
+    <circle cx="400" cy="160" r="14" fill="#F9A8D4" stroke="#FFFFFF" stroke-width="3"/>
+    <text x="400" y="165" text-anchor="middle" font-size="11" font-weight="800" fill="#FFFFFF">2</text>
+
+    <circle cx="640" cy="160" r="14" fill="#FBCFE8" stroke="#FFFFFF" stroke-width="3"/>
+    <text x="640" y="165" text-anchor="middle" font-size="11" font-weight="800" fill="#BE185D">3</text>
+  </g>
+
+  <!-- Phase 1: NOW -->
+  <g transform="translate(60,200)">
+    <rect width="200" height="248" rx="16" fill="#FFFFFF" stroke="#F472B6" stroke-width="2"/>
+    <rect width="200" height="42" rx="16" fill="#F472B6"/>
+    <rect y="24" width="200" height="18" fill="#F472B6"/>
+    <text x="100" y="28" text-anchor="middle" font-size="14" font-weight="800" fill="#FFFFFF">NOW · 0~2개월</text>
+
+    <text x="14" y="68" font-size="12" font-weight="700" fill="#BE185D">핵심 안정화</text>
+    <line x1="14" y1="76" x2="186" y2="76" stroke="#F3D4E3"/>
+
+    <g transform="translate(14,90)" font-size="11" fill="#374151">
+      <text>✓ 1차 prod 배포 완료</text>
+      <text y="20">✓ AI Vision OCR · 모임 RLS</text>
+      <text y="40">✓ /guide 작성요령+사용법</text>
+      <text y="60">✓ PWA 캐시 정책 (incident-0014)</text>
+      <text y="80">✓ 카테고리·결제수단 3열 그리드</text>
+      <text y="108" font-style="italic" fill="#9CA3AF">남은 일:</text>
+      <text y="124">· stale 캐시 purge useEffect 제거</text>
+      <text y="142">· 로그인 onboarding 정돈</text>
+      <text y="160">· 모바일 시각 회귀 점검</text>
+    </g>
+  </g>
+
+  <!-- Phase 2: NEXT -->
+  <g transform="translate(300,200)">
+    <rect width="200" height="248" rx="16" fill="#FFFFFF" stroke="#F9A8D4" stroke-width="2"/>
+    <rect width="200" height="42" rx="16" fill="#F9A8D4"/>
+    <rect y="24" width="200" height="18" fill="#F9A8D4"/>
+    <text x="100" y="28" text-anchor="middle" font-size="14" font-weight="800" fill="#FFFFFF">NEXT · 2~6개월</text>
+
+    <text x="14" y="68" font-size="12" font-weight="700" fill="#BE185D">유지율을 만드는 가치</text>
+    <line x1="14" y1="76" x2="186" y2="76" stroke="#F3D4E3"/>
+
+    <g transform="translate(14,90)" font-size="11" fill="#374151">
+      <text>· 알림 (예산 80% / 고정 D-N / 모임)</text>
+      <text y="22">· AI 어시스턴트 확장 — 카테고리·</text>
+      <text y="36">  예산·고정거래 등록 자연어로</text>
+      <text y="58">· 통계 깊이 — 분기·연간 + AI 회고</text>
+      <text y="78">· 시각 회귀 (Playwright 스냅샷)</text>
+      <text y="98">· 다크 모드 + 한국어 외 1개 (영어)</text>
+      <text y="118">· 모임 권한 — 관리자/편집/조회</text>
+      <text y="138">· 영수증 사진 일괄 업로드</text>
+      <text y="160">· 거래 검색 강화 (자연어)</text>
+    </g>
+  </g>
+
+  <!-- Phase 3: LATER -->
+  <g transform="translate(540,200)">
+    <rect width="200" height="248" rx="16" fill="#FFFFFF" stroke="#FBCFE8" stroke-width="2"/>
+    <rect width="200" height="42" rx="16" fill="#FBCFE8"/>
+    <rect y="24" width="200" height="18" fill="#FBCFE8"/>
+    <text x="100" y="28" text-anchor="middle" font-size="14" font-weight="800" fill="#BE185D">LATER · 6~12개월</text>
+
+    <text x="14" y="68" font-size="12" font-weight="700" fill="#BE185D">차별화 · 검토 단계</text>
+    <line x1="14" y1="76" x2="186" y2="76" stroke="#F3D4E3"/>
+
+    <g transform="translate(14,90)" font-size="11" fill="#374151">
+      <text>· 외부 은행/카드사 OpenBanking</text>
+      <text y="14">  API 직접 연동 (검토 중)</text>
+      <text y="36">· 가족 자녀 용돈 계정 (서브)</text>
+      <text y="58">· 데이터 가져오기 — 다른 가계부</text>
+      <text y="72">  앱 export 파일 import</text>
+      <text y="94">· 영수증 외 OCR — 송장·견적서</text>
+      <text y="116">· 자영업자용 간단 회계 모드</text>
+      <text y="136">  (Beachhead 후보)</text>
+      <text y="158">· 데스크톱 앱 (Electron/Tauri)</text>
+    </g>
+  </g>
+
+  <!-- legend -->
+  <g transform="translate(400,464)" text-anchor="middle" font-size="10" fill="#9CA3AF">
+    <text>이 로드맵은 사용자 피드백·prod 사용 데이터에 따라 매월 재조정됩니다.</text>
+  </g>
+</svg>
