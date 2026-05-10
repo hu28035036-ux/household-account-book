@@ -122,7 +122,7 @@ export function PaymentMethodsClient() {
           <CardSubtle className="text-center py-6">불러오는 중…</CardSubtle>
         </Card>
       ) : (
-        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <ul className="grid grid-cols-3 gap-3">
           {rows.map((p) => (
             <li key={p.id}>
               <Card className="flex items-center justify-between gap-3">
