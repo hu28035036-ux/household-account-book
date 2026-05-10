@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="375" height="650" fill="#FFF7FA"/>
+  <text x="20" y="19" font-size="13" font-weight="600" fill="#1F2937">9:41</text>
+  <rect x="0" y="28" width="375" height="56" fill="#FFFFFF"/>
+  <line x1="0" y1="84" x2="375" y2="84" stroke="#F3D4E3"/>
+  <text x="20" y="63" font-size="17" font-weight="600" fill="#1F2937">월 캘린더</text>
+  <g transform="translate(248,46)"><rect width="32" height="32" rx="8" fill="#FCE7F3" stroke="#F9A8D4"/><text x="16" y="22" text-anchor="middle" font-size="14" fill="#BE185D">✨</text></g>
+
+  <!-- summary -->
+  <g transform="translate(20,104)">
+    <rect width="335" height="62" rx="12" fill="#FFFFFF" stroke="#F3D4E3"/>
+    <text x="16" y="24" font-size="11" fill="#9CA3AF">2026년 5월</text>
+    <text x="16" y="46" font-size="20" font-weight="700" fill="#1F2937">남은 예산 312,400원</text>
+    <text x="319" y="40" text-anchor="end" font-size="11" font-weight="600" fill="#10B981">61%</text>
+    <rect x="16" y="50" width="288" height="5" rx="2.5" fill="#F3F4F6"/>
+    <rect x="16" y="50" width="176" height="5" rx="2.5" fill="#10B981"/>
+  </g>
+
+  <!-- weekday header -->
+  <g transform="translate(20,182)" font-size="11" fill="#9CA3AF" text-anchor="middle">
+    <text x="22" y="14">일</text><text x="68" y="14">월</text><text x="114" y="14">화</text>
+    <text x="160" y="14">수</text><text x="206" y="14">목</text><text x="252" y="14">금</text>
+    <text x="298" y="14" fill="#3B82F6">토</text>
+  </g>
+
+  <!-- calendar grid 5 rows × 7 cols, 46×54 cells -->
+  <g transform="translate(20,200)" font-family="-apple-system, system-ui">
+    <!-- row 1: 27 28 29 30 1 2 3 -->
+    <g font-size="11">
+      <text x="22" y="16" text-anchor="middle" fill="#D1D5DB">27</text>
+      <text x="68" y="16" text-anchor="middle" fill="#D1D5DB">28</text>
+      <text x="114" y="16" text-anchor="middle" fill="#D1D5DB">29</text>
+      <text x="160" y="16" text-anchor="middle" fill="#D1D5DB">30</text>
+      <text x="206" y="16" text-anchor="middle" fill="#1F2937" font-weight="600">1</text>
+      <text x="252" y="16" text-anchor="middle" fill="#1F2937" font-weight="600">2</text>
+      <text x="298" y="16" text-anchor="middle" fill="#3B82F6" font-weight="600">3</text>
+    </g>
+    <!-- row 2 with sample expense numbers -->
+    <g transform="translate(0,28)">
+      <text x="22" y="14" text-anchor="middle" font-size="11" fill="#1F2937" font-weight="600">4</text>
+      <text x="22" y="28" text-anchor="middle" font-size="9" fill="#BE185D">12,400</text>
+      <text x="68" y="14" text-anchor="middle" font-size="11" fill="#1F2937" font-weight="600">5</text>
+      <text x="68" y="28" text-anchor="middle" font-size="9" fill="#BE185D">8,500</text>
+      <text x="114" y="14" text-anchor="middle" font-size="11" fill="#1F2937" font-weight="600">6</text>
+      <text x="160" y="14" text-anchor="middle" font-size="11" fill="#1F2937" font-weight="600">7</text>
+      <text x="160" y="28" text-anchor="middle" font-size="9" fill="#BE185D">35,000</text>
+      <text x="206" y="14" text-anchor="middle" font-size="11" fill="#1F2937" font-weight="600">8</text>
+      <text x="252" y="14" text-anchor="middle" font-size="11" fill="#1F2937" font-weight="600">9</text>
+      <text x="252" y="28" text-anchor="middle" font-size="9" fill="#BE185D">22,000</text>
+      <text x="298" y="14" text-anchor="middle" font-size="11" fill="#3B82F6" font-weight="600">10</text>
+      <text x="298" y="28" text-anchor="middle" font-size="9" fill="#BE185D">14,800</text>
+    </g>
+    <!-- row 3 with TODAY marker on 11 -->
+    <g transform="translate(0,72)">
+      <circle cx="22" cy="14" r="13" fill="#F472B6"/>
+      <text x="22" y="18" text-anchor="middle" font-size="11" fill="#FFFFFF" font-weight="700">11</text>
+      <text x="22" y="36" text-anchor="middle" font-size="9" fill="#BE185D" font-weight="600">5,200</text>
+      <text x="68" y="18" text-anchor="middle" font-size="11" fill="#9CA3AF">12</text>
+      <text x="114" y="18" text-anchor="middle" font-size="11" fill="#9CA3AF">13</text>
+      <text x="160" y="18" text-anchor="middle" font-size="11" fill="#9CA3AF">14</text>
+      <text x="206" y="18" text-anchor="middle" font-size="11" fill="#9CA3AF">15</text>
+      <text x="252" y="18" text-anchor="middle" font-size="11" fill="#9CA3AF">16</text>
+      <text x="298" y="18" text-anchor="middle" font-size="11" fill="#93C5FD">17</text>
+    </g>
+    <!-- rows 4 5 short -->
+    <g transform="translate(0,116)" font-size="11" fill="#D1D5DB">
+      <text x="22" y="16" text-anchor="middle">18</text><text x="68" y="16" text-anchor="middle">19</text>
+      <text x="114" y="16" text-anchor="middle">20</text><text x="160" y="16" text-anchor="middle">21</text>
+      <text x="206" y="16" text-anchor="middle">22</text><text x="252" y="16" text-anchor="middle">23</text>
+      <text x="298" y="16" text-anchor="middle">24</text>
+    </g>
+    <g transform="translate(0,140)" font-size="11" fill="#D1D5DB">
+      <text x="22" y="16" text-anchor="middle">25</text><text x="68" y="16" text-anchor="middle">26</text>
+      <text x="114" y="16" text-anchor="middle">27</text><text x="160" y="16" text-anchor="middle">28</text>
+      <text x="206" y="16" text-anchor="middle">29</text><text x="252" y="16" text-anchor="middle">30</text>
+      <text x="298" y="16" text-anchor="middle">31</text>
+    </g>
+  </g>
+
+  <!-- bottom hint -->
+  <g transform="translate(20,396)">
+    <rect width="335" height="48" rx="10" fill="#FCE7F3"/>
+    <text x="16" y="22" font-size="12" font-weight="600" fill="#BE185D">💡 셀을 누르면 그 날 거래만 보기</text>
+    <text x="16" y="40" font-size="11" fill="#374151">오늘 칸은 핑크 동그라미로 표시</text>
+  </g>
+
+  <!-- bottom nav -->
+  <rect x="0" y="586" width="375" height="64" fill="#FFFFFF"/>
+  <line x1="0" y1="586" x2="375" y2="586" stroke="#F3D4E3"/>
+  <g font-size="9" text-anchor="middle">
+    <text x="46" y="612" font-size="16" fill="#BE185D">📅</text><text x="46" y="630" fill="#BE185D" font-weight="700">캘린더</text>
+    <text x="123" y="612" font-size="16" fill="#9CA3AF">📋</text><text x="123" y="630" fill="#9CA3AF">거래</text>
+    <circle cx="187" cy="616" r="22" fill="#F472B6"/>
+    <text x="187" y="622" font-size="18" fill="#FFFFFF">⬆</text>
+    <text x="252" y="612" font-size="16" fill="#9CA3AF">📊</text><text x="252" y="630" fill="#9CA3AF">통계</text>
+    <text x="328" y="612" font-size="16" fill="#9CA3AF">⋯</text><text x="328" y="630" fill="#9CA3AF">더보기</text>
+  </g>
+</svg>

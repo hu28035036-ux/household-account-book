@@ -39,6 +39,8 @@ const withPWA = withPWAInit({
         options: {
           cacheName: 'public-pages',
           expiration: { maxEntries: 4, maxAgeSeconds: 7 * 24 * 60 * 60 },
+          // 4xx/5xx 응답은 캐시하지 않음 — stale 에러 영구화 차단
+          cacheableResponse: { statuses: [0, 200] },
         },
       },
       // 그 외 HTML 문서 — NetworkFirst, 짧은 캐시 (1시간)
@@ -63,15 +65,19 @@ const withPWA = withPWAInit({
         options: {
           cacheName: 'static',
           expiration: { maxEntries: 64, maxAgeSeconds: 7 * 24 * 60 * 60 },
+          // 4xx/5xx 응답은 캐시하지 않음 — stale 에러 영구화 차단
+          cacheableResponse: { statuses: [0, 200] },
         },
       },
       // 이미지 — SWR, 30일 (재방문 빠름)
+      // cacheableResponse 미설정 시 4xx 응답이 30일간 stale 로 박혀 onError 영구화 사고 발생 가능.
       {
         urlPattern: ({ request }) => request.destination === 'image',
         handler: 'StaleWhileRevalidate',
         options: {
           cacheName: 'images',
           expiration: { maxEntries: 64, maxAgeSeconds: 30 * 24 * 60 * 60 },
+          cacheableResponse: { statuses: [0, 200] },
         },
       },
     ],

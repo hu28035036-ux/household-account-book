@@ -15,6 +15,23 @@ export function SwUpdatePrompt() {
   const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
   const [dismissed, setDismissed] = useState(false);
 
+  // SW image 캐시에 박힌 stale 4xx 응답을 1회 강제 청소.
+  // next.config.mjs 의 cacheableResponse 추가는 신규 사용자에게만 효과 — 기존 사용자는
+  // 이미 보관된 stale 응답을 30일간 들고 있으므로 한 번 비워줘야 회복.
+  // localStorage 키로 1회만 실행. 이 useEffect 는 1~2주 뒤 다음 PR 에서 제거.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const PURGED_KEY = 'images-cache-purged-2026-05-10';
+    if (window.localStorage.getItem(PURGED_KEY)) return;
+    if (!('caches' in window)) return;
+    caches
+      .delete('images')
+      .catch(() => {})
+      .finally(() => {
+        window.localStorage.setItem(PURGED_KEY, '1');
+      });
+  }, []);
+
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
     let cancelled = false;

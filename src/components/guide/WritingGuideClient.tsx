@@ -175,7 +175,12 @@ export function WritingGuideClient({ showHeader = true }: { showHeader?: boolean
 }
 
 function StepCard({ step }: { step: GuideStep }) {
-  const [errored, setErrored] = useState(false);
+  // 첫 실패 시 cache-busting query 로 1회 retry — SW image 캐시에 stale 4xx 가
+  // 박혀있는 사용자가 한 번에 회복되도록.
+  const [retries, setRetries] = useState(0);
+  const failed = retries >= 2;
+  const src = retries === 0 ? step.image : `${step.image}?retry=${retries}`;
+
   return (
     <Card>
       <div className="flex items-center gap-2">
@@ -186,14 +191,15 @@ function StepCard({ step }: { step: GuideStep }) {
       </div>
 
       <div className="mt-3 rounded-md overflow-hidden border border-borderSoft bg-pageBackground">
-        {!errored ? (
+        {!failed ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={step.image}
+            key={retries}
+            src={src}
             alt={step.title}
             className="w-full h-auto block"
             loading="lazy"
-            onError={() => setErrored(true)}
+            onError={() => setRetries((r) => r + 1)}
           />
         ) : (
           <div className="aspect-video flex flex-col items-center justify-center text-textMuted gap-1">
