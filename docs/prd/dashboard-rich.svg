@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 540" width="800" height="540" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="800" height="540" fill="#FFF7FA"/>
+
+  <!-- title -->
+  <g transform="translate(400,46)" text-anchor="middle">
+    <rect x="-200" y="-22" width="400" height="36" rx="18" fill="#FFFFFF" stroke="#F9A8D4"/>
+    <text y="3" font-size="14" font-weight="700" fill="#BE185D">예시: "민지" 의 5월 셋째주 (Day 14)</text>
+  </g>
+  <text x="400" y="98" text-anchor="middle" font-size="11" fill="#9CA3AF">가상 페르소나 · 1인가구 직장인 · 모바일 사용 80% · 매일 1~2분 입력</text>
+
+  <!-- top summary card -->
+  <g transform="translate(40,124)">
+    <rect width="720" height="80" rx="14" fill="#FFFFFF" stroke="#F3D4E3"/>
+    <text x="20" y="26" font-size="11" fill="#9CA3AF">2026년 5월 (14/31)</text>
+    <text x="20" y="56" font-size="22" font-weight="800" fill="#1F2937">남은 예산 312,400원</text>
+    <text x="700" y="26" text-anchor="end" font-size="11" font-weight="600" fill="#9CA3AF">카테고리 합산 800,000원</text>
+    <text x="700" y="56" text-anchor="end" font-size="22" font-weight="800" fill="#10B981">61%</text>
+    <rect x="20" y="68" width="660" height="6" rx="3" fill="#F3F4F6"/>
+    <rect x="20" y="68" width="403" height="6" rx="3" fill="#10B981"/>
+  </g>
+
+  <!-- weekday + calendar (compact 2 weeks shown) -->
+  <g transform="translate(40,222)">
+    <text x="0" y="0" font-size="13" font-weight="700" fill="#1F2937">월 캘린더 — 거래 풍부</text>
+
+    <g transform="translate(0,16)" font-size="10" fill="#9CA3AF" text-anchor="middle">
+      <text x="50" y="14">일</text><text x="150" y="14">월</text><text x="250" y="14">화</text>
+      <text x="350" y="14">수</text><text x="450" y="14">목</text><text x="550" y="14">금</text>
+      <text x="650" y="14" fill="#3B82F6">토</text>
+    </g>
+
+    <!-- row 1 of cells with example data -->
+    <g transform="translate(0,32)">
+      <g>
+        <rect x="14" y="0" width="72" height="56" rx="8" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="50" y="16" text-anchor="middle" font-size="11" fill="#9CA3AF">10</text>
+        <text x="50" y="34" text-anchor="middle" font-size="10" fill="#BE185D" font-weight="700">17,400</text>
+        <circle cx="36" cy="46" r="2" fill="#F472B6"/>
+        <circle cx="44" cy="46" r="2" fill="#FB7185"/>
+        <circle cx="52" cy="46" r="2" fill="#A78BFA"/>
+      </g>
+      <g transform="translate(100,0)">
+        <rect width="72" height="56" rx="8" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="36" y="16" text-anchor="middle" font-size="11" font-weight="600" fill="#1F2937">11</text>
+        <text x="36" y="34" text-anchor="middle" font-size="10" fill="#BE185D" font-weight="700">8,500</text>
+        <circle cx="22" cy="46" r="2" fill="#F472B6"/>
+      </g>
+      <g transform="translate(200,0)">
+        <rect width="72" height="56" rx="8" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="36" y="16" text-anchor="middle" font-size="11" font-weight="600" fill="#1F2937">12</text>
+        <text x="36" y="34" text-anchor="middle" font-size="10" fill="#BE185D" font-weight="700">35,000</text>
+        <circle cx="22" cy="46" r="2" fill="#A78BFA"/>
+        <circle cx="30" cy="46" r="2" fill="#60A5FA"/>
+      </g>
+      <g transform="translate(300,0)">
+        <rect width="72" height="56" rx="8" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="36" y="16" text-anchor="middle" font-size="11" font-weight="600" fill="#1F2937">13</text>
+        <text x="36" y="34" text-anchor="middle" font-size="10" fill="#BE185D" font-weight="700">22,000</text>
+        <circle cx="22" cy="46" r="2" fill="#F472B6"/>
+      </g>
+      <!-- TODAY -->
+      <g transform="translate(400,0)">
+        <rect width="72" height="56" rx="8" fill="#FCE7F3" stroke="#F472B6" stroke-width="2"/>
+        <circle cx="14" cy="14" r="9" fill="#F472B6"/>
+        <text x="14" y="18" text-anchor="middle" font-size="10" fill="#FFFFFF" font-weight="700">14</text>
+        <text x="36" y="34" text-anchor="middle" font-size="10" fill="#BE185D" font-weight="700">5,200</text>
+        <text x="36" y="50" text-anchor="middle" font-size="8" fill="#BE185D">오늘</text>
+      </g>
+      <g transform="translate(500,0)">
+        <rect width="72" height="56" rx="8" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="36" y="16" text-anchor="middle" font-size="11" fill="#9CA3AF">15</text>
+      </g>
+      <g transform="translate(600,0)">
+        <rect width="72" height="56" rx="8" fill="#FFFFFF" stroke="#F3D4E3"/>
+        <text x="36" y="16" text-anchor="middle" font-size="11" fill="#3B82F6">16</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- recent transactions -->
+  <g transform="translate(40,340)">
+    <rect width="350" height="170" rx="12" fill="#FFFFFF" stroke="#F3D4E3"/>
+    <text x="14" y="22" font-size="12" font-weight="700" fill="#1F2937">오늘 거래 (Day 14)</text>
+    <line x1="14" y1="32" x2="336" y2="32" stroke="#F3F4F6"/>
+
+    <g font-size="11" transform="translate(14,52)">
+      <text y="0" fill="#1F2937" font-weight="600">스타벅스 강남점</text>
+      <text x="322" y="0" text-anchor="end" fill="#BE185D" font-weight="700">-5,200</text>
+      <text y="14" font-size="9" fill="#9CA3AF">카페 · 신용카드 · 09:41 (학습됨)</text>
+
+      <line y1="22" x2="322" y2="22" stroke="#F3F4F6"/>
+
+      <text y="40" fill="#9CA3AF" font-size="10">— 어제 (5/13) —</text>
+
+      <text y="60" fill="#1F2937" font-weight="600">CU 편의점 신촌</text>
+      <text x="322" y="60" text-anchor="end" fill="#BE185D" font-weight="700">-3,200</text>
+      <text y="74" font-size="9" fill="#9CA3AF">식비 · 신용카드 (학습됨)</text>
+
+      <line y1="82" x2="322" y2="82" stroke="#F3F4F6"/>
+
+      <text y="100" fill="#1F2937" font-weight="600">올리브영 신촌</text>
+      <text x="322" y="100" text-anchor="end" fill="#BE185D" font-weight="700">-18,800</text>
+      <text y="114" font-size="9" fill="#9CA3AF">의류·미용 · 카카오페이 (검토 필요)</text>
+    </g>
+  </g>
+
+  <!-- AI insight -->
+  <g transform="translate(410,340)">
+    <rect width="350" height="170" rx="12" fill="#FFF1F5" stroke="#F9A8D4"/>
+    <text x="14" y="22" font-size="12" font-weight="700" fill="#BE185D">✨ AI 인사이트 (자동)</text>
+    <line x1="14" y1="32" x2="336" y2="32" stroke="#F9A8D4" opacity="0.5"/>
+
+    <g font-size="11" transform="translate(14,52)" fill="#374151">
+      <text y="0">• 카페 카테고리 <tspan font-weight="700" fill="#BE185D">87%</tspan> 사용 (한도 도달 임박)</text>
+      <text y="20">• 식비는 <tspan font-weight="700" fill="#10B981">전월 대비 -12%</tspan> 줄임 👏</text>
+      <text y="40">• 주말 카페 지출이 평일의 <tspan font-weight="700">2.3배</tspan></text>
+      <text y="60">• 5/14 신용카드 누적 <tspan font-weight="700">387,200원</tspan></text>
+    </g>
+
+    <g transform="translate(14,128)">
+      <rect width="322" height="28" rx="14" fill="#FFFFFF" stroke="#F472B6"/>
+      <text x="161" y="18" text-anchor="middle" font-size="11" fill="#BE185D" font-weight="700">월말 회고 자동 분석 보기 →</text>
+    </g>
+  </g>
+</svg>
