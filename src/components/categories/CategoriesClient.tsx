@@ -107,29 +107,30 @@ export function CategoriesClient() {
           <CardSubtle className="text-center py-6">불러오는 중…</CardSubtle>
         </Card>
       ) : (
-        <ul className="grid grid-cols-3 gap-3">
+        <ul className="grid grid-cols-3 gap-2">
           {rows.map((c) => (
             <li key={c.id}>
-              <Card className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
+              <Card className="p-3 sm:p-3 flex flex-col gap-2">
+                {/* 상단: 색상 점 + 카테고리 이름 */}
+                <div className="flex items-center gap-1.5 min-w-0">
                   <span
-                    className="inline-block h-3 w-3 rounded-full shrink-0"
+                    className="inline-block h-2 w-2 rounded-full shrink-0"
                     style={{ backgroundColor: c.color ?? '#F472B6' }}
                   />
-                  <div className="min-w-0">
-                    <CardTitle className="truncate">{c.name}</CardTitle>
-                    <div className="text-xs text-textSecondary mt-0.5 flex items-center gap-2">
-                      <span>{c.type === 'income' ? '수입' : c.type === 'expense' ? '지출' : '공통'}</span>
-                      {c.is_default && <Badge tone="muted">기본</Badge>}
-                    </div>
-                  </div>
+                  <div className="text-sm font-semibold text-textPrimary truncate">{c.name}</div>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <Button size="sm" variant="ghost" onClick={() => startEdit(c)} aria-label="수정">
-                    <Pencil className="h-4 w-4" strokeWidth={1.75} />
+                {/* 중간: 지출/수입/공통 + 기본 뱃지 */}
+                <div className="text-[11px] text-textSecondary flex items-center gap-1.5 flex-wrap">
+                  <span>{c.type === 'income' ? '수입' : c.type === 'expense' ? '지출' : '공통'}</span>
+                  {c.is_default && <Badge tone="muted">기본</Badge>}
+                </div>
+                {/* 하단: 수정/삭제 버튼 */}
+                <div className="flex items-center justify-end gap-0.5">
+                  <Button size="sm" variant="ghost" onClick={() => startEdit(c)} aria-label="수정" className="h-7 w-7 px-0">
+                    <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => remove(c)} aria-label="삭제">
-                    <Trash2 className="h-4 w-4 text-danger" strokeWidth={1.75} />
+                  <Button size="sm" variant="ghost" onClick={() => remove(c)} aria-label="삭제" className="h-7 w-7 px-0">
+                    <Trash2 className="h-3.5 w-3.5 text-danger" strokeWidth={1.75} />
                   </Button>
                 </div>
               </Card>

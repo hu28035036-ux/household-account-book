@@ -122,25 +122,26 @@ export function PaymentMethodsClient() {
           <CardSubtle className="text-center py-6">불러오는 중…</CardSubtle>
         </Card>
       ) : (
-        <ul className="grid grid-cols-3 gap-3">
+        <ul className="grid grid-cols-3 gap-2">
           {rows.map((p) => (
             <li key={p.id}>
-              <Card className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <CardTitle className="truncate">{p.name}</CardTitle>
-                  <div className="text-xs text-textSecondary mt-0.5 flex items-center gap-2 flex-wrap">
-                    <Badge tone="muted">{TYPE_LABEL[p.type]}</Badge>
-                    {p.issuer_name && <span>{p.issuer_name}</span>}
-                    {p.masked_number && <span className="tabular">{p.masked_number}</span>}
-                    {p.is_default && <Badge tone="muted">기본</Badge>}
-                  </div>
+              <Card className="p-3 sm:p-3 flex flex-col gap-2">
+                {/* 상단: 결제수단 이름 */}
+                <div className="text-sm font-semibold text-textPrimary truncate">{p.name}</div>
+                {/* 중간: 유형/발급사/끝4자리/기본 */}
+                <div className="text-[11px] text-textSecondary flex items-center gap-1.5 flex-wrap min-w-0">
+                  <Badge tone="muted">{TYPE_LABEL[p.type]}</Badge>
+                  {p.issuer_name && <span className="truncate">{p.issuer_name}</span>}
+                  {p.masked_number && <span className="tabular truncate">{p.masked_number}</span>}
+                  {p.is_default && <Badge tone="muted">기본</Badge>}
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <Button size="sm" variant="ghost" onClick={() => startEdit(p)} aria-label="수정">
-                    <Pencil className="h-4 w-4" strokeWidth={1.75} />
+                {/* 하단: 수정/삭제 버튼 */}
+                <div className="flex items-center justify-end gap-0.5">
+                  <Button size="sm" variant="ghost" onClick={() => startEdit(p)} aria-label="수정" className="h-7 w-7 px-0">
+                    <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => remove(p)} aria-label="삭제">
-                    <Trash2 className="h-4 w-4 text-danger" strokeWidth={1.75} />
+                  <Button size="sm" variant="ghost" onClick={() => remove(p)} aria-label="삭제" className="h-7 w-7 px-0">
+                    <Trash2 className="h-3.5 w-3.5 text-danger" strokeWidth={1.75} />
                   </Button>
                 </div>
               </Card>
