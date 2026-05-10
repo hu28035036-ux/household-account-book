@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="800" height="480" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="800" height="480" fill="#FFF7FA"/>
+
+  <!-- title -->
+  <g transform="translate(400,46)" text-anchor="middle">
+    <rect x="-180" y="-22" width="360" height="36" rx="18" fill="#FFFFFF" stroke="#F9A8D4"/>
+    <text y="3" font-size="14" font-weight="700" fill="#BE185D">월말 AI 회고 — "민지" 의 5월</text>
+  </g>
+  <text x="400" y="98" text-anchor="middle" font-size="11" fill="#9CA3AF">/stats 페이지에서 [✨ AI 분석] 한 번 누르면 자동 생성</text>
+
+  <!-- main card -->
+  <g transform="translate(80,124)">
+    <rect width="640" height="316" rx="18" fill="#FFFFFF" stroke="#F3D4E3"/>
+
+    <!-- header -->
+    <g transform="translate(20,24)">
+      <text font-size="11" fill="#9CA3AF">2026.05.01 — 2026.05.31 · 47건 거래</text>
+      <text y="22" font-size="20" font-weight="800" fill="#1F2937">한 줄 요약</text>
+      <text y="44" font-size="14" fill="#374151">
+        외식·카페에 한도 도달했지만, <tspan font-weight="700" fill="#10B981">전월 대비 식비 -22%</tspan> 줄였어요.
+      </text>
+      <text y="62" font-size="14" fill="#374151">
+        다음 달은 <tspan font-weight="700" fill="#BE185D">카페 한도 -25%</tspan> 가 가장 효과 클 것 같아요.
+      </text>
+    </g>
+
+    <line x1="20" y1="106" x2="620" y2="106" stroke="#F3D4E3"/>
+
+    <!-- 3 column insights -->
+    <g transform="translate(20,124)">
+      <!-- 잘한 것 -->
+      <g>
+        <rect width="190" height="170" rx="12" fill="#F0FDF4" stroke="#86EFAC"/>
+        <text x="14" y="22" font-size="12" font-weight="700" fill="#10B981">👏 잘한 것</text>
+        <line x1="14" y1="32" x2="176" y2="32" stroke="#86EFAC" opacity="0.5"/>
+
+        <g transform="translate(14,52)" font-size="10" fill="#374151">
+          <text>• 식비 -22% (전월 대비)</text>
+          <text y="20">• 매일 평균 1.6건 입력</text>
+          <text y="40">• 영수증 업로드 8회</text>
+          <text y="60">• 학습된 가맹점 14곳</text>
+          <text y="80">• 자동 분류 정확도 89%</text>
+          <text y="104" font-size="9" fill="#10B981" font-weight="700">→ 습관 형성 진행 중</text>
+        </g>
+      </g>
+
+      <!-- 신호등 -->
+      <g transform="translate(205,0)">
+        <rect width="190" height="170" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text x="14" y="22" font-size="12" font-weight="700" fill="#DC2626">⚠ 주의 신호</text>
+        <line x1="14" y1="32" x2="176" y2="32" stroke="#FCA5A5" opacity="0.5"/>
+
+        <g transform="translate(14,52)" font-size="10" fill="#374151">
+          <text>• 카페 한도 105% 초과</text>
+          <text y="20">• 주말 카페 = 평일 ×2.3</text>
+          <text y="40">• 신용카드만 누적 ↑</text>
+          <text y="60">• 5/22 한 번에 -86k</text>
+          <text y="84" font-size="9" fill="#DC2626" font-weight="700">→ 5/22 의류 충동지출</text>
+          <text y="100" font-size="9" fill="#9CA3AF">  사전 알림이 있었으면 ↓</text>
+        </g>
+      </g>
+
+      <!-- 다음달 제안 -->
+      <g transform="translate(410,0)">
+        <rect width="190" height="170" rx="12" fill="#FFF1F5" stroke="#F9A8D4"/>
+        <text x="14" y="22" font-size="12" font-weight="700" fill="#BE185D">💡 다음 달 한 가지</text>
+        <line x1="14" y1="32" x2="176" y2="32" stroke="#F9A8D4" opacity="0.5"/>
+
+        <g transform="translate(14,52)" font-size="10" fill="#374151">
+          <text font-weight="700" fill="#BE185D">"카페 한도 80k → 60k"</text>
+          <text y="20">한 가지만 줄여 보세요.</text>
+
+          <text y="44" font-weight="700" fill="#1F2937">왜?</text>
+          <text y="58">평일 1잔/일 정도로</text>
+          <text y="70">바꾸면 자연스럽게 ↓</text>
+
+          <text y="92" font-size="9" fill="#9CA3AF">예산 페이지에서 한 줄 수정</text>
+
+          <g transform="translate(0,108)">
+            <rect width="162" height="22" rx="11" fill="#F472B6"/>
+            <text x="81" y="15" text-anchor="middle" font-size="10" fill="#FFFFFF" font-weight="700">→ 예산 80k → 60k 적용</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- bottom note -->
+  <g transform="translate(400,460)" text-anchor="middle">
+    <text font-size="10" fill="#9CA3AF">AI 회고는 자동 생성 + 자동 저장 — /ai-history 에서 다시 펼쳐 볼 수 있어요</text>
+  </g>
+</svg>
