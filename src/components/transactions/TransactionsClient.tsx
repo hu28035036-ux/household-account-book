@@ -8,23 +8,44 @@ import { TransactionTable } from './TransactionTable';
 import { TransactionCardList } from './TransactionCardList';
 import { TransactionEditor } from './TransactionEditor';
 import { useActiveHousehold } from '@/lib/active-household';
+import { useAbortableFetch } from '@/lib/hooks/useAbortableFetch';
 
-type Row = any;
+// 거래 행 — TransactionTable.Row + TransactionEditor.Initial 둘과 호환.
+// 둘 사이의 합집합으로 정의 (Editor 는 일부 optional, Table 은 모두 required).
+type TransactionRow = {
+  id: string;
+  transaction_date: string;
+  type: 'income' | 'expense' | 'transfer';
+  amount: number;
+  merchant_name: string | null;
+  description: string | null;
+  memo: string | null;
+  household_id: string | null;
+  category_id?: string | null;
+  payment_method_id?: string | null;
+  categories?: { name: string; color: string | null; icon?: string | null } | null;
+  payment_methods?: { name: string; type?: string; masked_number: string | null } | null;
+};
+
+// TransactionEditor.Category / PaymentMethod 와 호환 — type 필수 string.
+type CategoryItem = { id: string; name: string; color?: string | null; type: string };
+type PaymentMethodItem = { id: string; name: string; type: string };
 
 export function TransactionsClient() {
   const { activeId, households } = useActiveHousehold();
   const activeName = activeId ? households.find((h) => h.id === activeId)?.name ?? null : null;
-  const [rows, setRows] = useState<Row[]>([]);
+  const [rows, setRows] = useState<TransactionRow[]>([]);
   const [total, setTotal] = useState(0);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [editorOpen, setEditorOpen] = useState(false);
-  const [editing, setEditing] = useState<Row | null>(null);
+  const [editing, setEditing] = useState<TransactionRow | null>(null);
   const [q, setQ] = useState('');
   const [type, setType] = useState<'' | 'income' | 'expense' | 'transfer'>('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkPending, setBulkPending] = useState(false);
+  const aFetch = useAbortableFetch();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -35,24 +56,32 @@ export function TransactionsClient() {
     if (activeId) params.set('household_id', activeId);
     else params.set('scope', 'personal');
     params.set('limit', '50');
+    // useAbortableFetch — q/type 빠르게 바뀌어도 stale 응답이 setState 안 덮어쓰게.
     const [txRes, catRes, pmRes] = await Promise.all([
-      fetch('/api/transactions?' + params.toString()).then((r) => r.json()),
-      fetch('/api/categories').then((r) => r.json()),
-      fetch('/api/payment-methods').then((r) => r.json()),
+      aFetch('/api/transactions?' + params.toString()),
+      aFetch('/api/categories'),
+      aFetch('/api/payment-methods'),
     ]);
-    setRows(txRes?.data?.rows ?? []);
-    setTotal(txRes?.data?.total ?? 0);
-    setCategories(catRes?.data ?? []);
-    setPaymentMethods(pmRes?.data ?? []);
+    if (!txRes || !catRes || !pmRes) {
+      // 한 요청이라도 abort 됐으면 setState 안 함
+      return;
+    }
+    const txJson = await txRes.json();
+    const catJson = await catRes.json();
+    const pmJson = await pmRes.json();
+    setRows(txJson?.data?.rows ?? []);
+    setTotal(txJson?.data?.total ?? 0);
+    setCategories(catJson?.data ?? []);
+    setPaymentMethods(pmJson?.data ?? []);
     setSelected(new Set());
     setLoading(false);
-  }, [q, type, activeId]);
+  }, [q, type, activeId, aFetch]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  async function onDelete(row: Row) {
+  async function onDelete(row: TransactionRow) {
     if (!confirm(`이 거래를 삭제할까요?\n${row.merchant_name ?? ''} ${row.amount?.toLocaleString?.() ?? ''}원`)) return;
     const res = await fetch(`/api/transactions/${row.id}`, { method: 'DELETE' });
     if (res.ok) load();
@@ -182,12 +211,12 @@ export function TransactionsClient() {
         <>
           <div className="hidden md:block">
             <TransactionTable
-              rows={rows}
+              rows={rows as unknown as Parameters<typeof TransactionTable>[0]['rows']}
               onEdit={(r) => {
-                setEditing(r);
+                setEditing(r as unknown as TransactionRow);
                 setEditorOpen(true);
               }}
-              onDelete={onDelete}
+              onDelete={onDelete as unknown as Parameters<typeof TransactionTable>[0]['onDelete']}
               selectedIds={selected}
               onToggle={toggle}
               onToggleAll={toggleAll}
@@ -195,12 +224,12 @@ export function TransactionsClient() {
           </div>
           <div className="md:hidden">
             <TransactionCardList
-              rows={rows}
+              rows={rows as unknown as Parameters<typeof TransactionCardList>[0]['rows']}
               onEdit={(r) => {
-                setEditing(r);
+                setEditing(r as unknown as TransactionRow);
                 setEditorOpen(true);
               }}
-              onDelete={onDelete}
+              onDelete={onDelete as unknown as Parameters<typeof TransactionCardList>[0]['onDelete']}
               selectedIds={selected}
               onToggle={toggle}
             />

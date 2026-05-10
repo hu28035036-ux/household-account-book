@@ -5,6 +5,10 @@
     {
       "path": "/api/admin/purge-raw-text",
       "schedule": "0 18 * * *"
+    },
+    {
+      "path": "/api/recurring/run",
+      "schedule": "5 0 * * *"
     }
   ]
 }

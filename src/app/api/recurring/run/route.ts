@@ -7,17 +7,22 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 /**
- * GitHub Actions / Vercel Cron 에서 매일 호출.
- * Authorization: Bearer ${CRON_TOKEN} 검증 후 실행.
+ * Vercel Cron / GitHub Actions 에서 매일 호출.
+ * - Vercel Cron: 자동 헤더 `x-vercel-cron` 통과
+ * - 외부 호출: Authorization: Bearer ${CRON_TOKEN}
  *
  * - active=true AND auto_post=true AND next_run_date <= today → 거래 자동 등록
  * - 사전 알림(notify_days_before) 도래한 룰은 알림 row 생성
  */
-export async function POST(req: NextRequest) {
-  const token = req.headers.get('authorization');
-  const expected = process.env.CRON_TOKEN ? `Bearer ${process.env.CRON_TOKEN}` : null;
-  if (!expected || token !== expected) {
-    return fail('UNAUTHORIZED', '잘못된 cron 토큰');
+async function handle(req: NextRequest) {
+  // Vercel Cron 자동 호출은 헤더로 통과
+  const isVercelCron = !!req.headers.get('x-vercel-cron');
+  if (!isVercelCron) {
+    const token = req.headers.get('authorization');
+    const expected = process.env.CRON_TOKEN ? `Bearer ${process.env.CRON_TOKEN}` : null;
+    if (!expected || token !== expected) {
+      return fail('UNAUTHORIZED', '잘못된 cron 토큰');
+    }
   }
 
   const admin = createSupabaseAdminClient();
@@ -87,4 +92,13 @@ export async function POST(req: NextRequest) {
     posted,
     notified,
   });
+}
+
+// Vercel Cron 은 GET 으로 호출 — GET/POST 둘 다 지원
+export async function GET(req: NextRequest) {
+  return handle(req);
+}
+
+export async function POST(req: NextRequest) {
+  return handle(req);
 }

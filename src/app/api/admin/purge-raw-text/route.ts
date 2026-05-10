@@ -18,7 +18,7 @@ async function isAuthorized(req: NextRequest): Promise<boolean> {
   return !!process.env.CRON_TOKEN && token === process.env.CRON_TOKEN;
 }
 
-export async function POST(req: NextRequest) {
+async function handle(req: NextRequest) {
   if (!(await isAuthorized(req))) {
     return fail('UNAUTHORIZED', '잘못된 토큰');
   }
@@ -30,4 +30,14 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     return fail('INTERNAL', e instanceof Error ? e.message : '폐기 실패');
   }
+}
+
+// Vercel Cron 은 GET 으로 호출 — POST 만 export 했던 기존 코드는 매일 405 발생
+// (PII raw_text 가 폐기되지 않고 무기한 잔존). GET/POST 둘 다 지원.
+export async function GET(req: NextRequest) {
+  return handle(req);
+}
+
+export async function POST(req: NextRequest) {
+  return handle(req);
 }
