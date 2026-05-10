@@ -9,6 +9,7 @@ import { TransactionCardList } from './TransactionCardList';
 import { TransactionEditor } from './TransactionEditor';
 import { useActiveHousehold } from '@/lib/active-household';
 import { useAbortableFetch } from '@/lib/hooks/useAbortableFetch';
+import { useConfirm, useAlertModal } from '@/components/common/ConfirmProvider';
 
 // 거래 행 — TransactionTable.Row + TransactionEditor.Initial 둘과 호환.
 // 둘 사이의 합집합으로 정의 (Editor 는 일부 optional, Table 은 모두 required).
@@ -46,6 +47,8 @@ export function TransactionsClient() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkPending, setBulkPending] = useState(false);
   const aFetch = useAbortableFetch();
+  const confirm = useConfirm();
+  const alertModal = useAlertModal();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -82,7 +85,13 @@ export function TransactionsClient() {
   }, [load]);
 
   async function onDelete(row: TransactionRow) {
-    if (!confirm(`이 거래를 삭제할까요?\n${row.merchant_name ?? ''} ${row.amount?.toLocaleString?.() ?? ''}원`)) return;
+    const ok = await confirm({
+      title: '거래 삭제',
+      message: `${row.merchant_name ?? ''} ${row.amount?.toLocaleString?.() ?? ''}원 거래를 삭제할까요? 되돌릴 수 없습니다.`,
+      confirmText: '삭제',
+      tone: 'danger',
+    });
+    if (!ok) return;
     const res = await fetch(`/api/transactions/${row.id}`, { method: 'DELETE' });
     if (res.ok) load();
   }
@@ -105,7 +114,13 @@ export function TransactionsClient() {
 
   async function bulkDelete() {
     if (selected.size === 0) return;
-    if (!confirm(`선택한 ${selected.size}건을 삭제할까요? 되돌릴 수 없습니다.`)) return;
+    const ok = await confirm({
+      title: `${selected.size}건 일괄 삭제`,
+      message: `선택한 ${selected.size}건을 삭제할까요? 되돌릴 수 없습니다.`,
+      confirmText: '삭제',
+      tone: 'danger',
+    });
+    if (!ok) return;
     setBulkPending(true);
     try {
       const res = await fetch('/api/transactions/delete-bulk', {
@@ -115,13 +130,16 @@ export function TransactionsClient() {
       });
       const j = await res.json();
       if (!res.ok) {
-        alert(j?.error?.message ?? '일괄 삭제 실패');
+        await alertModal({ title: '일괄 삭제 실패', message: j?.error?.message ?? '일괄 삭제 실패' });
         return;
       }
       const deleted = j?.data?.deleted ?? 0;
       const skipped = j?.data?.skipped ?? 0;
       if (skipped > 0) {
-        alert(`${deleted}건 삭제 · ${skipped}건은 권한이 없어 건너뜀(다른 가족이 만든 거래)`);
+        await alertModal({
+          title: '일괄 삭제 완료',
+          message: `${deleted}건 삭제 · ${skipped}건은 권한이 없어 건너뜀 (다른 가족이 만든 거래).`,
+        });
       }
       await load();
     } finally {
