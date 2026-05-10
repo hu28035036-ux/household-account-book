@@ -55,6 +55,8 @@ const withPWA = withPWAInit({
           cacheName: 'pages',
           networkTimeoutSeconds: 4,
           expiration: { maxEntries: 32, maxAgeSeconds: 60 * 60 },
+          // 4xx/5xx HTML(401/403 redirect 등)을 1시간 캐시하면 인증 흐름이 깨질 수 있음
+          cacheableResponse: { statuses: [0, 200] },
         },
       },
       // CSS/JS/Worker/Font — SWR (해시된 URL 이라 stale 위험 X)
@@ -88,6 +90,37 @@ const withPWA = withPWAInit({
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  async headers() {
+    // 보안 표준 헤더 — 금융 PII + OpenAI 키를 다루는 앱이라 기본 hardening.
+    // CSP 는 Next.js 의 inline script(<Script>, hydration), Vercel Insights,
+    // Supabase Realtime WebSocket, OpenAI 호출(서버 라우트 → 클라이언트는 동일 origin)
+    // 을 모두 허용하도록 보수적으로 작성.
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://*.supabase.co",
+      "font-src 'self' data:",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join('; ');
+
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Content-Security-Policy', value: csp },
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=()' },
+        ],
+      },
+    ];
+  },
 };
 
 export default withPWA(nextConfig);
