@@ -188,9 +188,13 @@ export async function createRecurringRule(
   return data as RecurringRule;
 }
 
+// userId 인자는 호환성 유지 (호출처 변경 없이) — 권한 검증은 RLS 에 위임.
+// 0017_recurring_rules_household_rls.sql 가 RLS UPDATE/DELETE 를 모임 멤버까지
+// 허용했으므로 service 단에서 .eq('user_id') 로 한 단계 더 좁히면 모임 멤버가
+// 룰 수정/삭제 못 함 (PR #15 의도 미작동). RLS 만 신뢰.
 export async function updateRecurringRule(
   supabase: SupabaseClient,
-  userId: string,
+  _userId: string,
   id: string,
   patch: Partial<RecurringRuleInput>,
 ): Promise<RecurringRule> {
@@ -199,13 +203,14 @@ export async function updateRecurringRule(
     .from('recurring_rules')
     .select('*')
     .eq('id', id)
-    .eq('user_id', userId)
     .single();
   if (e1) throw e1;
 
+  // eslint-disable-next-line
   const merged = { ...(existing as any), ...patch } as RecurringRuleInput & {
     next_run_date: string | null;
   };
+  // eslint-disable-next-line
   let next_run_date = (existing as any).next_run_date as string | null;
   const recalc =
     patch.frequency !== undefined ||
@@ -223,7 +228,6 @@ export async function updateRecurringRule(
     .from('recurring_rules')
     .update({ ...patch, next_run_date })
     .eq('id', id)
-    .eq('user_id', userId)
     .select('*')
     .single();
   if (error) throw error;
@@ -232,14 +236,10 @@ export async function updateRecurringRule(
 
 export async function deleteRecurringRule(
   supabase: SupabaseClient,
-  userId: string,
+  _userId: string,
   id: string,
 ): Promise<void> {
-  const { error } = await supabase
-    .from('recurring_rules')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', userId);
+  const { error } = await supabase.from('recurring_rules').delete().eq('id', id);
   if (error) throw error;
 }
 
