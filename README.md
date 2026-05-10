@@ -75,6 +75,17 @@ supabase/         마이그레이션 SQL
 
 | PR | 제목 | 핵심 |
 |---|---|---|
+| [#20](https://github.com/hu28035036-ux/household-account-book/pull/20) | recurring RLS 비대칭 회귀 fix | `recurringService.update/delete` 의 `.eq('user_id')` 제거 — 0017 RLS 가 모임 멤버 허용했는데 service 가 owner 강제하던 비대칭 해소. **0017 SQL 은 prod DB 적용 필요** |
+| [#19](https://github.com/hu28035036-ux/household-account-book/pull/19) | ConfirmProvider 도입 | useConfirm/useAlertModal hook + AppShell mount + TransactionsClient 4 콜 1차 마이그레이션. 22 콜은 같은 hook 으로 후속 점진. |
+| [#18](https://github.com/hu28035036-ux/household-account-book/pull/18) | as any 6회 정리 | MfaCard·Editor·CandidateCard 의 가장 risky 한 6 건 → 구체 union/intersection 타입 |
+| [#17](https://github.com/hu28035036-ux/household-account-book/pull/17) | services 단위 테스트 (잔여) | candidate / household / cardStats 3 파일 12 케이스. _supabaseMock 헬퍼 재사용. |
+| [#16](https://github.com/hu28035036-ux/household-account-book/pull/16) | services 단위 테스트 + recurring 클램프 버그 fix | transaction/category/paymentMethod/recurring 4 파일 28 케이스. 작성 중 발견된 **monthly 31일 클램프 미동작 버그 fix** (말일 룰이 다음 달 1일로 잘못 등록되던 문제). |
+| [#15](https://github.com/hu28035036-ux/household-account-book/pull/15) | 디버깅 항목 일괄 처리 (★★★ 4 + ★★ 6) | cron GET 추가 (purge-raw-text + recurring/run) / fail() prod sanitize / CSP·HSTS·X-Frame 등 보안 헤더 / useAbortableFetch / 0007~0017 down 스크립트 / 0017 recurring RLS 모임 멤버 / TransactionsClient any→type / pages SWR cacheableResponse |
+| [#14](https://github.com/hu28035036-ux/household-account-book/pull/14) | PRD chunk 전략 보강 | Appendix §A.1 — 데이터 종류별 chunk(외부 노하우 200~400t / 거래 50~100t / 월 회고 800~1,200t) + 계층적 chunking + sliding/semantic + RLS 매트릭스 |
+| [#13](https://github.com/hu28035036-ux/household-account-book/pull/13) | 관리자 이름 컬럼 + 삭제 fix + RAG PRD | 가입자 표 이름 마스킹("허○회") · DELETE 호환성 (query/body 둘 다) · 외부 RAG + 사용자별 RAG NEXT 항목 + RAG 권고 부록 (정확도+속도) |
+| [#12](https://github.com/hu28035036-ux/household-account-book/pull/12) | PRD v2.1 — 가상 페르소나 시나리오 | dashboard-rich / persona-30days / ai-insight-card 3 SVG + 페르소나 4 마일스톤 / 화면 4 질문 / 한 가지만 원칙 섹션 |
+| [#11](https://github.com/hu28035036-ux/household-account-book/pull/11) | PRD v2.0 + Now/Next/Later 로드맵 | docs/PRD.md (8 섹션 + Appendix) + cover-purpose/vision-loops/roadmap-timeline 3 SVG. 사용법 화면은 public/guide/usage 9 SVG 재활용 |
+| [#9](https://github.com/hu28035036-ux/household-account-book/pull/9) | README 최근 업데이트 + OpenAI Vision 전환 반영 | 한 줄 설명·스택·5단계 셋업·주요 화면·최근 업데이트 표 |
 | [#8](https://github.com/hu28035036-ux/household-account-book/pull/8) | UI 정돈 | 카테고리·결제수단 카드를 모바일/태블릿/PC 모두 3열 grid 로 통일. 분석 후보 "일괄 승인 (선택 필요)" 텍스트 단축 — 한 줄 유지. |
 | [#7](https://github.com/hu28035036-ux/household-account-book/pull/7) | 사용법 SVG + PWA 캐시 안정화 | `/guide/usage/` 9개 SVG 추가 (월캘린더·OCR·import·후보·예산·고정·통계·모임·백업). PWA SW 가 4xx 응답을 30일 stale 로 캐시하던 사고 차단 (`cacheableResponse: { statuses: [0, 200] }`). 첫 실패 시 cache-busting query 로 1회 자동 retry. |
 | [#6](https://github.com/hu28035036-ux/household-account-book/pull/6) | 가이드 탭 분리 | `/guide` 를 "작성 요령" + "사용법" 두 탭으로. 월캘린더 상단 전체 예산을 카테고리 합산 자동 계산. |
