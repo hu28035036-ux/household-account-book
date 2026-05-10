@@ -16,11 +16,15 @@ const SCRIPTS = [
   'scripts/test-mutation-apis.mjs',
 ];
 
-const cmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const isWin = process.platform === 'win32';
+const cmd = isWin ? 'npm.cmd' : 'npm';
 console.log('[smoke] dev 서버 시작…');
+// Node 24+ Windows 에서 npm.cmd 직접 spawn 시 EINVAL — shell:true 로 cmd.exe 경유.
+// incident-0015 후속 (docs/verification/2026-05-11-code-validation.md).
 const dev = spawn(cmd, ['run', 'dev'], {
   stdio: ['ignore', 'pipe', 'pipe'],
   env: process.env,
+  shell: isWin,
 });
 dev.stdout.on('data', () => {});
 dev.stderr.on('data', () => {});
@@ -62,9 +66,14 @@ for (const s of SCRIPTS) {
 
 console.log('\n[smoke] dev 서버 종료');
 dev.kill();
-// child npm 이 자식 next 까지 완전히 죽이지 못할 수 있어 추가 정리
-if (process.platform === 'win32') {
-  spawn('taskkill', ['/F', '/IM', 'node.exe'], { stdio: 'ignore' }).on('close', () => {});
+// Windows: dev pid 를 루트로 그 child tree 만 정리 (/T 옵션).
+// 기존 `taskkill /F /IM node.exe` 는 모든 Node 프로세스 (smoke 자체 포함) 를
+// 죽일 수 있어 위험 — pid 기반 tree-kill 로 좁힘.
+if (isWin && dev.pid) {
+  spawn('taskkill', ['/F', '/T', '/PID', String(dev.pid)], { stdio: 'ignore' }).on(
+    'close',
+    () => {},
+  );
 }
 
 if (totalFail > 0) {
