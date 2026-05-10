@@ -77,18 +77,24 @@ export function computeNextRun(rule: RecurringRuleInput, fromDate: Date): Date {
   }
   if (rule.frequency === 'monthly') {
     const dom = rule.day_of_month ?? cursor.getUTCDate();
-    const candidate = new Date(
-      Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth(), dom),
-    );
+    // 주의: new Date(Date.UTC(year, month, 31)) 은 30일짜리 달이면 자동으로 다음
+    // 달 1일로 overflow 된다. 이 때문에 후처리로 lastDayOfMonth 비교해도 다음 달
+    // 기준이 되어 클램프가 안 걸렸음 (버그). 먼저 month/year 를 정한 뒤 dom 을
+    // 그 달의 마지막 날로 클램프한 후 Date 를 만든다.
+    let y = cursor.getUTCFullYear();
+    let m = cursor.getUTCMonth();
+    const lastOfThis = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+    const candidateDom = Math.min(dom, lastOfThis);
+    const candidate = new Date(Date.UTC(y, m, candidateDom));
     if (candidate < cursor) {
-      candidate.setUTCMonth(candidate.getUTCMonth() + 1);
+      m += 1;
+      if (m > 11) {
+        m = 0;
+        y += 1;
+      }
     }
-    // 31일 같이 그 달엔 없는 day → 마지막 날로 클램프
-    const lastDayOfMonth = new Date(
-      Date.UTC(candidate.getUTCFullYear(), candidate.getUTCMonth() + 1, 0),
-    ).getUTCDate();
-    if (dom > lastDayOfMonth) candidate.setUTCDate(lastDayOfMonth);
-    return candidate;
+    const lastOfTarget = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+    return new Date(Date.UTC(y, m, Math.min(dom, lastOfTarget)));
   }
   // yearly
   const moy = rule.month_of_year ?? cursor.getUTCMonth() + 1;
@@ -108,13 +114,17 @@ export function computeAfter(rule: RecurringRule | RecurringRuleInput, runDate: 
     return next;
   }
   if (rule.frequency === 'monthly') {
+    // eslint-disable-next-line
     const dom = (rule as any).day_of_month ?? runDate.getUTCDate();
-    const target = new Date(Date.UTC(runDate.getUTCFullYear(), runDate.getUTCMonth() + 1, dom));
-    const last = new Date(
-      Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0),
-    ).getUTCDate();
-    if (dom > last) target.setUTCDate(last);
-    return target;
+    // computeNextRun 과 동일 버그(overflow) 수정 — month/year 먼저, dom 클램프 후 Date.
+    let y = runDate.getUTCFullYear();
+    let m = runDate.getUTCMonth() + 1;
+    if (m > 11) {
+      m = 0;
+      y += 1;
+    }
+    const lastOfTarget = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+    return new Date(Date.UTC(y, m, Math.min(dom, lastOfTarget)));
   }
   // yearly
   const moy = (rule as any).month_of_year ?? runDate.getUTCMonth() + 1;
