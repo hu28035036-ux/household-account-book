@@ -34,7 +34,7 @@ export function MfaCard() {
     const totp = ((data?.totp ?? []) as FactorRow[]).map((f) => ({
       id: f.id,
       status: f.status,
-      friendly_name: (f as any).friendly_name ?? null,
+      friendly_name: (f as FactorRow & { friendly_name?: string | null }).friendly_name ?? null,
     }));
     setFactors(totp);
     if (totp.some((f) => f.status === 'verified')) setStatus('verified');
@@ -61,9 +61,13 @@ export function MfaCard() {
         friendlyName: 'AI 가계부',
       });
       if (error) throw error;
-      setFactorId((data as any)?.id ?? null);
-      setQr((data as any)?.totp?.qr_code ?? null);
-      setSecret((data as any)?.totp?.secret ?? null);
+      // supabase.auth.mfa.enroll 의 반환 shape — id + totp.{qr_code, secret}
+      const enroll = data as
+        | { id?: string; totp?: { qr_code?: string; secret?: string } }
+        | null;
+      setFactorId(enroll?.id ?? null);
+      setQr(enroll?.totp?.qr_code ?? null);
+      setSecret(enroll?.totp?.secret ?? null);
       setCode('');
       setEnrollOpen(true);
     } catch (e) {
