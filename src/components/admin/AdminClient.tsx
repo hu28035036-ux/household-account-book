@@ -12,12 +12,25 @@ type AllowedEmail = { id: string; email: string; note: string | null; created_at
 type UserRow = {
   id: string;
   email: string | null;
+  full_name: string | null;
+  nickname: string | null;
   last_sign_in_at: string | null;
   created_at: string;
   banned_until: string | null;
   confirmed_at: string | null;
   transactions_count: number;
 };
+
+// 이름 마스킹 — 맨 앞 글자 + 가운데(○) + 맨 뒤 글자만 노출.
+// 예: "허신회" → "허○회" / "김민지" → "김○지" / "이재훈민" → "이○○민"
+function maskName(name: string | null): string {
+  if (!name) return '-';
+  const trimmed = name.trim();
+  if (trimmed.length <= 1) return trimmed;
+  if (trimmed.length === 2) return `${trimmed[0]}*`;
+  const middle = '○'.repeat(trimmed.length - 2);
+  return `${trimmed[0]}${middle}${trimmed[trimmed.length - 1]}`;
+}
 
 export function AdminClient({ currentEmail }: { currentEmail: string | null }) {
   const [allowed, setAllowed] = useState<AllowedEmail[]>([]);
@@ -88,16 +101,22 @@ export function AdminClient({ currentEmail }: { currentEmail: string | null }) {
   }
 
   async function deleteHard(u: UserRow) {
+    const label = maskName(u.full_name) !== '-' ? maskName(u.full_name) : (u.email ?? u.id);
     const v = prompt(
-      `${u.email} 계정을 영구 삭제합니다. 모든 거래/파일/예산이 함께 사라집니다.\n\n진행하려면 DELETE 입력`,
+      `${label} 계정을 영구 삭제합니다. 모든 거래/파일/예산이 함께 사라집니다.\n\n진행하려면 DELETE 입력`,
     );
     if (v !== 'DELETE') return;
-    const res = await fetch(`/api/admin/users/${u.id}`, {
+    // confirm 은 query string 으로 전달 — 일부 환경에서 DELETE+body 가 stripped
+    // 되는 호환성 이슈 우회 (서버는 query/body 둘 다 받음)
+    const res = await fetch(`/api/admin/users/${u.id}?confirm=DELETE`, {
       method: 'DELETE',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ confirm: 'DELETE' }),
     });
-    if (res.ok) load();
+    if (res.ok) {
+      load();
+    } else {
+      const j = await res.json().catch(() => ({}));
+      alert(`삭제 실패: ${j?.error?.message ?? res.statusText}`);
+    }
   }
 
   return (
@@ -168,6 +187,7 @@ export function AdminClient({ currentEmail }: { currentEmail: string | null }) {
             <table className="min-w-full text-sm">
               <thead className="bg-sectionBackground text-textSecondary">
                 <tr>
+                  <th className="text-left px-3 py-2 whitespace-nowrap">이름</th>
                   <th className="text-left px-3 py-2">이메일</th>
                   <th className="text-left px-3 py-2 whitespace-nowrap">가입</th>
                   <th className="text-left px-3 py-2 whitespace-nowrap">최근 로그인</th>
@@ -181,6 +201,16 @@ export function AdminClient({ currentEmail }: { currentEmail: string | null }) {
                   const banned = !!u.banned_until && new Date(u.banned_until) > new Date();
                   return (
                     <tr key={u.id}>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        {u.full_name ? (
+                          <span className="font-medium text-textPrimary">{maskName(u.full_name)}</span>
+                        ) : (
+                          <span className="text-textMuted">-</span>
+                        )}
+                        {u.nickname && (
+                          <span className="ml-1.5 text-xs text-textMuted">({maskName(u.nickname)})</span>
+                        )}
+                      </td>
                       <td className="px-3 py-2 truncate max-w-[260px]">{u.email ?? '-'}</td>
                       <td className="px-3 py-2 whitespace-nowrap text-xs text-textSecondary">
                         {formatDateKST(u.created_at)}

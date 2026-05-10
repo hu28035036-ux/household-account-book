@@ -34,14 +34,19 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   // 본인 계정 자체 삭제 방지
   if (params.id === u.user.id) return fail('BAD_REQUEST', '본인 계정은 /api/account에서 삭제하세요.');
 
-  // 본문 confirmation
-  let body: any = {};
+  // confirm 검사 — query string 우선, body fallback (DELETE+body 가 일부 환경에서
+  // stripped 되는 호환성 이슈 우회. 클라이언트는 ?confirm=DELETE 로 보냄.)
+  const url = new URL(req.url);
+  const queryConfirm = url.searchParams.get('confirm');
+  let bodyConfirm: string | undefined;
   try {
-    body = await req.json();
+    const body = (await req.json()) as { confirm?: string };
+    bodyConfirm = body?.confirm;
   } catch {
-    /* empty */
+    /* body 없을 수 있음 — OK */
   }
-  if (body?.confirm !== 'DELETE') return fail('BAD_REQUEST', '본문에 { confirm: "DELETE" } 필요');
+  const confirm = queryConfirm ?? bodyConfirm;
+  if (confirm !== 'DELETE') return fail('BAD_REQUEST', 'confirm=DELETE 필요 (query 또는 body)');
 
   try {
     const admin = createSupabaseAdminClient();
