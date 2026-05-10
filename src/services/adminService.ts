@@ -36,8 +36,20 @@ export async function listUsers(admin: SupabaseClient) {
   if (error) throw error;
   const users = data.users ?? [];
 
-  // 거래 수 조회 (최근 30일)
-  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  // profiles 일괄 조회 — full_name + nickname (가입자 표 첫 컬럼 표시용)
+  const userIds = users.map((u) => u.id);
+  const profilesByUserId: Record<string, { full_name: string | null; nickname: string | null }> = {};
+  if (userIds.length > 0) {
+    const { data: profiles } = await admin
+      .from('profiles')
+      .select('user_id, full_name, nickname')
+      .in('user_id', userIds);
+    for (const p of (profiles ?? []) as Array<{ user_id: string; full_name: string | null; nickname: string | null }>) {
+      profilesByUserId[p.user_id] = { full_name: p.full_name, nickname: p.nickname };
+    }
+  }
+
+  // 거래 수 조회 (전체 누적)
   const counts: Record<string, number> = {};
   for (const u of users) {
     const { count } = await admin
@@ -50,12 +62,13 @@ export async function listUsers(admin: SupabaseClient) {
   return users.map((u) => ({
     id: u.id,
     email: u.email,
+    full_name: profilesByUserId[u.id]?.full_name ?? null,
+    nickname: profilesByUserId[u.id]?.nickname ?? null,
     last_sign_in_at: u.last_sign_in_at,
     created_at: u.created_at,
     banned_until: (u as any).banned_until ?? null,
     confirmed_at: u.confirmed_at,
     transactions_count: counts[u.id] ?? 0,
-    _since30Days: since,
   }));
 }
 
