@@ -196,7 +196,7 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
                 <span className="w-16 shrink-0 text-xs text-textSecondary">유형</span>
                 <select
                   value={type}
-                  onChange={(e) => setType(e.target.value as any)}
+                  onChange={(e) => setType(e.target.value as 'income' | 'expense' | 'transfer')}
                   className="flex-1 h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
                 >
                   <option value="expense">지출</option>

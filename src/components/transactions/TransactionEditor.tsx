@@ -133,7 +133,7 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
             <span className="text-xs text-textSecondary">유형</span>
             <select
               value={type}
-              onChange={(e) => setType(e.target.value as any)}
+              onChange={(e) => setType(e.target.value as 'income' | 'expense' | 'transfer')}
               className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
             >
               <option value="expense">지출</option>
