@@ -142,7 +142,7 @@ export function CandidatesClient() {
           )}
           <div className="ml-auto">
             <Button size="sm" onClick={bulkApprove} disabled={pending || selected.size === 0}>
-              {selected.size > 0 ? `선택 ${selected.size}건 일괄 승인` : '일괄 승인 (선택 필요)'}
+              {selected.size > 0 ? `선택 ${selected.size}건 일괄 승인` : '일괄 승인'}
             </Button>
           </div>
         </div>
