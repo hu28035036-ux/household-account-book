@@ -244,6 +244,36 @@ PDF [하네스 엔지니어링 요약](./references/하네스엔지니어링-요
 - self-test 케이스 — fixture 가 ripgrep 정책에 의해 무시되는 시나리오 즉시 잡힘
 - 도구 옵션 주석에 incident-0005 명시
 
+### incident-0015 — smoke:all dev 서버 spawn EINVAL (Windows + Node 24) [CLOSED 2026-05-11]
+- 발생 시점: 2026-05-11 08:40 KST (Codex 1차 검증)
+- 단계: smoke:all (사전 dev 서버 spawn)
+- 사용자 영향: no (사용자 자체 검증 흐름 영향)
+- 발견자: Codex (`docs/verification/2026-05-11-code-validation.md`)
+- 종결: 2026-05-11 17:00 KST (Claude Code fix)
+
+**무엇이 일어났나**
+- `npm.cmd run smoke:all` 실행 시 `scripts/run-smoke.mjs:21` 의 `spawn('npm.cmd', ['run', 'dev'], …)` 에서 `Error: spawn EINVAL` 발생.
+- 샌드박스 내·외 동일 재현 → 권한 문제 아님.
+- dev 서버 자체가 안 떠서 smoke 세부 4 스크립트 (endpoints/pages/content/mutation) 검증 자체 진행 불가.
+
+**왜 일어났나**
+- Windows + Node 24 환경에서 `.cmd` 배치 파일을 `shell` 옵션 없이 `spawn` 하면 Node 24 의 보안 강화 정책상 EINVAL.
+- 기존 코드는 `shell: true` 없이 호출 → Node 22 이하에서는 동작, Node 24 에서 깨짐.
+- 또한 종료 시 `taskkill /F /IM node.exe` 가 너무 광범위 (smoke 프로세스 자체 포함 가능) — 별개 위험.
+
+**fix**
+- `scripts/run-smoke.mjs:23` — `spawn` 옵션에 `shell: isWin` 추가.
+- `scripts/run-smoke.mjs:67-70` — `taskkill /F /IM node.exe` → `taskkill /F /T /PID <dev.pid>` 로 dev child tree 만 정리.
+- `docs/verification/2026-05-11-code-validation.md` §0 에 후속 수정 기록.
+
+**검증 (사용자 로컬 권장)**
+- `npm run smoke:all` 재실행 → dev 서버 정상 기동 + smoke 4 스크립트 결과 확인.
+- 종료 후 `tasklist | findstr node` 로 잔여 node 프로세스 없음 확인.
+
+**얻은 교훈**
+- Node major 업그레이드 후 `spawn(*.cmd, ...)` 호출은 `shell: true` 명시 필요.
+- `taskkill /IM` (image name) 사용 금지 — 항상 `/PID` (process id) + `/T` (tree) 로 좁힘.
+
 ### incident-0014 — 1차 배포 + 영역 작업 모드 (PR #2 / PR #3)
 - 발생 시점: 2026-05-08 10:00~10:07 UTC
 - 단계: 배포 + 영역 작업 진입
