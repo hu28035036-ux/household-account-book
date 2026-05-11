@@ -244,6 +244,42 @@ PDF [하네스 엔지니어링 요약](./references/하네스엔지니어링-요
 - self-test 케이스 — fixture 가 ripgrep 정책에 의해 무시되는 시나리오 즉시 잡힘
 - 도구 옵션 주석에 incident-0005 명시
 
+### incident-0015-followup — smoke 인증·쿠키 위장 (test-pages-* + test-all-endpoints ai-status 401) [OPEN]
+- 발생 시점: 2026-05-11 09:30 KST (Codex 재확인)
+- 단계: smoke 세부 스크립트 4종
+- 사용자 영향: no (사용자 자체 검증 흐름 영향)
+- 발견자: Codex (`docs/verification/2026-05-11-code-validation.md` §5)
+
+**무엇이 일어났나**
+- incident-0015 의 spawn EINVAL fix 후에도 `smoke:all` 전체 실패.
+- `test-all-endpoints.mjs`: 39 중 38 실패. `GET /api/ai-status → 401` (기대 200/503).
+- `test-pages-as-user.mjs` / `test-pages-content.mjs`: 보호 페이지가 모두 `307`.
+- `test-mutation-apis.mjs`: 모든 mutation 이 `AUTH_IDENTIFY_REQUIRED`.
+
+**Claude Code 점검 결과 (2026-05-11 17:30)**
+- `src/app/api/ai-status/route.ts` — 인증 체크 없는 공개 GET. 코드상 401 발생 경로 없음.
+- `src/middleware.ts:80-82` — matcher 가 `/api/*` 제외. ai-status 에 미들웨어 redirect 없음.
+- `scripts/test-all-endpoints.mjs:48-50` — ai-status 를 PUBLIC_APIS 로 분류 (기대값 정확).
+- 결론: ai-status 401 은 **코드 단 원인 없음** — 환경 의존.
+
+**가설**
+- A: dev 서버 미준비 상태에서 호출 (login 페이지 HTML 응답을 401 로 오인) — `waitReady()` 의 polling 보강 필요할 수도.
+- B: `@supabase/ssr` 의 storage_key 별 multiple cookie split 변경과 smoke 의 단순 cookie 생성 방식 불일치 — `test-pages-*` 의 401/307 가 이 원인.
+
+**fix 안 함** (이번 사이클)
+- 환경 재현 없이는 ai-status 401 디버그 불가
+- smoke 쿠키 위장 fix 는 smoke 스크립트 전면 재작성 — 별도 PR 트랙
+
+**다음 단계**
+1. 로컬 `npm run dev` 띄우고 브라우저로 `/api/ai-status` 호출 → 실제 status 확인
+2. 200 이면 Codex 환경 한정 이슈로 종결
+3. 아니면 응답 본문/헤더로 진짜 원인 파악
+4. smoke `@supabase/ssr` 쿠키 포맷 (`sb-<project_ref>-auth-token`) 으로 재작성 — 별도 PR
+
+**얻은 교훈**
+- Codex 환경 재현 보고는 *현상* 일 수 있음. *코드 경로* 와 *환경 변수* 둘 다 확인.
+- smoke 스크립트의 인증 쿠키 위장은 Supabase Auth 라이브러리 업그레이드에 취약 — 향후 `playwright` 의 실제 로그인 + storage state 패턴으로 마이그레이션 검토.
+
 ### incident-0015 — smoke:all dev 서버 spawn EINVAL (Windows + Node 24) [CLOSED 2026-05-11]
 - 발생 시점: 2026-05-11 08:40 KST (Codex 1차 검증)
 - 단계: smoke:all (사전 dev 서버 spawn)
