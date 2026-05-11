@@ -1,14 +1,24 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { FileText, AlertTriangle } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { Badge } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
+import { Modal } from '@/components/common/Modal';
 import { formatKRW, parseKRWInput } from '@/lib/formatting/money';
 import { formatDateKST } from '@/lib/formatting/date';
 
+export type CandidateFile = {
+  id: string;
+  file_name: string | null;
+  file_type: string | null;
+  signed_url: string | null;
+};
+
 export type Candidate = {
   id: string;
+  uploaded_file_id?: string | null;
   transaction_date: string | null;
   type: 'income' | 'expense' | 'transfer';
   amount: number | null;
@@ -21,6 +31,7 @@ export type Candidate = {
   raw_text_basis: string | null;
   warnings: string[];
   user_action: 'pending' | 'approved' | 'rejected' | 'edited';
+  _file?: CandidateFile | null;
 };
 
 type Props = {
@@ -38,6 +49,7 @@ const WARN_LABELS: Record<string, string> = {
   basis_not_found: '근거 텍스트 누락',
   differs_from_user_pattern: '평소 패턴과 다름',
   recurring_candidate: '반복 지출 가능성',
+  amount_suspicious_magnitude: '금액 자릿수 의심',
 };
 
 export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
@@ -50,6 +62,7 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
   const [payment, setPayment] = useState(c.payment_method_suggestion ?? '');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
     setDate(c.transaction_date ?? '');
@@ -63,7 +76,15 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
   const conf = Math.round(c.confidence * 100);
   const isDup = c.duplicate_status !== 'none';
   const isReview = c.warnings.includes('date_uncertain') || c.warnings.includes('amount_uncertain');
+  const isSuspicious = c.warnings.includes('amount_suspicious_magnitude');
+  const needsReview = isReview || isSuspicious || conf < 60;
   const canSelect = !isDup && !isReview;
+
+  const file = c._file;
+  const isImage = !!file?.file_type?.startsWith('image/');
+  const isPdf =
+    !!file?.file_type?.includes('pdf') || (file?.file_name && /\.pdf$/i.test(file.file_name));
+  const hasPreview = !!file?.signed_url;
 
   async function saveEdit() {
     setPending(true);
@@ -131,7 +152,15 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
   }
 
   return (
-    <Card>
+    <Card
+      className={
+        needsReview
+          ? 'border-l-4 border-l-warning'
+          : isDup
+            ? 'border-l-4 border-l-danger'
+            : undefined
+      }
+    >
       <div className="flex items-start gap-3">
         <input
           type="checkbox"
@@ -141,16 +170,56 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
           onChange={(e) => onSelect(c.id, e.target.checked)}
           aria-label="일괄 승인 선택"
         />
+        {/* 원본 파일 썸네일 — 클릭하면 풀스크린 미리보기. 분석이 원본과 맞게 됐는지 즉시 대조. */}
+        {hasPreview && isImage && (
+          <button
+            type="button"
+            onClick={() => setPreviewOpen(true)}
+            aria-label="원본 이미지 크게 보기"
+            className="h-16 w-16 sm:h-20 sm:w-20 rounded-lg border border-borderDefault overflow-hidden shrink-0 hover:opacity-80 transition-opacity"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={file!.signed_url!}
+              alt={file!.file_name ?? '원본'}
+              className="h-full w-full object-cover"
+            />
+          </button>
+        )}
+        {hasPreview && !isImage && (
+          <button
+            type="button"
+            onClick={() => setPreviewOpen(true)}
+            aria-label="원본 PDF 열기"
+            className="h-16 w-16 sm:h-20 sm:w-20 rounded-lg border border-borderDefault bg-sectionBackground inline-flex items-center justify-center shrink-0 text-textPinkStrong hover:bg-softPinkBackground"
+          >
+            <FileText className="h-6 w-6" strokeWidth={1.5} />
+          </button>
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div className="min-w-0">
-              <div className="text-base font-semibold text-textPrimary truncate">
-                {c.merchant_name || '미지정 가맹점'}
+              <div className="flex items-center gap-1.5">
+                {needsReview && (
+                  <AlertTriangle
+                    className="h-4 w-4 text-warning shrink-0"
+                    strokeWidth={2}
+                    aria-label="검토 필요"
+                  />
+                )}
+                <div className="text-base font-semibold text-textPrimary truncate">
+                  {c.merchant_name || '미지정 가맹점'}
+                </div>
               </div>
               <div className="mt-0.5 text-xs text-textSecondary">
                 {c.transaction_date ? formatDateKST(c.transaction_date) : '날짜 없음'} ·{' '}
                 {c.category_suggestion ?? '카테고리 ?'} · {c.payment_method_suggestion ?? '결제수단 ?'}
               </div>
+              {file?.file_name && (
+                <div className="mt-0.5 text-[11px] text-textMuted truncate">
+                  원본: {file.file_name}
+                </div>
+              )}
             </div>
             <div
               className={
@@ -272,6 +341,42 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
           </div>
         </div>
       </div>
+
+      {previewOpen && hasPreview && (
+        <Modal
+          open={previewOpen}
+          onClose={() => setPreviewOpen(false)}
+          title={file?.file_name ?? '원본 파일'}
+          className="!max-w-3xl"
+        >
+          {isImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={file!.signed_url!}
+              alt={file!.file_name ?? '원본 이미지'}
+              className="w-full h-auto rounded-lg border border-borderDefault"
+            />
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-textSecondary">
+                PDF 미리보기는 새 탭에서 엽니다.
+              </p>
+              <a
+                href={file!.signed_url!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-primaryPink text-textOnPink text-sm font-medium hover:bg-primaryPinkHover"
+              >
+                <FileText className="h-4 w-4" strokeWidth={1.75} />
+                새 탭에서 열기
+              </a>
+            </div>
+          )}
+          <p className="mt-2 text-[11px] text-textMuted">
+            원본은 업로드 후 7일이 지나면 자동 삭제됩니다.
+          </p>
+        </Modal>
+      )}
     </Card>
   );
 }

@@ -1,22 +1,49 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { recordMerchantLearning, logCorrection } from './learningService';
 import { checkBudgetAlertsForUser } from '@/lib/budgets/alertCheck';
+import { getSignedUrls } from './fileService';
 
 export async function listCandidates(
   supabase: SupabaseClient,
   userId: string,
   status: 'pending' | 'approved' | 'rejected' | 'all' = 'pending',
 ) {
+  // uploaded_files 정보까지 join — 후보 검증 UI 에서 원본 이미지 썸네일·파일명을 보여주기 위함
   let q = supabase
     .from('transaction_candidates')
-    .select('*')
+    .select(
+      '*, uploaded_files:uploaded_file_id(id, file_name, file_type, storage_path)',
+    )
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(200);
   if (status !== 'all') q = q.eq('user_action', status);
   const { data, error } = await q;
   if (error) throw error;
-  return data ?? [];
+  const rows = (data ?? []) as any[];
+
+  // 같은 storage_path 는 한 번만 발급되도록 batch — N+1 방지. signed URL TTL 10분.
+  const paths = rows
+    .map((r) => r.uploaded_files?.storage_path)
+    .filter((p: unknown): p is string => typeof p === 'string');
+  const urlMap = await getSignedUrls(supabase, paths, 600);
+
+  return rows.map((r) => {
+    const f = r.uploaded_files ?? null;
+    const signedUrl = f?.storage_path ? urlMap.get(f.storage_path) ?? null : null;
+    return {
+      ...r,
+      uploaded_files: undefined, // 응답 정리 — _file 로 평탄화
+      _file: f
+        ? {
+            id: f.id,
+            file_name: f.file_name as string | null,
+            file_type: f.file_type as string | null,
+            signed_url: signedUrl,
+          }
+        : null,
+    };
+  });
 }
 
 export async function updateCandidate(
