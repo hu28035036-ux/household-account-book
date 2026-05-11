@@ -120,21 +120,21 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
     <Modal open={open} onClose={onClose} title={editing ? '거래 수정' : '거래 추가'}>
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
-          <label className="block">
+          <label className="block min-w-0">
             <span className="text-xs text-textSecondary">날짜</span>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full min-w-0 h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
             />
           </label>
-          <label className="block">
+          <label className="block min-w-0">
             <span className="text-xs text-textSecondary">유형</span>
             <select
               value={type}
               onChange={(e) => setType(e.target.value as 'income' | 'expense' | 'transfer')}
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full min-w-0 h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
             >
               <option value="expense">지출</option>
               <option value="income">수입</option>
@@ -164,12 +164,12 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
           />
         </label>
         <div className="grid grid-cols-2 gap-3">
-          <label className="block">
+          <label className="block min-w-0">
             <span className="text-xs text-textSecondary">카테고리</span>
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full min-w-0 h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
             >
               <option value="">미지정</option>
               {categories.map((c) => (
@@ -178,13 +178,22 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
                 </option>
               ))}
             </select>
+            {categories.length === 0 && (
+              <p className="mt-1 text-xs text-textMuted">
+                카테고리가 없어요.{' '}
+                <a href="/categories" className="text-textPinkStrong underline">
+                  카테고리 페이지
+                </a>
+                에서 추가하거나 잠시 후 다시 시도해 주세요.
+              </p>
+            )}
           </label>
-          <label className="block">
+          <label className="block min-w-0">
             <span className="text-xs text-textSecondary">결제수단</span>
             <select
               value={paymentMethodId}
               onChange={(e) => setPaymentMethodId(e.target.value)}
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full min-w-0 h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
             >
               <option value="">미지정</option>
               {paymentMethods.map((p) => (
@@ -193,6 +202,15 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
                 </option>
               ))}
             </select>
+            {paymentMethods.length === 0 && (
+              <p className="mt-1 text-xs text-textMuted">
+                결제수단이 없어요.{' '}
+                <a href="/payment-methods" className="text-textPinkStrong underline">
+                  결제수단 페이지
+                </a>
+                에서 추가하거나 잠시 후 다시 시도해 주세요.
+              </p>
+            )}
           </label>
         </div>
         <label className="block">

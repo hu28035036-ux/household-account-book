@@ -65,17 +65,23 @@ export function TransactionsClient() {
       aFetch('/api/categories'),
       aFetch('/api/payment-methods'),
     ]);
-    if (!txRes || !catRes || !pmRes) {
-      // 한 요청이라도 abort 됐으면 setState 안 함
+    // categories/payment-methods 는 사실상 정적이라 일부만 도착해도 즉시 채워 select 가 빈 채로 남지 않게.
+    // (이전: 하나라도 abort 면 전체 setState 스킵 → 첫 진입에서 빈 select 가 보임)
+    if (catRes) {
+      const catJson = await catRes.json();
+      setCategories(catJson?.data ?? []);
+    }
+    if (pmRes) {
+      const pmJson = await pmRes.json();
+      setPaymentMethods(pmJson?.data ?? []);
+    }
+    if (!txRes) {
+      setLoading(false);
       return;
     }
     const txJson = await txRes.json();
-    const catJson = await catRes.json();
-    const pmJson = await pmRes.json();
     setRows(txJson?.data?.rows ?? []);
     setTotal(txJson?.data?.total ?? 0);
-    setCategories(catJson?.data ?? []);
-    setPaymentMethods(pmJson?.data ?? []);
     setSelected(new Set());
     setLoading(false);
   }, [q, type, activeId, aFetch]);

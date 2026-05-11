@@ -261,7 +261,7 @@ function BankPicker({
       {!banks ? (
         <p className="text-sm text-textSecondary py-6 text-center">불러오는 중…</p>
       ) : (
-        <ul className="grid grid-cols-2 gap-2 max-h-[50vh] overflow-y-auto pr-1">
+        <ul className="grid grid-cols-2 gap-2 max-h-[50dvh] overflow-y-auto pr-1">
           {filtered.map((b) => (
             <li key={b.code}>
               <button

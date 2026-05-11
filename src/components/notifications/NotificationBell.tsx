@@ -133,7 +133,7 @@ export function NotificationBell() {
                 </Link>
               </div>
             </div>
-            <div className="max-h-[60vh] overflow-y-auto">
+            <div className="max-h-[60dvh] overflow-y-auto">
               {items.length === 0 ? (
                 <div className="px-3 py-6 text-sm text-textSecondary text-center">
                   알림이 없습니다.
