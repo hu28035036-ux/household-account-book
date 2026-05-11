@@ -41,6 +41,19 @@ export function CandidatesClient() {
     [rows],
   );
 
+  // 같은 업로드 파일에서 나온 후보들을 그룹화 (카뱅/카드 다행 캡처 케이스).
+  // uploaded_file_id 가 없으면 단일 그룹(_orphan).
+  const groups = useMemo(() => {
+    const map = new Map<string, { fileId: string | null; fileName: string | null; items: Candidate[] }>();
+    for (const r of rows) {
+      const fid = r.uploaded_file_id ?? '_orphan';
+      const fname = r._file?.file_name ?? null;
+      if (!map.has(fid)) map.set(fid, { fileId: r.uploaded_file_id ?? null, fileName: fname, items: [] });
+      map.get(fid)!.items.push(r);
+    }
+    return Array.from(map.values());
+  }, [rows]);
+
   function toggle(id: string, on: boolean) {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -167,18 +180,64 @@ export function CandidatesClient() {
           <CardSubtle className="mt-1">AI 업로드에서 영수증을 올려보세요.</CardSubtle>
         </Card>
       ) : (
-        <ul className="space-y-3">
-          {rows.map((c) => (
-            <li key={c.id}>
-              <CandidateCard
-                c={c}
-                selected={selected.has(c.id)}
-                onSelect={toggle}
-                onChange={load}
-              />
-            </li>
-          ))}
-        </ul>
+        <div className="space-y-5">
+          {groups.map((g, gi) => {
+            // 그룹이 1개뿐(단일 영수증)이면 헤더 생략해 시각 노이즈 최소화.
+            const showHeader = g.items.length > 1;
+            const groupIds = g.items.map((c) => c.id);
+            const groupSelectedCount = groupIds.filter((id) => selected.has(id)).length;
+            const groupAllSelected = groupIds.every((id) => selected.has(id));
+            function toggleGroup() {
+              setSelected((prev) => {
+                const next = new Set(prev);
+                if (groupAllSelected) groupIds.forEach((id) => next.delete(id));
+                else
+                  g.items.forEach((c) => {
+                    const canSel =
+                      c.duplicate_status === 'none' &&
+                      !c.warnings.includes('amount_uncertain') &&
+                      !c.warnings.includes('date_uncertain');
+                    if (canSel) next.add(c.id);
+                  });
+                return next;
+              });
+            }
+            return (
+              <div key={g.fileId ?? `orphan-${gi}`} className="space-y-2">
+                {showHeader && (
+                  <div className="flex items-center justify-between gap-3 flex-wrap text-xs text-textSecondary px-1">
+                    <div className="min-w-0 truncate">
+                      📎 <b className="text-textPrimary">{g.fileName ?? '원본 파일'}</b>
+                      <span className="ml-1.5 text-textMuted">— {g.items.length}건 추출</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={toggleGroup}
+                      disabled={pending}
+                      className="text-xs text-textPinkStrong underline underline-offset-2 disabled:opacity-50"
+                    >
+                      {groupAllSelected
+                        ? '이 파일의 안전 후보 선택 해제'
+                        : `이 파일의 안전 후보 전체 선택 (${groupSelectedCount}/${g.items.length})`}
+                    </button>
+                  </div>
+                )}
+                <ul className="space-y-3">
+                  {g.items.map((c) => (
+                    <li key={c.id}>
+                      <CandidateCard
+                        c={c}
+                        selected={selected.has(c.id)}
+                        onSelect={toggle}
+                        onChange={load}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
       )}
 
       {/* 모바일 하단 sticky — 통일 사이즈: h-9 / px-3 / text-sm (= Button size="sm") */}

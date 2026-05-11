@@ -77,6 +77,26 @@ export async function getSignedUrl(
   return data.signedUrl;
 }
 
+/**
+ * 여러 storage path 의 signed URL 을 한 번에 발급. 200개 후보를 위해 200번
+ * createSignedUrl 호출하던 부담을 1번으로 줄임. 발급 실패 path 는 결과 Map 에서 누락됨.
+ */
+export async function getSignedUrls(
+  supabase: SupabaseClient,
+  storagePaths: string[],
+  ttlSeconds = 60,
+): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  const unique = Array.from(new Set(storagePaths.filter(Boolean)));
+  if (unique.length === 0) return out;
+  const { data, error } = await supabase.storage.from(BUCKET).createSignedUrls(unique, ttlSeconds);
+  if (error) return out;
+  for (const item of data ?? []) {
+    if (item.path && item.signedUrl) out.set(item.path, item.signedUrl);
+  }
+  return out;
+}
+
 export async function softDeleteFile(supabase: SupabaseClient, userId: string, id: string) {
   const file = await getFile(supabase, userId, id);
   if (!file) return;
