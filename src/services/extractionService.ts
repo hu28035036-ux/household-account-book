@@ -7,12 +7,43 @@ import { buildExtractionPrompt } from '@/lib/ai/prompt';
 import { parseExtractionLoose, type ExtractionResult } from '@/lib/ai/extractionSchema';
 import { checkDuplicate } from '@/lib/duplicate/check';
 import { inputHash } from '@/lib/learning/hash';
+import { todayKSTISO } from '@/lib/formatting/date';
 import {
   getLearningHints,
   getCachedExtraction,
   setCachedExtraction,
   applyLearningPostprocess,
 } from './learningService';
+
+/**
+ * 1차(detail:low) 결과의 품질이 낮을 때 2차(detail:high)로 승급할지 판단.
+ * 은행/카드 거래내역 캡처처럼 작은 글자가 빽빽한 케이스에서 low 가 거의 못 읽는 경우를 잡아낸다.
+ * 영수증/카드 1건 케이스에서는 보통 1차에서 성공하므로 비용 회귀 없음.
+ */
+export function shouldUpgradeToHigh(extraction: ExtractionResult): boolean {
+  const txs = extraction.transactions ?? [];
+  if (txs.length === 0) return true;
+  const allDatesNull = txs.every((t) => t.transaction_date == null);
+  const allAmountsNull = txs.every((t) => t.amount == null);
+  if (allDatesNull || allAmountsNull) return true;
+  const avgConf = txs.reduce((s, t) => s + (t.confidence ?? 0), 0) / txs.length;
+  if (avgConf < 0.4) return true;
+  return false;
+}
+
+/**
+ * extraction.document_type 가 은행/카드 캡처로 판정되면 캐시 source_type 도 동일하게 보정.
+ * 그렇지 않으면 파일 MIME 기반 기본값(inferSourceType)을 그대로 사용.
+ */
+export function effectiveSourceType(
+  inferred: string,
+  documentType: ExtractionResult['document_type'],
+): string {
+  if (documentType === 'bank_capture' || documentType === 'card_capture' || documentType === 'sms') {
+    return documentType;
+  }
+  return inferred;
+}
 
 export async function runExtractionForFile(
   supabase: SupabaseClient,
@@ -62,7 +93,7 @@ export async function runExtractionForFile(
   } else {
     // 2) 학습 힌트
     const hints = await getLearningHints(supabase, userId);
-    const prompt = buildExtractionPrompt(masked, hints);
+    const prompt = buildExtractionPrompt(masked, hints, todayKSTISO());
 
     // 3) ai_extraction_jobs 시작 기록
     const { data: jobRow } = await supabase
@@ -79,9 +110,15 @@ export async function runExtractionForFile(
       .single();
 
     try {
+      // 1차: imageDetail='low' (영수증 케이스는 여기서 거의 항상 충분)
       let raw: string;
       try {
-        const r = await llmGenerate({ prompt, temperature: 0.1, imageUrls });
+        const r = await llmGenerate({
+          prompt,
+          temperature: 0.1,
+          imageUrls,
+          imageDetail: imageUrls ? 'low' : undefined,
+        });
         raw = r.content;
         modelName = r.model;
       } catch (e) {
@@ -96,10 +133,34 @@ export async function runExtractionForFile(
         throw e;
       }
 
+      let parseFailed = false;
       try {
         extraction = parseExtractionLoose(raw);
       } catch {
-        // 1회 재시도 (temperature 0, 이미지도 그대로 전달)
+        parseFailed = true;
+        extraction = { document_type: 'other', transactions: [], global_warnings: [] };
+      }
+
+      // 2차(자동 승급): 이미지가 있고 1차가 빈약하면 detail='high' 로 재호출.
+      // 은행/카드 거래내역 캡처처럼 작은 글자 빽빽한 화면에서 결정적으로 차이 남.
+      if (imageUrls && (parseFailed || shouldUpgradeToHigh(extraction))) {
+        try {
+          const r2 = await llmGenerate({
+            prompt,
+            temperature: 0,
+            imageUrls,
+            imageDetail: 'high',
+            maxTokens: 2500,
+            timeoutMs: 90_000,
+          });
+          extraction = parseExtractionLoose(r2.content);
+          modelName = `${r2.model}:high`;
+        } catch (e) {
+          // 2차 실패 시 1차 결과 유지 (없으면 빈 결과)
+          if (parseFailed) throw e;
+        }
+      } else if (parseFailed) {
+        // 이미지가 없거나 (PDF/텍스트) 흐름에서 파싱 실패 — 기존처럼 temperature 0 으로 재시도
         const r2 = await llmGenerate({ prompt, temperature: 0, imageUrls });
         extraction = parseExtractionLoose(r2.content);
         modelName = r2.model;
@@ -118,7 +179,8 @@ export async function runExtractionForFile(
       throw e;
     }
 
-    await setCachedExtraction(supabase, userId, hash, sourceType, extraction);
+    const cacheSourceType = effectiveSourceType(sourceType, extraction.document_type);
+    await setCachedExtraction(supabase, userId, hash, cacheSourceType, extraction);
   }
 
   // 4) 환각 검증 + 학습 후처리 + 중복 검사 + 후보 insert
@@ -139,7 +201,11 @@ export async function runExtractionForFile(
     if (t.amount == null) warnings.push('amount_uncertain');
     if (t.merchant_name == null) warnings.push('merchant_uncertain');
 
-    if (t.raw_text_basis) {
+    // 이미지 단독(masked 가 빈 문자열)인 경우 OCR 텍스트가 없으므로
+    // basis_not_found 검사는 의미가 없다(LLM 의 raw_text_basis 가 무엇이든 항상 false 가 됨).
+    // 이미지+OCR 병존이거나 OCR-only 인 경우에만 환각 검증을 수행.
+    const hasOcr = !!masked;
+    if (t.raw_text_basis && hasOcr) {
       const basisNoSpace = t.raw_text_basis.replace(/\s+/g, '');
       // Vision (이미지 직접 분석) 가 활성됐으면 raw_text_basis 가 OCR 텍스트와
       // 일치하지 않을 수 있음 — AI 가 이미지에서 본 정보가 OCR 에는 없을 수 있어

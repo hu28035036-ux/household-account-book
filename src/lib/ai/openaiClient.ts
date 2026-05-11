@@ -19,6 +19,14 @@ type GenerateOptions = {
    * 영수증/카드내역 인식 정확도 큰 폭 향상 — Tesseract OCR 망가져도 이미지로 보강.
    */
   imageUrls?: string[];
+  /**
+   * Vision 이미지 해상도 힌트. 'low' = 512px 다운샘플 (빠름, 영수증 OK),
+   * 'high' = 원본 + 타일 (은행/카드 거래내역 같은 다행 작은 글자에 필수), 'auto' = 모델 판단.
+   * 기본 'low'. 자동 승급 분기에서만 'high' 사용 (비용 보존).
+   */
+  imageDetail?: 'low' | 'high' | 'auto';
+  /** 호출 타임아웃 (ms). 기본 60_000. detail:'high' 호출은 90_000 권장. */
+  timeoutMs?: number;
 };
 
 export class OpenAIUnavailableError extends Error {
@@ -37,7 +45,7 @@ export async function openaiGenerate(opts: GenerateOptions): Promise<LLMResult> 
   const model = opts.model ?? process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
 
   const ctrl = new AbortController();
-  const timeout = setTimeout(() => ctrl.abort(), 60_000);
+  const timeout = setTimeout(() => ctrl.abort(), opts.timeoutMs ?? 60_000);
   const signal = opts.signal ?? ctrl.signal;
 
   try {
@@ -60,7 +68,7 @@ export async function openaiGenerate(opts: GenerateOptions): Promise<LLMResult> 
                     { type: 'text', text: opts.prompt },
                     ...opts.imageUrls.map((url) => ({
                       type: 'image_url',
-                      image_url: { url, detail: 'low' as const },
+                      image_url: { url, detail: opts.imageDetail ?? 'low' },
                     })),
                   ]
                 : opts.prompt,
