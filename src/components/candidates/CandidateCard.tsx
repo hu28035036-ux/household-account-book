@@ -154,17 +154,17 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
   return (
     <Card
       className={
-        needsReview
-          ? 'border-l-4 border-l-warning'
+        (needsReview
+          ? 'border-l-4 border-l-warning '
           : isDup
-            ? 'border-l-4 border-l-danger'
-            : undefined
+            ? 'border-l-4 border-l-danger '
+            : '') + '!p-2.5 sm:!p-3'
       }
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2.5">
         <input
           type="checkbox"
-          className="mt-1.5 h-5 w-5 rounded border-borderDefault text-primaryPink focus:ring-primaryPinkBorder"
+          className="mt-1 h-4 w-4 rounded border-borderDefault text-primaryPink focus:ring-primaryPinkBorder shrink-0"
           checked={selected}
           disabled={!canSelect}
           onChange={(e) => onSelect(c.id, e.target.checked)}
@@ -176,7 +176,7 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
             type="button"
             onClick={() => setPreviewOpen(true)}
             aria-label="원본 이미지 크게 보기"
-            className="h-16 w-16 sm:h-20 sm:w-20 rounded-lg border border-borderDefault overflow-hidden shrink-0 hover:opacity-80 transition-opacity"
+            className="h-11 w-11 rounded-md border border-borderDefault overflow-hidden shrink-0 hover:opacity-80 transition-opacity"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -191,39 +191,34 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
             type="button"
             onClick={() => setPreviewOpen(true)}
             aria-label="원본 PDF 열기"
-            className="h-16 w-16 sm:h-20 sm:w-20 rounded-lg border border-borderDefault bg-sectionBackground inline-flex items-center justify-center shrink-0 text-textPinkStrong hover:bg-softPinkBackground"
+            className="h-11 w-11 rounded-md border border-borderDefault bg-sectionBackground inline-flex items-center justify-center shrink-0 text-textPinkStrong hover:bg-softPinkBackground"
           >
-            <FileText className="h-6 w-6" strokeWidth={1.5} />
+            <FileText className="h-4 w-4" strokeWidth={1.5} />
           </button>
         )}
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 {needsReview && (
                   <AlertTriangle
-                    className="h-4 w-4 text-warning shrink-0"
+                    className="h-3.5 w-3.5 text-warning shrink-0"
                     strokeWidth={2}
                     aria-label="검토 필요"
                   />
                 )}
-                <div className="text-base font-semibold text-textPrimary truncate">
+                <div className="text-sm font-semibold text-textPrimary truncate">
                   {c.merchant_name || '미지정 가맹점'}
                 </div>
               </div>
-              <div className="mt-0.5 text-xs text-textSecondary">
+              <div className="text-[11px] text-textSecondary truncate">
                 {c.transaction_date ? formatDateKST(c.transaction_date) : '날짜 없음'} ·{' '}
                 {c.category_suggestion ?? '카테고리 ?'} · {c.payment_method_suggestion ?? '결제수단 ?'}
               </div>
-              {file?.file_name && (
-                <div className="mt-0.5 text-[11px] text-textMuted truncate">
-                  원본: {file.file_name}
-                </div>
-              )}
             </div>
             <div
               className={
-                'tabular text-base font-semibold whitespace-nowrap ' +
+                'tabular text-sm font-semibold whitespace-nowrap shrink-0 ' +
                 (c.type === 'income' ? 'text-income' : c.type === 'transfer' ? 'text-transfer' : 'text-expense')
               }
             >
@@ -233,107 +228,156 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
             </div>
           </div>
 
-          <div className="mt-2 flex items-center gap-2 flex-wrap">
-            <Badge tone={conf >= 70 ? 'success' : conf >= 40 ? 'warning' : 'review'}>신뢰도 {conf}%</Badge>
-            {c.duplicate_status === 'suspected' && <Badge tone="duplicate">중복 의심</Badge>}
-            {c.duplicate_status === 'duplicate' && <Badge tone="review">중복 가능성 높음</Badge>}
+          <div className="mt-1 flex items-center gap-1 flex-wrap">
+            <Badge
+              tone={conf >= 70 ? 'success' : conf >= 40 ? 'warning' : 'review'}
+              className="!px-1.5 !py-0 !text-[10px]"
+            >
+              {conf}%
+            </Badge>
+            {c.duplicate_status === 'suspected' && (
+              <Badge tone="duplicate" className="!px-1.5 !py-0 !text-[10px]">
+                중복 의심
+              </Badge>
+            )}
+            {c.duplicate_status === 'duplicate' && (
+              <Badge tone="review" className="!px-1.5 !py-0 !text-[10px]">
+                중복
+              </Badge>
+            )}
             {c.warnings.map((w) => (
-              <Badge key={w} tone={w === 'differs_from_user_pattern' ? 'warning' : 'review'}>
+              <Badge
+                key={w}
+                tone={w === 'differs_from_user_pattern' ? 'warning' : 'review'}
+                className="!px-1.5 !py-0 !text-[10px]"
+              >
                 {WARN_LABELS[w] ?? w}
               </Badge>
             ))}
+            {c.raw_text_basis && (
+              <span
+                className="text-[10px] text-textMuted font-mono truncate max-w-[180px] sm:max-w-[260px]"
+                title={c.raw_text_basis}
+              >
+                · {c.raw_text_basis}
+              </span>
+            )}
           </div>
 
-          {c.raw_text_basis && (
-            <div className="mt-2 text-xs text-textMuted">
-              근거: <span className="font-mono">{c.raw_text_basis}</span>
-            </div>
-          )}
-
           {editing && (
-            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <label className="flex items-center gap-2">
-                <span className="w-16 shrink-0 text-xs text-textSecondary">날짜</span>
+            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+              <label className="flex items-center gap-2 min-w-0">
+                <span className="w-14 shrink-0 text-[11px] text-textSecondary">날짜</span>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="flex-1 h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
+                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-white text-textPrimary text-sm"
                 />
               </label>
-              <label className="flex items-center gap-2">
-                <span className="w-16 shrink-0 text-xs text-textSecondary">유형</span>
+              <label className="flex items-center gap-2 min-w-0">
+                <span className="w-14 shrink-0 text-[11px] text-textSecondary">유형</span>
                 <select
                   value={type}
                   onChange={(e) => setType(e.target.value as 'income' | 'expense' | 'transfer')}
-                  className="flex-1 h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
+                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-white text-textPrimary text-sm"
                 >
                   <option value="expense">지출</option>
                   <option value="income">수입</option>
                   <option value="transfer">이체</option>
                 </select>
               </label>
-              <label className="flex items-center gap-2">
-                <span className="w-16 shrink-0 text-xs text-textSecondary">금액</span>
+              <label className="flex items-center gap-2 min-w-0">
+                <span className="w-14 shrink-0 text-[11px] text-textSecondary">금액</span>
                 <input
                   inputMode="numeric"
                   value={amountStr}
                   onChange={(e) => setAmountStr(e.target.value)}
                   placeholder="예: 12000"
-                  className="flex-1 h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm tabular"
+                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-white text-textPrimary text-sm tabular"
                 />
               </label>
-              <label className="flex items-center gap-2">
-                <span className="w-16 shrink-0 text-xs text-textSecondary">가맹점</span>
+              <label className="flex items-center gap-2 min-w-0">
+                <span className="w-14 shrink-0 text-[11px] text-textSecondary">가맹점</span>
                 <input
                   value={merchant}
                   onChange={(e) => setMerchant(e.target.value)}
                   placeholder="예: 스타벅스 강남점"
-                  className="flex-1 h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
+                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-white text-textPrimary text-sm"
                 />
               </label>
-              <label className="flex items-center gap-2">
-                <span className="w-16 shrink-0 text-xs text-textSecondary">카테고리</span>
+              <label className="flex items-center gap-2 min-w-0">
+                <span className="w-14 shrink-0 text-[11px] text-textSecondary">카테고리</span>
                 <input
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   placeholder="예: 카페/간식"
-                  className="flex-1 h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
+                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-white text-textPrimary text-sm"
                 />
               </label>
-              <label className="flex items-center gap-2">
-                <span className="w-16 shrink-0 text-xs text-textSecondary">결제수단</span>
+              <label className="flex items-center gap-2 min-w-0">
+                <span className="w-14 shrink-0 text-[11px] text-textSecondary">결제수단</span>
                 <input
                   value={payment}
                   onChange={(e) => setPayment(e.target.value)}
                   placeholder="예: 신용카드"
-                  className="flex-1 h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
+                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-white text-textPrimary text-sm"
                 />
               </label>
             </div>
           )}
 
-          {error && <p className="mt-2 text-sm rounded-md bg-dangerSoft text-danger px-3 py-2">{error}</p>}
+          {error && (
+            <p className="mt-1.5 text-xs rounded-md bg-dangerSoft text-danger px-2 py-1.5">{error}</p>
+          )}
 
-          <div className="mt-3 flex items-center justify-end gap-1 flex-wrap">
+          <div className="mt-1.5 flex items-center justify-end gap-1 flex-wrap">
             {editing ? (
               <>
-                <Button size="sm" variant="ghost" onClick={() => setEditing(false)} disabled={pending}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setEditing(false)}
+                  disabled={pending}
+                  className="!h-7 !px-2 !text-xs !rounded-md"
+                >
                   취소
                 </Button>
-                <Button size="sm" onClick={saveEdit} disabled={pending}>
+                <Button
+                  size="sm"
+                  onClick={saveEdit}
+                  disabled={pending}
+                  className="!h-7 !px-2.5 !text-xs !rounded-md"
+                >
                   저장
                 </Button>
               </>
             ) : (
               <>
-                <Button size="sm" variant="ghost" onClick={() => setEditing(true)} disabled={pending}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setEditing(true)}
+                  disabled={pending}
+                  className="!h-7 !px-2 !text-xs !rounded-md"
+                >
                   수정
                 </Button>
-                <Button size="sm" variant="ghost" onClick={reject} disabled={pending}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={reject}
+                  disabled={pending}
+                  className="!h-7 !px-2 !text-xs !rounded-md"
+                >
                   제외
                 </Button>
-                <Button size="sm" onClick={approve} disabled={pending}>
+                <Button
+                  size="sm"
+                  onClick={approve}
+                  disabled={pending}
+                  className="!h-7 !px-2.5 !text-xs !rounded-md"
+                >
                   승인
                 </Button>
               </>
