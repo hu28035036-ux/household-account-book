@@ -134,13 +134,25 @@ export function CandidatesClient() {
 
       {message && <p className="text-sm rounded-md bg-successSoft text-success px-3 py-2">{message}</p>}
 
-      {/* 액션바 — 모든 버튼 통일 사이즈: h-9 / px-3 / text-sm (= Button size="sm") */}
+      {/* 액션바 — 가로 컴팩트: !h-8 !px-2 !text-xs (Button size="sm" 기본 px-3 → px-2 로 약 2/3) */}
       <div className="sticky top-14 z-10 -mx-4 px-4 py-2 bg-pageBackground/95 backdrop-blur border-b border-borderSoft md:static md:top-auto md:mx-0 md:px-0 md:py-0 md:bg-transparent md:backdrop-blur-0 md:border-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button size="sm" variant="secondary" onClick={selectAllClean} disabled={cleanCount === 0}>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={selectAllClean}
+            disabled={cleanCount === 0}
+            className="!h-8 !px-2 !text-xs"
+          >
             안전 후보 전체 선택
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())} disabled={selected.size === 0}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setSelected(new Set())}
+            disabled={selected.size === 0}
+            className="!h-8 !px-2 !text-xs"
+          >
             선택 해제 ({selected.size})
           </Button>
           {duplicateRows.length > 0 && (
@@ -149,13 +161,19 @@ export function CandidatesClient() {
               variant="danger"
               onClick={bulkRejectDuplicates}
               disabled={pending}
+              className="!h-8 !px-2 !text-xs"
             >
               중복 {duplicateRows.length}건 일괄 거부
             </Button>
           )}
           <div className="ml-auto">
-            <Button size="sm" onClick={bulkApprove} disabled={pending || selected.size === 0}>
-              {selected.size > 0 ? `선택 ${selected.size}건 일괄 승인` : '일괄 승인'}
+            <Button
+              size="sm"
+              onClick={bulkApprove}
+              disabled={pending || selected.size === 0}
+              className="!h-8 !px-2 !text-xs"
+            >
+              {selected.size > 0 ? `선택 ${selected.size}건 승인` : '일괄 승인'}
             </Button>
           </div>
         </div>
@@ -247,7 +265,7 @@ export function CandidatesClient() {
           style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.75rem)' }}
         >
           <Button onClick={bulkApprove} disabled={pending || selected.size === 0} fullWidth size="sm">
-            선택 {selected.size}건 일괄 승인
+            선택 {selected.size}건 승인
           </Button>
         </div>
       )}

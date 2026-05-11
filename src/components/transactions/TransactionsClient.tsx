@@ -50,6 +50,8 @@ export function TransactionsClient() {
   const confirm = useConfirm();
   const alertModal = useAlertModal();
 
+  // 거래내역만 q/type/activeId 의존. categories·payment-methods 는 컨텍스트 무관이라
+  // 별도 useEffect 로 마운트 시 1회만 fetch — 모임↔개인 전환 시 fetch 수 3개 → 1개로 감소.
   const load = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
@@ -59,26 +61,35 @@ export function TransactionsClient() {
     if (activeId) params.set('household_id', activeId);
     else params.set('scope', 'personal');
     params.set('limit', '50');
-    // useAbortableFetch — q/type 빠르게 바뀌어도 stale 응답이 setState 안 덮어쓰게.
-    const [txRes, catRes, pmRes] = await Promise.all([
-      aFetch('/api/transactions?' + params.toString()),
-      aFetch('/api/categories'),
-      aFetch('/api/payment-methods'),
-    ]);
-    if (!txRes || !catRes || !pmRes) {
-      // 한 요청이라도 abort 됐으면 setState 안 함
-      return;
-    }
+    const txRes = await aFetch('/api/transactions?' + params.toString());
+    if (!txRes) return; // abort
     const txJson = await txRes.json();
-    const catJson = await catRes.json();
-    const pmJson = await pmRes.json();
     setRows(txJson?.data?.rows ?? []);
     setTotal(txJson?.data?.total ?? 0);
-    setCategories(catJson?.data ?? []);
-    setPaymentMethods(pmJson?.data ?? []);
     setSelected(new Set());
     setLoading(false);
   }, [q, type, activeId, aFetch]);
+
+  // categories / payment-methods 는 사용자 단위 데이터(RLS 로 user_id 기반)라
+  // 모임 컨텍스트 전환과 무관 — 마운트 시 한 번만 fetch.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const [catRes, pmRes] = await Promise.all([
+        fetch('/api/categories'),
+        fetch('/api/payment-methods'),
+      ]);
+      if (cancelled) return;
+      const catJson = await catRes.json().catch(() => ({}));
+      const pmJson = await pmRes.json().catch(() => ({}));
+      if (cancelled) return;
+      setCategories(catJson?.data ?? []);
+      setPaymentMethods(pmJson?.data ?? []);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     load();
