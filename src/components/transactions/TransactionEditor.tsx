@@ -29,7 +29,12 @@ type Props = {
   initial?: Initial;
   categories: Category[];
   paymentMethods: PaymentMethod[];
-  onSaved: () => void;
+  /**
+   * 저장 성공 시 호출. 인자로 서버 응답의 transaction row 전달 (있을 때).
+   * 호출자는 row 를 받아 클라이언트 state 에 prepend/replace 하여 optimistic UI 구현.
+   * row 가 없으면 호출자가 전체 재요청으로 fallback.
+   */
+  onSaved: (row?: any) => void;
 };
 
 export function TransactionEditor({ open, onClose, initial, categories, paymentMethods, onSaved }: Props) {
@@ -107,7 +112,10 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
           }),
         });
       }
-      onSaved();
+      // 서버 응답의 row(있으면) 를 그대로 부모에 전달 — 부모가 optimistic prepend/replace.
+      // /api/transactions POST/PATCH 응답 포맷: { data: { row } } 또는 { data: row }.
+      const savedRow = (json?.data?.row ?? json?.data) ?? undefined;
+      onSaved(savedRow);
       onClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : '저장 실패');

@@ -95,6 +95,30 @@ export function TransactionsClient() {
     load();
   }, [load]);
 
+  // optimistic patch helpers — 응답 기다리지 않고 클라이언트 state 먼저 갱신.
+  // 실패하면 onError 콜백에서 롤백.
+  function patchPrepend(row: TransactionRow) {
+    setRows((prev) => [row, ...prev]);
+    setTotal((t) => t + 1);
+  }
+  function patchReplace(row: TransactionRow) {
+    setRows((prev) => prev.map((r) => (r.id === row.id ? row : r)));
+  }
+  function patchRemove(id: string) {
+    setRows((prev) => prev.filter((r) => r.id !== id));
+    setTotal((t) => Math.max(0, t - 1));
+  }
+
+  function handleSaved(savedRow: any) {
+    if (!savedRow || !savedRow.id) {
+      // 서버가 row 안 돌려준 경우 fallback — 전체 재요청
+      void load();
+      return;
+    }
+    if (editing) patchReplace(savedRow as TransactionRow);
+    else patchPrepend(savedRow as TransactionRow);
+  }
+
   async function onDelete(row: TransactionRow) {
     const ok = await confirm({
       title: '거래 삭제',
@@ -103,8 +127,17 @@ export function TransactionsClient() {
       tone: 'danger',
     });
     if (!ok) return;
+    // optimistic remove — 실패 시 롤백
+    const snapshot = rows;
+    const snapshotTotal = total;
+    patchRemove(row.id);
     const res = await fetch(`/api/transactions/${row.id}`, { method: 'DELETE' });
-    if (res.ok) load();
+    if (!res.ok) {
+      setRows(snapshot);
+      setTotal(snapshotTotal);
+      const j = await res.json().catch(() => ({}));
+      await alertModal({ title: '삭제 실패', message: j?.error?.message ?? '삭제 실패' });
+    }
   }
 
   function toggle(id: string) {
@@ -133,26 +166,36 @@ export function TransactionsClient() {
     });
     if (!ok) return;
     setBulkPending(true);
+    // optimistic: 선택된 row 모두 즉시 제거. 실패 시 롤백.
+    const ids = Array.from(selected);
+    const snapshot = rows;
+    const snapshotTotal = total;
+    setRows((prev) => prev.filter((r) => !selected.has(r.id)));
+    setTotal((t) => Math.max(0, t - selected.size));
+    setSelected(new Set());
     try {
       const res = await fetch('/api/transactions/delete-bulk', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ ids: Array.from(selected) }),
+        body: JSON.stringify({ ids }),
       });
       const j = await res.json();
       if (!res.ok) {
+        setRows(snapshot);
+        setTotal(snapshotTotal);
         await alertModal({ title: '일괄 삭제 실패', message: j?.error?.message ?? '일괄 삭제 실패' });
         return;
       }
       const deleted = j?.data?.deleted ?? 0;
       const skipped = j?.data?.skipped ?? 0;
       if (skipped > 0) {
+        // skipped 가 있으면 일부 row 가 실제로는 안 지워졌으니 정확한 상태를 위해 한 번만 재요청
         await alertModal({
           title: '일괄 삭제 완료',
           message: `${deleted}건 삭제 · ${skipped}건은 권한이 없어 건너뜀 (다른 가족이 만든 거래).`,
         });
+        await load();
       }
-      await load();
     } finally {
       setBulkPending(false);
     }
@@ -272,7 +315,7 @@ export function TransactionsClient() {
         initial={editing ?? undefined}
         categories={categories}
         paymentMethods={paymentMethods}
-        onSaved={load}
+        onSaved={handleSaved}
       />
     </div>
   );
