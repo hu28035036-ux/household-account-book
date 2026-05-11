@@ -23,6 +23,12 @@ export type LLMOptions = {
   temperature?: number;
   /** 영수증 이미지 등을 함께 분석 (vision). https URL 또는 data URL. OpenAI 만 지원 — Ollama fallback 시 무시됨. */
   imageUrls?: string[];
+  /** Vision 해상도 (OpenAI 전용, Ollama 무시). 기본 'low'. */
+  imageDetail?: 'low' | 'high' | 'auto';
+  /** max_tokens (OpenAI 전용, Ollama 무시). */
+  maxTokens?: number;
+  /** 호출 타임아웃 ms (OpenAI 전용, Ollama 무시). */
+  timeoutMs?: number;
 };
 
 export async function llmGenerate(opts: LLMOptions): Promise<LLMResult> {
@@ -34,6 +40,9 @@ export async function llmGenerate(opts: LLMOptions): Promise<LLMResult> {
         prompt: opts.prompt,
         temperature: opts.temperature,
         imageUrls: opts.imageUrls,
+        imageDetail: opts.imageDetail,
+        maxTokens: opts.maxTokens,
+        timeoutMs: opts.timeoutMs,
       });
     } catch (e) {
       errs.push(`openai: ${e instanceof Error ? e.message : String(e)}`);

@@ -152,7 +152,7 @@ export function UploadClient() {
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="text-2xl font-semibold text-textPrimary">AI 업로드</h2>
-        <Badge tone="muted">OCR은 브라우저에서 실행됩니다</Badge>
+        <Badge tone="muted">사진은 AI 비전, PDF는 브라우저 OCR</Badge>
       </div>
 
       <AiServerStatus />
@@ -183,7 +183,7 @@ export function UploadClient() {
           <div>
             <div className="font-medium text-textPrimary mb-1">처리 흐름</div>
             <ol className="list-decimal pl-5 space-y-0.5">
-              <li>업로드 → 본인 브라우저에서 <b>OCR</b>(텍스트 추출, 약 5~15초)</li>
+              <li>업로드 → <b>사진</b>은 AI 비전이 이미지로 직접 분석, <b>PDF</b>는 본인 브라우저에서 텍스트 추출 (약 5~15초)</li>
               <li>민감정보 자동 <b>마스킹</b>(카드/주민/전화/계좌번호)</li>
               <li><b>AI</b> 가 가맹점·금액·카테고리 추정 (1~3초)</li>
               <li>‘분석 후보’ 페이지에 등록 → 검토 후 승인 → 거래내역에 반영</li>
@@ -191,8 +191,8 @@ export function UploadClient() {
           </div>
 
           <div className="rounded-md bg-softPinkBackground/60 px-3 py-2 text-xs">
-            🔒 OCR 텍스트는 본인 PC/폰 안에서 처리되고, AI에 보내질 때는 카드번호·주민번호·
-            전화번호가 자동으로 가려진 상태로 전송됩니다. 원본 텍스트는{' '}
+            🔒 PDF 텍스트는 본인 PC/폰 안에서 처리되고, 사진은 압축된 이미지로 AI 에 전송됩니다.
+            두 경우 모두 카드/주민/전화/계좌번호는 마스킹된 상태로 전송됩니다. 원본 텍스트는{' '}
             <b className="text-textPrimary">7일 후 자동 삭제</b>됩니다.
           </div>
 
