@@ -52,7 +52,7 @@ export function Modal({ open, onClose, title, children, className }: Props) {
       <div
         className={cn(
           'relative bg-pageBackground w-full sm:max-w-md mx-0 sm:mx-4 rounded-t-modal sm:rounded-modal shadow-xl border border-borderDefault',
-          'p-4 sm:p-5 max-h-[92vh] overflow-y-auto',
+          'p-4 sm:p-5 max-h-[92dvh] overflow-y-auto',
           className,
         )}
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)' }}

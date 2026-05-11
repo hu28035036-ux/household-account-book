@@ -158,7 +158,7 @@ export function BottomNav({ isAdmin = false }: Props) {
             onClick={() => setMoreOpen(false)}
           />
           <div
-            className="absolute inset-x-0 bottom-0 bg-pageBackground rounded-t-2xl border-t border-borderDefault max-h-[85vh] overflow-y-auto shadow-2xl"
+            className="absolute inset-x-0 bottom-0 bg-pageBackground rounded-t-2xl border-t border-borderDefault max-h-[85dvh] overflow-y-auto shadow-2xl"
             style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)' }}
           >
             <div className="sticky top-0 bg-pageBackground/95 backdrop-blur flex items-center justify-between px-4 pt-3 pb-2 border-b border-borderSoft">
