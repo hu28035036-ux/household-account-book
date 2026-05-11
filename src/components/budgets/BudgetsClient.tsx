@@ -251,35 +251,47 @@ export function BudgetsClient() {
             const expanded = expandedKey === b.id;
             return (
               <li key={b.id}>
-                <Card>
+                <Card className="!p-2.5 sm:!p-3">
                   <div className="flex items-start justify-between gap-2">
                     <button
                       type="button"
                       onClick={() => toggleExpand(b.id, b.category_id)}
                       className="min-w-0 text-left flex-1 hover:opacity-80 transition-opacity"
                     >
-                      <CardTitle className="truncate inline-flex items-center gap-1.5">
+                      <CardTitle className="!text-sm truncate inline-flex items-center gap-1">
                         {b.category_id ? b.categories?.name ?? '카테고리' : '전체'}
                         <ChevronDown
-                          className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`}
+                          className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`}
                           strokeWidth={1.75}
                         />
                       </CardTitle>
-                      <CardSubtle className="mt-0.5">
+                      <CardSubtle className="!text-[11px] mt-0.5">
                         한도 {formatKRW(b.amount)} · 알림 {Math.round(b.alert_threshold * 100)}%
                       </CardSubtle>
                     </button>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Button size="sm" variant="ghost" onClick={() => startEdit(b)} aria-label="수정">
-                        <Pencil className="h-4 w-4" strokeWidth={1.75} />
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => startEdit(b)}
+                        aria-label="수정"
+                        className="!h-7 !w-7 !px-0"
+                      >
+                        <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => remove(b)} aria-label="삭제">
-                        <Trash2 className="h-4 w-4 text-danger" strokeWidth={1.75} />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => remove(b)}
+                        aria-label="삭제"
+                        className="!h-7 !w-7 !px-0"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-danger" strokeWidth={1.75} />
                       </Button>
                     </div>
                   </div>
                   {prog ? (
-                    <div className="mt-3">
+                    <div className="mt-1.5">
                       <BudgetBar
                         name={prog.category_name}
                         color={prog.category_color}
@@ -290,9 +302,9 @@ export function BudgetsClient() {
                       />
                     </div>
                   ) : (
-                    <CardSubtle className="mt-3">사용 내역이 아직 없어요.</CardSubtle>
+                    <CardSubtle className="!text-[11px] mt-1.5">사용 내역이 아직 없어요.</CardSubtle>
                   )}
-                  {b.memo && <p className="mt-3 text-xs text-textMuted">{b.memo}</p>}
+                  {b.memo && <p className="mt-1.5 text-[11px] text-textMuted">{b.memo}</p>}
                   {expanded && (
                     <ExpandedTxList
                       loading={txLoading[b.id]}
