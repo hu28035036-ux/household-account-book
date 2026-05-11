@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { shouldUpgradeToHigh, effectiveSourceType } from '@/services/extractionService';
+import {
+  shouldUpgradeToHigh,
+  effectiveSourceType,
+  isAmountSuspicious,
+} from '@/services/extractionService';
 import type { ExtractionResult } from '@/lib/ai/extractionSchema';
 
 function makeResult(partials: Partial<ExtractionResult['transactions'][number]>[]): ExtractionResult {
@@ -64,6 +68,36 @@ describe('shouldUpgradeToHigh', () => {
       { transaction_date: '2026-05-10', amount: 3000, confidence: 0.4 },
     ]);
     expect(shouldUpgradeToHigh(r)).toBe(false);
+  });
+});
+
+describe('isAmountSuspicious', () => {
+  it('100원 미만은 의심 = true (자릿수 누락 가능)', () => {
+    expect(isAmountSuspicious(50)).toBe(true);
+    expect(isAmountSuspicious(99)).toBe(true);
+  });
+
+  it('1억원 초과는 의심 = true (자릿수 추가 가능)', () => {
+    expect(isAmountSuspicious(100_000_001)).toBe(true);
+    expect(isAmountSuspicious(1_000_000_000)).toBe(true);
+  });
+
+  it('일반 영수증 금액(100원 ~ 1억원)은 의심 = false', () => {
+    expect(isAmountSuspicious(100)).toBe(false);
+    expect(isAmountSuspicious(5_800)).toBe(false);
+    expect(isAmountSuspicious(12_800)).toBe(false);
+    expect(isAmountSuspicious(3_500_000)).toBe(false);
+    expect(isAmountSuspicious(100_000_000)).toBe(false);
+  });
+
+  it('음수도 절댓값 기준으로 동일하게 판정', () => {
+    expect(isAmountSuspicious(-50)).toBe(true);
+    expect(isAmountSuspicious(-12_800)).toBe(false);
+    expect(isAmountSuspicious(-200_000_000)).toBe(true);
+  });
+
+  it('0 은 의심 제외 (LLM 이 모르면 null 을 쓰므로 0 은 정상 거의 없음)', () => {
+    expect(isAmountSuspicious(0)).toBe(false);
   });
 });
 

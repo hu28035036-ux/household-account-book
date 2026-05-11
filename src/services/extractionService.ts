@@ -35,6 +35,16 @@ export function shouldUpgradeToHigh(extraction: ExtractionResult): boolean {
  * extraction.document_type 가 은행/카드 캡처로 판정되면 캐시 source_type 도 동일하게 보정.
  * 그렇지 않으면 파일 MIME 기반 기본값(inferSourceType)을 그대로 사용.
  */
+/**
+ * 한국 영수증/거래내역의 일반 금액 범위(100원 ~ 1억원) 밖이면 자릿수 인식 오류 의심.
+ * 0 은 검증 제외 (LLM 이 모르면 null 을 쓰므로 0 자체가 거의 안 옴).
+ */
+export function isAmountSuspicious(amount: number): boolean {
+  const abs = Math.abs(amount);
+  if (abs === 0) return false;
+  return abs < 100 || abs > 100_000_000;
+}
+
 export function effectiveSourceType(
   inferred: string,
   documentType: ExtractionResult['document_type'],
@@ -110,17 +120,21 @@ export async function runExtractionForFile(
       .single();
 
     try {
-      // 1차: imageDetail='low' (영수증 케이스는 여기서 거의 항상 충분)
+      // 1차: imageDetail='high' (영수증·은행·카드 캡처 모두 high — 사용자 보고에 따라
+      // 금액 자릿수/날짜 숫자 인식 오류가 low 다운샘플에서 발생. 비용 증가는 건당 약
+      // $0.001-0.003 이지만 사용자 신뢰가 우선). 텍스트(PDF/OCR) 흐름에는 imageDetail 무관.
       let raw: string;
       try {
         const r = await llmGenerate({
           prompt,
           temperature: 0.1,
           imageUrls,
-          imageDetail: imageUrls ? 'low' : undefined,
+          imageDetail: imageUrls ? 'high' : undefined,
+          maxTokens: imageUrls ? 2500 : undefined,
+          timeoutMs: imageUrls ? 90_000 : undefined,
         });
         raw = r.content;
-        modelName = r.model;
+        modelName = imageUrls ? `${r.model}:high` : r.model;
       } catch (e) {
         if (e instanceof LLMUnavailableError) {
           await supabase
@@ -141,8 +155,8 @@ export async function runExtractionForFile(
         extraction = { document_type: 'other', transactions: [], global_warnings: [] };
       }
 
-      // 2차(자동 승급): 이미지가 있고 1차가 빈약하면 detail='high' 로 재호출.
-      // 은행/카드 거래내역 캡처처럼 작은 글자 빽빽한 화면에서 결정적으로 차이 남.
+      // 2차(안전망): 이미지가 있고 1차가 파싱 실패/빈약하면 temperature 0 으로 재호출.
+      // 1차가 이미 high 라서 해상도 추가 승급은 없음 — 결정적 디코딩만 시도.
       if (imageUrls && (parseFailed || shouldUpgradeToHigh(extraction))) {
         try {
           const r2 = await llmGenerate({
@@ -154,7 +168,7 @@ export async function runExtractionForFile(
             timeoutMs: 90_000,
           });
           extraction = parseExtractionLoose(r2.content);
-          modelName = `${r2.model}:high`;
+          modelName = `${r2.model}:high:retry`;
         } catch (e) {
           // 2차 실패 시 1차 결과 유지 (없으면 빈 결과)
           if (parseFailed) throw e;
@@ -200,6 +214,13 @@ export async function runExtractionForFile(
     if (t.transaction_date == null) warnings.push('date_uncertain');
     if (t.amount == null) warnings.push('amount_uncertain');
     if (t.merchant_name == null) warnings.push('merchant_uncertain');
+
+    // amount sanity: 한국 영수증/거래내역의 일반 범위는 100원 ~ 1억원. 그 밖이면
+    // 자릿수 누락/추가 가능성이 높아 사용자가 검토하도록 warning 부여 + confidence 하향.
+    if (t.amount != null && isAmountSuspicious(t.amount)) {
+      warnings.push('amount_suspicious_magnitude');
+      t.confidence = Math.max(0, t.confidence - 0.1);
+    }
 
     // 이미지 단독(masked 가 빈 문자열)인 경우 OCR 텍스트가 없으므로
     // basis_not_found 검사는 의미가 없다(LLM 의 raw_text_basis 가 무엇이든 항상 false 가 됨).
