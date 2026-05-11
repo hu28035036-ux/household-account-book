@@ -27,6 +27,22 @@ describe('buildExtractionPrompt', () => {
     expect(p).toContain('어제');
   });
 
+  it('날짜 정확도 sanity check 가이드("11.05", "0 패딩")를 포함한다', () => {
+    const p = buildExtractionPrompt('', baseHints, '2026-05-11');
+    expect(p).toContain('날짜 정확도');
+    expect(p).toContain('11.05');
+    expect(p).toContain('0 패딩');
+  });
+
+  it('금액 정확도 sanity check 가이드(100원 ~ 1억원 범위, 콤마 자릿수)를 포함한다', () => {
+    const p = buildExtractionPrompt('', baseHints, '2026-05-11');
+    expect(p).toContain('금액 정확도');
+    expect(p).toContain('100원');
+    expect(p).toContain('1억원');
+    expect(p).toContain('1,280');
+    expect(p).toContain('128,000');
+  });
+
   it('학습 힌트 hintBlock 에 한국 은행/카드사 이름을 함께 주입한다', () => {
     const p = buildExtractionPrompt('', baseHints, '2026-05-11');
     expect(p).toContain('known_korean_banks_and_cards');
