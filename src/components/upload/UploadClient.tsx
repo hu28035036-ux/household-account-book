@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
@@ -38,6 +39,12 @@ type Item = {
 export function UploadClient() {
   const router = useRouter();
   const [items, setItems] = useState<Item[]>([]);
+
+  // 분석 끝나면 /candidates 로 이동하므로, 페이지 진입 직후 미리 prefetch 해두면
+  // router.push 시점에 라우트 + RSC 가 캐시되어 즉시 표시.
+  useEffect(() => {
+    router.prefetch('/candidates');
+  }, [router]);
   // 일괄/선택 분석을 위한 선택 집합 (localId 기준).
   // ocr_done 상태인 항목만 분석 가능 — UI 에서 그 외 항목은 체크박스 비활성화.
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -340,9 +347,13 @@ export function UploadClient() {
                   </div>
                 </div>
               </div>
-              <Button onClick={() => router.push('/candidates')} className="shrink-0">
+              <Link
+                href="/candidates"
+                prefetch
+                className="shrink-0 inline-flex items-center justify-center gap-2 font-medium h-11 px-4 text-sm rounded-lg bg-primaryPink text-textOnPink hover:bg-primaryPinkHover transition-colors"
+              >
                 분석 후보로 이동 <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
-              </Button>
+              </Link>
             </div>
           </Card>
         );

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { Header } from './Header';
+import { RoutePrefetcher } from './RoutePrefetcher';
 import { ActiveHouseholdProvider } from '@/lib/active-household';
 import { SwUpdatePrompt } from '@/components/common/SwUpdatePrompt';
 import { ConfirmProvider } from '@/components/common/ConfirmProvider';
@@ -17,6 +18,7 @@ export function AppShell({ title, userEmail, isAdmin = false, children }: Props)
   return (
     <ActiveHouseholdProvider>
       <ConfirmProvider>
+        <RoutePrefetcher />
         <div className="min-h-screen flex bg-appBackground">
           <Sidebar isAdmin={isAdmin} />
           <div className="flex-1 flex flex-col min-w-0">
