@@ -144,6 +144,9 @@ export function UploadClient() {
   // 일괄 분석에서는 navigate=false 로 호출하고, 모든 분석이 끝난 뒤 한 번만 이동.
   async function analyze(item: Item, opts: { navigate?: boolean } = { navigate: true }) {
     if (!item.uploadedFileId) return false;
+    // 분석 호출과 동시에 /candidates RSC 페이로드를 한 번 더 prefetch — Next.js 캐시 기본 30초라
+    // 분석이 길어지면 마운트 시 prefetch 가 만료될 수 있어 안전망.
+    router.prefetch('/candidates');
     patch(item.localId, { status: 'analyzing' });
     try {
       const res = await fetch(`/api/extraction/${item.uploadedFileId}`, { method: 'POST' });

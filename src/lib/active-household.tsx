@@ -1,11 +1,25 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 
 const STORAGE_KEY = 'active_household_id';
 // 서버 컴포넌트(SSR 대시보드/통계)에서 cookies()로 읽기 위한 키.
 const COOKIE_KEY = 'active_household_id';
+
+// active_household_id 쿠키를 읽는 SSR 페이지 화이트리스트.
+// 컨텍스트 전환 시 router.refresh() 가 필요한 페이지만 명시 — 나머지 클라이언트
+// 컴포넌트 페이지는 activeId 변화에 직접 반응하므로 refresh 불필요.
+//
+// 새 SSR 페이지를 추가할 때 active_household_id 쿠키를 읽는다면 여기에도 추가.
+const SSR_PATHS_NEEDING_REFRESH = ['/dashboard', '/stats'];
 
 export type ActiveHousehold = {
   id: string;
@@ -40,6 +54,7 @@ function writeCookie(value: string | null) {
 
 export function ActiveHouseholdProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [activeId, setActiveIdState] = useState<string | null>(null);
   const [households, setHouseholds] = useState<ActiveHousehold[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,10 +104,14 @@ export function ActiveHouseholdProvider({ children }: { children: ReactNode }) {
         writeCookie(id);
       }
       setActiveIdState(id);
-      // SSR 페이지(대시보드/통계)가 새 쿠키로 다시 렌더링되도록 트리거
-      router.refresh();
+      // SSR 페이지(대시보드/통계 등 화이트리스트) 에서만 새 쿠키로 다시 렌더링 트리거.
+      // 나머지 CSR 페이지는 activeId 변화에 직접 반응하므로 refresh 불필요 → 전환 속도 ↑.
+      const needsRefresh =
+        pathname != null &&
+        SSR_PATHS_NEEDING_REFRESH.some((p) => pathname === p || pathname.startsWith(p + '/'));
+      if (needsRefresh) router.refresh();
     },
-    [router],
+    [router, pathname],
   );
 
   return (
