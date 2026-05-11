@@ -243,7 +243,7 @@ Claude Code가 다음에 봐야 할 파일:
   - `scripts/test-all-endpoints.mjs:48-50` — ai-status 를 `PUBLIC_APIS` 로 분류해 200 기대. 기대값 자체는 정확.
   - 결론: Codex 가 본 401 은 **환경 의존** (가능성: dev 서버 미준비 + login redirect HTML 응답을 401 로 오인 / Supabase rate limit / 환경변수 미설정으로 cold-start 시 다른 분기). **코드 변경으로 fix 불가**.
 - **smoke 쿠키 위장 (scripts/test-pages-* + lib/auth/getSession.ts + lib/supabase/server.ts)**: Supabase Auth 가 access token 을 storage_key 별 multiple cookies 로 split 하는 최근 변경과 smoke 의 단순 cookie 생성 방식이 불일치할 가능성. fix 는 **smoke 스크립트 전면 재작성** 필요 — 큰 범위라 별도 PR 권고.
-- **저장**: PR #26 (squash commit 머지 후 채울 SHA)
+- **저장**: PR [#26](https://github.com/hu28035036-ux/household-account-book/pull/26) (squash commit `39bc343`)
 - **변경 파일**:
   - `docs/verification/2026-05-11-code-validation.md` — 본 §6 (자기 참조)
   - `harness/runbook.md` — incident-0015-followup OPEN entry 추가 (smoke 인증/쿠키 위장 미해결)
