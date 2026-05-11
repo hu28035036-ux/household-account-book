@@ -9,12 +9,13 @@
 
 ## 0. 후속 수정 요약 (Claude Code 2026-05-11 17:00)
 
-Codex 의 incident-0015 (`smoke:all` EINVAL) 원인 분석 후 fix 적용:
-
-- **원인**: Windows + Node 24 환경에서 `spawn('npm.cmd', [...])` 가 `shell` 옵션 없이 호출되면 `EINVAL` 발생. Node 24 의 spawn behavior 가 일부 Windows 배치 파일(.cmd) 에 대해 `shell: true` 를 요구.
-- **Fix**: `scripts/run-smoke.mjs:21` — `spawn` 옵션에 `shell: isWin` 추가.
-- **추가 안전성 개선**: 기존 `taskkill /F /IM node.exe` 가 모든 Node 프로세스 (smoke 자체 포함) 를 죽일 수 있어 위험 → `taskkill /F /T /PID <dev.pid>` 로 dev child tree 만 정리하도록 좁힘.
-- 변경 파일: `scripts/run-smoke.mjs`
+- **처리**: incident-0015 → **CLOSED**
+- **의도**: Windows + Node 24 에서 `spawn('npm.cmd', [...])` 가 `shell` 옵션 없이 호출되면 EINVAL — Node 24 의 spawn 보안 강화 정책이 `.cmd` 배치에 대해 `shell: true` 를 요구. 추가로 기존 `taskkill /F /IM node.exe` 가 모든 Node 프로세스를 죽이는 위험 패턴 → `taskkill /F /T /PID <dev.pid>` 로 dev child tree 만 정리하도록 좁힘.
+- **저장**: PR [#22](https://github.com/hu28035036-ux/household-account-book/pull/22) (squash commit `4e3bddb`)
+- **변경 파일**:
+  - `scripts/run-smoke.mjs` — spawn `shell: isWin` + taskkill PID-tree
+  - `docs/verification/2026-05-11-code-validation.md` — 본 §0 (자기 참조)
+  - `harness/runbook.md` — incident-0015 entry 추가 (CLOSED)
 
 Codex 가 "우선순위 높음" 으로 적은 1·2번 항목 처리됨. 3번 (smoke 세부 스크립트 4개 결과 기록) 은 dev 서버를 띄워야 하므로 사용자가 로컬에서 `npm run smoke:all` 실행 후 추가 기록 권장.
 
