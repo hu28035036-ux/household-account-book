@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
-import { FileText, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { FileText, ArrowRight, CheckCircle2, PlayCircle, Sparkles } from 'lucide-react';
 import { Dropzone } from './Dropzone';
 import { OcrPreview } from './OcrPreview';
 // Tesseract.js 미사용 — 이미지는 서버 vision (gpt-4o-mini) 으로 직접 분석.
@@ -38,9 +38,22 @@ type Item = {
 export function UploadClient() {
   const router = useRouter();
   const [items, setItems] = useState<Item[]>([]);
+  // 일괄/선택 분석을 위한 선택 집합 (localId 기준).
+  // ocr_done 상태인 항목만 분석 가능 — UI 에서 그 외 항목은 체크박스 비활성화.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [batchPending, setBatchPending] = useState(false);
 
   function patch(localId: string, p: Partial<Item>) {
     setItems((prev) => prev.map((it) => (it.localId === localId ? { ...it, ...p } : it)));
+  }
+
+  function toggleSelect(localId: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(localId)) next.delete(localId);
+      else next.add(localId);
+      return next;
+    });
   }
 
   async function uploadOne(item: Item) {
@@ -120,17 +133,50 @@ export function UploadClient() {
     }
   }
 
-  async function analyze(item: Item) {
-    if (!item.uploadedFileId) return;
+  // 단일 분석. navigate=true 면 완료 직후 /candidates 로 이동(기존 동작 유지).
+  // 일괄 분석에서는 navigate=false 로 호출하고, 모든 분석이 끝난 뒤 한 번만 이동.
+  async function analyze(item: Item, opts: { navigate?: boolean } = { navigate: true }) {
+    if (!item.uploadedFileId) return false;
     patch(item.localId, { status: 'analyzing' });
-    const res = await fetch(`/api/extraction/${item.uploadedFileId}`, { method: 'POST' });
-    const json = await res.json();
-    if (!res.ok) {
-      patch(item.localId, { status: 'failed', error: json?.error?.message ?? '분석 실패' });
-      return;
+    try {
+      const res = await fetch(`/api/extraction/${item.uploadedFileId}`, { method: 'POST' });
+      const json = await res.json();
+      if (!res.ok) {
+        patch(item.localId, { status: 'failed', error: json?.error?.message ?? '분석 실패' });
+        return false;
+      }
+      patch(item.localId, { status: 'analyzed' });
+      if (opts.navigate) router.push('/candidates');
+      return true;
+    } catch (e) {
+      patch(item.localId, {
+        status: 'failed',
+        error: e instanceof Error ? e.message : '분석 실패',
+      });
+      return false;
     }
-    patch(item.localId, { status: 'analyzed' });
-    router.push('/candidates');
+  }
+
+  // 여러 항목 일괄 분석. 동시 호출 수는 3 으로 제한 (서버/OpenAI rate limit 보호).
+  // 모두 끝나면 한 번만 /candidates 로 이동.
+  async function analyzeMany(targetItems: Item[]) {
+    if (targetItems.length === 0 || batchPending) return;
+    setBatchPending(true);
+    setSelected(new Set());
+    const CONCURRENCY = 3;
+    let cursor = 0;
+    let anySuccess = false;
+    async function worker() {
+      while (cursor < targetItems.length) {
+        const idx = cursor++;
+        const it = targetItems[idx];
+        const ok = await analyze(it, { navigate: false });
+        if (ok) anySuccess = true;
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, targetItems.length) }, worker));
+    setBatchPending(false);
+    if (anySuccess) router.push('/candidates');
   }
 
   function onFiles(files: File[]) {
@@ -204,6 +250,72 @@ export function UploadClient() {
 
       <Dropzone onFiles={onFiles} />
 
+      {/* 일괄/선택 분석 액션 바 — ocr_done 항목이 1개 이상일 때만 표시 */}
+      {(() => {
+        const analyzable = items.filter((it) => it.status === 'ocr_done');
+        if (analyzable.length === 0) return null;
+        const selectedAnalyzable = analyzable.filter((it) => selected.has(it.localId));
+        const allSelected =
+          analyzable.length > 0 && analyzable.every((it) => selected.has(it.localId));
+        function toggleAll() {
+          setSelected((prev) => {
+            if (allSelected) {
+              const next = new Set(prev);
+              analyzable.forEach((it) => next.delete(it.localId));
+              return next;
+            }
+            const next = new Set(prev);
+            analyzable.forEach((it) => next.add(it.localId));
+            return next;
+          });
+        }
+        return (
+          <Card className="bg-softPinkBackground/50 border-primaryPinkSoft">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-3 min-w-0">
+                <button
+                  type="button"
+                  onClick={toggleAll}
+                  disabled={batchPending}
+                  className="text-xs sm:text-sm text-textPinkStrong underline underline-offset-2 disabled:opacity-50"
+                >
+                  {allSelected ? '선택 해제' : '전체 선택'}
+                </button>
+                <span className="text-xs text-textSecondary">
+                  분석 가능 {analyzable.length}건 · 선택 {selectedAnalyzable.length}건
+                </span>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => void analyzeMany(selectedAnalyzable)}
+                  disabled={selectedAnalyzable.length === 0 || batchPending}
+                  className="shrink-0"
+                >
+                  <PlayCircle className="h-4 w-4" strokeWidth={1.75} />
+                  선택한 {selectedAnalyzable.length}건 분석
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => void analyzeMany(analyzable)}
+                  disabled={batchPending}
+                  className="shrink-0"
+                >
+                  <Sparkles className="h-4 w-4" strokeWidth={1.75} />
+                  전체 {analyzable.length}건 한 번에 분석
+                </Button>
+              </div>
+            </div>
+            {batchPending && (
+              <p className="mt-2 text-xs text-textMuted">
+                일괄 분석 중… 모두 끝나면 분석 후보 페이지로 이동합니다.
+              </p>
+            )}
+          </Card>
+        );
+      })()}
+
       {/* 분석 완료된 항목이 있으면 분석 후보로 빠르게 이동 */}
       {(() => {
         const analyzedCount = items.filter((it) => it.status === 'analyzed').length;
@@ -249,6 +361,19 @@ export function UploadClient() {
         {items.map((it) => (
           <Card key={it.localId} className="space-y-3">
             <div className="flex gap-3">
+              {/* 체크박스 — 분석 가능(ocr_done) 상태에서만 활성 표시 */}
+              {it.status === 'ocr_done' && (
+                <label className="flex items-start pt-1 shrink-0 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selected.has(it.localId)}
+                    onChange={() => toggleSelect(it.localId)}
+                    disabled={batchPending}
+                    aria-label={`${it.file.name} 일괄 분석 대상으로 선택`}
+                    className="h-5 w-5 accent-primaryPink cursor-pointer"
+                  />
+                </label>
+              )}
               {it.file.type === 'application/pdf' || /\.pdf$/i.test(it.file.name) ? (
                 <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-lg border border-borderDefault bg-sectionBackground inline-flex items-center justify-center shrink-0 text-textPinkStrong">
                   <FileText className="h-8 w-8" strokeWidth={1.5} />
