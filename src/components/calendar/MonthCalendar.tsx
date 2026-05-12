@@ -24,9 +24,14 @@ type Tx = {
   type: 'income' | 'expense' | 'transfer';
   amount: number;
   merchant_name: string | null;
+  category_id: string | null;
   category_name: string | null;
   category_color: string | null;
+  payment_method_id: string | null;
   payment_method_name: string | null;
+  memo: string | null;
+  household_id: string | null;
+  recurring_rule_id: string | null;
 };
 
 type CategoryBudget = {
@@ -565,7 +570,8 @@ export function MonthCalendar({
         </Modal>
       )}
 
-      {/* 거래 수정 — TransactionEditor 재사용. onSaved 후 SSR 페이지 갱신 */}
+      {/* 거래 수정 — TransactionEditor 재사용. onSaved 후 SSR 페이지 갱신.
+          기존 카테고리/결제수단/메모/household 가 빈 값으로 덮어쓰이지 않도록 전체 필드 전달. */}
       {selectedTx && (
         <TransactionEditor
           open={editorOpen}
@@ -576,6 +582,11 @@ export function MonthCalendar({
             type: selectedTx.type,
             amount: selectedTx.amount,
             merchant_name: selectedTx.merchant_name,
+            category_id: selectedTx.category_id,
+            payment_method_id: selectedTx.payment_method_id,
+            memo: selectedTx.memo,
+            household_id: selectedTx.household_id,
+            recurring_rule_id: selectedTx.recurring_rule_id,
           }}
           categories={categories}
           paymentMethods={paymentMethods}
