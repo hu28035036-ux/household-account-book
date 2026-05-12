@@ -369,63 +369,7 @@ export function MonthCalendar({
         </div>
       </Card>
 
-      {/* ②-1 카테고리별 예산 진행률 (있을 때만) */}
-      {categoryBudgets.length > 0 && (
-        <Card>
-          <div className="flex items-center justify-between gap-2">
-            <CardTitle>카테고리별 예산</CardTitle>
-            <Link
-              href="/budgets"
-              className="text-xs text-textPinkStrong hover:underline shrink-0"
-            >
-              관리 →
-            </Link>
-          </div>
-          <ul className="mt-3 space-y-2.5">
-            {categoryBudgets.map((c) => {
-              const pct = Math.min(100, c.percent);
-              const overall = c.percent >= 100;
-              const caution = !overall && c.percent >= 80;
-              return (
-                <li key={c.category_id ?? c.category_name}>
-                  <div className="flex items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span
-                        className="inline-block h-2 w-2 rounded-full shrink-0"
-                        style={{ backgroundColor: c.category_color ?? '#F472B6' }}
-                      />
-                      <span className="text-textPrimary font-medium truncate">
-                        {c.category_name}
-                      </span>
-                    </div>
-                    <div className="text-textSecondary tabular shrink-0">
-                      {formatKRW(c.spent_amount)} /{' '}
-                      <span className="text-textPrimary">{formatKRW(c.budget_amount)}</span>
-                    </div>
-                  </div>
-                  <div className="mt-1 h-1.5 rounded-full bg-borderSoft overflow-hidden">
-                    <div
-                      className={cn(
-                        'h-full transition-[width]',
-                        overall ? 'bg-danger' : caution ? 'bg-warning' : 'bg-primaryPink',
-                      )}
-                      style={{ width: `${overall ? 100 : pct}%` }}
-                    />
-                  </div>
-                  <div
-                    className={cn(
-                      'mt-0.5 text-[10px] tabular text-right',
-                      overall ? 'text-danger' : caution ? 'text-warning' : 'text-textMuted',
-                    )}
-                  >
-                    {c.percent}%
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </Card>
-      )}
+      {/* (카테고리별 예산 카드는 상단 캐러셀로 이동 — 중복 제거) */}
 
       {/* ③ 이번 달 수입/지출/잔액 합계 */}
       <Card>
@@ -727,7 +671,8 @@ function BudgetCarousel({
 
         <div
           ref={scrollerRef}
-          className="overflow-x-auto snap-x snap-mandatory flex scroll-smooth -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="overflow-x-auto overflow-y-hidden snap-x snap-mandatory flex scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          style={{ overscrollBehaviorX: 'contain' }}
           aria-roledescription="carousel"
         >
           {/* 슬라이드 1: 합산 */}
@@ -735,7 +680,7 @@ function BudgetCarousel({
             role="group"
             aria-roledescription="slide"
             aria-label={`1 / ${slideCount} — 전체 합산`}
-            className="snap-start shrink-0 w-full px-1"
+            className="snap-center snap-always shrink-0 w-full"
           >
             <div className="flex items-end justify-between gap-3 flex-wrap">
               <div>
@@ -791,7 +736,7 @@ function BudgetCarousel({
                 role="group"
                 aria-roledescription="slide"
                 aria-label={`${i + 2} / ${slideCount} — ${cb.category_name}`}
-                className="snap-start shrink-0 w-full px-1"
+                className="snap-center snap-always shrink-0 w-full"
               >
                 <div className="flex items-end justify-between gap-3 flex-wrap">
                   <div className="min-w-0">
