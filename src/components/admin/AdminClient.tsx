@@ -45,9 +45,10 @@ export function AdminClient({ currentEmail }: { currentEmail: string | null }) {
 
   const load = useCallback(async () => {
     setLoading(true);
+    // cache: 'no-store' — 삭제 직후 stale 목록이 돌아오지 않도록 강제 fresh fetch
     const [aRes, uRes] = await Promise.all([
-      fetch('/api/admin/allowed-emails').then((r) => r.json()),
-      fetch('/api/admin/users').then((r) => r.json()),
+      fetch('/api/admin/allowed-emails', { cache: 'no-store' }).then((r) => r.json()),
+      fetch('/api/admin/users', { cache: 'no-store' }).then((r) => r.json()),
     ]);
     setAllowed(aRes?.data ?? []);
     setUsers(uRes?.data ?? []);
@@ -107,16 +108,23 @@ export function AdminClient({ currentEmail }: { currentEmail: string | null }) {
     );
     if (v !== 'DELETE') return;
     // confirm 은 query string 으로 전달 — 일부 환경에서 DELETE+body 가 stripped
-    // 되는 호환성 이슈 우회 (서버는 query/body 둘 다 받음)
+    // 되는 호환성 이슈 우회 (서버는 query/body 둘 다 받음).
+    // cache: 'no-store' — Service Worker / 브라우저 캐시가 stale 200 응답을 돌려주지 않도록.
     const res = await fetch(`/api/admin/users/${u.id}?confirm=DELETE`, {
       method: 'DELETE',
+      cache: 'no-store',
     });
-    if (res.ok) {
-      load();
-    } else {
-      const j = await res.json().catch(() => ({}));
-      alert(`삭제 실패: ${j?.error?.message ?? res.statusText}`);
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      alert(
+        `삭제 실패 (HTTP ${res.status}): ${j?.error?.message ?? res.statusText}\n\n` +
+          `자세한 에러는 서버 로그를 확인하세요. supabase service_role 키 또는 CASCADE FK 제약 문제일 수 있습니다.`,
+      );
+      return;
     }
+    // 성공 시 명시적 피드백 — 사용자가 "안 지워졌다" 오인 방지
+    alert(`${label} 삭제 완료. 목록을 갱신합니다.`);
+    await load();
   }
 
   return (
