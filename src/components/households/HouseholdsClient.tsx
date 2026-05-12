@@ -143,9 +143,22 @@ export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
 
   async function removeMem(m: Member) {
     if (!activeId) return;
-    if (!confirm('이 멤버를 가족에서 제거할까요?')) return;
-    const res = await fetch(`/api/households/${activeId}/members/${m.user_id}`, { method: 'DELETE' });
-    if (res.ok) loadDetails(activeId);
+    const displayName =
+      m.nickname?.trim() ||
+      m.full_name?.trim() ||
+      m.username?.trim() ||
+      `사용자 ${m.user_id.slice(0, 8)}`;
+    if (!confirm(`${displayName} 님을 이 모임에서 추방할까요?\n\n해당 멤버는 모임의 거래·예산을 더 이상 볼 수 없습니다. (개인 데이터는 보존)`)) return;
+    const res = await fetch(`/api/households/${activeId}/members/${m.user_id}`, {
+      method: 'DELETE',
+      cache: 'no-store',
+    });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      alert(`추방 실패 (HTTP ${res.status}): ${j?.error?.message ?? res.statusText}`);
+      return;
+    }
+    loadDetails(activeId);
   }
 
   async function joinByCode() {
@@ -317,8 +330,15 @@ export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
                               {m.role === 'owner' ? '총무' : '멤버'}
                             </Badge>
                             {active.is_owner && !isMe && (
-                              <Button size="sm" variant="ghost" onClick={() => removeMem(m)}>
-                                <Trash2 className="h-4 w-4 text-danger" strokeWidth={1.75} />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => removeMem(m)}
+                                title="멤버 추방"
+                                className="!h-7 !px-2 !text-xs text-danger"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+                                추방
                               </Button>
                             )}
                           </div>

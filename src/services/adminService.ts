@@ -97,7 +97,16 @@ export async function unbanUser(admin: SupabaseClient, userId: string) {
 }
 
 export async function deleteUserHard(admin: SupabaseClient, userId: string) {
-  // CASCADE로 사용자 데이터 일괄 삭제
-  const { error } = await admin.auth.admin.deleteUser(userId);
-  if (error) throw error;
+  // CASCADE 로 사용자 데이터 일괄 삭제.
+  // shouldSoftDelete=false 명시 — 일부 supabase 버전에서 default 가 soft 일 수 있어
+  // 명시적으로 hard delete (auth.users 행 자체 제거 → CASCADE FK 발동).
+  const { error } = await admin.auth.admin.deleteUser(userId, false);
+  if (error) {
+    // 에러를 그대로 throw 하면 라우트가 INTERNAL 로 잡아 클라이언트에 표시.
+    // 디버그 위해 message 에 status/code 포함되도록 보강.
+    const msg = `[deleteUser] ${error.message ?? 'unknown'}${
+      (error as any)?.code ? ` (code: ${(error as any).code})` : ''
+    }`;
+    throw new Error(msg);
+  }
 }
