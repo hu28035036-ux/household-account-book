@@ -59,17 +59,26 @@ export async function listUsers(admin: SupabaseClient) {
     counts[u.id] = count ?? 0;
   }
 
-  return users.map((u) => ({
-    id: u.id,
-    email: u.email,
-    full_name: profilesByUserId[u.id]?.full_name ?? null,
-    nickname: profilesByUserId[u.id]?.nickname ?? null,
-    last_sign_in_at: u.last_sign_in_at,
-    created_at: u.created_at,
-    banned_until: (u as any).banned_until ?? null,
-    confirmed_at: u.confirmed_at,
-    transactions_count: counts[u.id] ?? 0,
-  }));
+  return users.map((u) => {
+    // signup 폼은 full_name 을 supabase.auth.signUp({ options: { data: { full_name } } })
+    // 으로 user_metadata 에 저장. DB 트리거 handle_new_user 는 profiles.full_name 을 안 채우므로
+    // profiles 값이 null 이면 user_metadata 로 fallback — 모든 가입자 이름이 즉시 표시됨.
+    const meta = ((u as any).user_metadata ?? {}) as {
+      full_name?: string | null;
+      nickname?: string | null;
+    };
+    return {
+      id: u.id,
+      email: u.email,
+      full_name: profilesByUserId[u.id]?.full_name ?? meta.full_name ?? null,
+      nickname: profilesByUserId[u.id]?.nickname ?? meta.nickname ?? null,
+      last_sign_in_at: u.last_sign_in_at,
+      created_at: u.created_at,
+      banned_until: (u as any).banned_until ?? null,
+      confirmed_at: u.confirmed_at,
+      transactions_count: counts[u.id] ?? 0,
+    };
+  });
 }
 
 export async function banUser(admin: SupabaseClient, userId: string, durationHours = 87600) {
