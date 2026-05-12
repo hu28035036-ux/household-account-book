@@ -173,6 +173,57 @@ html.dark {
   --needs-review-text: #F87171;
 }
 
+/* =========================================================
+   컬러 테마별 다크 변형 — html.dark[data-theme='...'] 조합 셀렉터
+   pink-dark 는 위 html.dark 가 기본값. 아래 셀렉터는 specificity 가
+   더 높아(class+attr) lavender/mint/mocha 의 다크 톤을 자동 적용한다.
+   배경 계층은 동일(미드나잇)하게 두고, primary/border/strong 만 컬러 테마 색으로 덮어씀.
+   ========================================================= */
+html.dark[data-theme='lavender'] {
+  --primary: #9F7AEA;
+  --primary-hover: #B197FC;
+  --primary-soft: #2A1F3A;
+  --primary-light: #3A2F4A;
+  --primary-border: #3F2D5A;
+  --primary-dark: #B197FC;
+  --primary-strong: #C4B5FD;
+  --soft-bg: #1B1822;
+  --section-bg: #1A1820;
+  --border-default: #2E2A35;
+  --border-soft: #1F1C25;
+  --divider: #25222C;
+}
+
+html.dark[data-theme='mint'] {
+  --primary: #5EEAD4;
+  --primary-hover: #8DEFE2;
+  --primary-soft: #14302A;
+  --primary-light: #1A3D35;
+  --primary-border: #2F4A42;
+  --primary-dark: #8DEFE2;
+  --primary-strong: #6DE9D6;
+  --soft-bg: #14201C;
+  --section-bg: #131D1A;
+  --border-default: #2A332E;
+  --border-soft: #1C2521;
+  --divider: #222A26;
+}
+
+html.dark[data-theme='mocha'] {
+  --primary: #C9B59A;
+  --primary-hover: #D8C5A8;
+  --primary-soft: #2A241D;
+  --primary-light: #36302A;
+  --primary-border: #4A3F32;
+  --primary-dark: #D8C5A8;
+  --primary-strong: #D8C5A8;
+  --soft-bg: #1F1C16;
+  --section-bg: #1D1A14;
+  --border-default: #2E2A24;
+  --border-soft: #221F1A;
+  --divider: #28241E;
+}
+
 html, body {
   background-color: var(--app-bg);
   color: var(--text-primary);
