@@ -25,19 +25,19 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
-// 하단 5칸 — 가장 자주 쓰는 것만. 가운데 "업로드"는 핑크 FAB 형태로 강조.
+// 하단 5칸 — 모두 평면 아이콘 (FAB 동그라미 제거).
+// 사용자 지정 순서: 캘린더 → 거래 → 예산 → 통계 + 더보기.
 const PRIMARY = [
   { href: '/dashboard', label: '캘린더', icon: Calendar, prominent: false },
   { href: '/transactions', label: '거래', icon: Receipt, prominent: false },
-  { href: '/upload', label: '업로드', icon: Upload, prominent: true },
+  { href: '/budgets', label: '예산', icon: PiggyBank, prominent: false },
   { href: '/stats', label: '통계', icon: BarChart3, prominent: false },
 ] as const;
 
-// "더보기" 시트 항목. 사용자 지정 순서: 예산 → 카테고리 → 결제수단 →
-// 고정 거래 → 모임 → 분석 후보 → AI 기록 → 원본 파일 → 설정 → 관리자.
+// "더보기" 시트 항목. 업로드(자주 쓰지만 PRIMARY 4칸에서 빠짐) 를 맨 위로.
 // 알림은 헤더 우상단의 NotificationBell 로 접근하므로 시트에서 제외.
 const MORE = [
-  { href: '/budgets', label: '예산', icon: PiggyBank },
+  { href: '/upload', label: 'AI 업로드', icon: Upload },
   { href: '/categories', label: '카테고리', icon: Tags },
   { href: '/payment-methods', label: '결제수단', icon: CreditCard },
   { href: '/recurring', label: '고정 거래', icon: Repeat },
@@ -85,36 +85,8 @@ export function BottomNav({ isAdmin = false }: Props) {
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <ul className="grid grid-cols-5">
-          {PRIMARY.map(({ href, label, icon: Icon, prominent }) => {
+          {PRIMARY.map(({ href, label, icon: Icon }) => {
             const active = pathname === href || pathname.startsWith(href + '/');
-            if (prominent) {
-              return (
-                <li key={href} className="relative">
-                  <Link
-                    href={href}
-                    className="flex flex-col items-center justify-end gap-0.5 py-1 min-h-[56px]"
-                    aria-label={label}
-                  >
-                    <span
-                      className={cn(
-                        'h-12 w-12 -mt-3 rounded-full flex items-center justify-center text-textOnPink shadow-md ring-2 ring-pageBackground',
-                        active ? 'bg-primaryPinkHover' : 'bg-primaryPink',
-                      )}
-                    >
-                      <Icon className="h-6 w-6" strokeWidth={2} />
-                    </span>
-                    <span
-                      className={cn(
-                        'text-[11px] mt-0.5',
-                        active ? 'text-textPinkStrong' : 'text-textSecondary',
-                      )}
-                    >
-                      {label}
-                    </span>
-                  </Link>
-                </li>
-              );
-            }
             return (
               <li key={href}>
                 <Link
