@@ -23,9 +23,14 @@ export type CalendarMonth = {
     type: 'income' | 'expense' | 'transfer';
     amount: number;
     merchant_name: string | null;
+    category_id: string | null;
     category_name: string | null;
     category_color: string | null;
+    payment_method_id: string | null;
     payment_method_name: string | null;
+    memo: string | null;
+    household_id: string | null;
+    recurring_rule_id: string | null;
   }>>;
 };
 
@@ -47,7 +52,7 @@ export async function getCalendarMonth(
   let txQ = supabase
     .from('transactions')
     .select(
-      'id, transaction_date, type, amount, merchant_name, categories(name,color), payment_methods(name)',
+      'id, transaction_date, type, amount, merchant_name, category_id, payment_method_id, memo, household_id, recurring_rule_id, categories(name,color), payment_methods(name)',
     )
     .gte('transaction_date', from)
     .lte('transaction_date', to);
@@ -82,9 +87,14 @@ export async function getCalendarMonth(
         type: t.type as 'income' | 'expense' | 'transfer',
         amount: Number(t.amount),
         merchant_name: (t as any).merchant_name ?? null,
+        category_id: (t as any).category_id ?? null,
         category_name: (t as any).categories?.name ?? null,
         category_color: (t as any).categories?.color ?? null,
+        payment_method_id: (t as any).payment_method_id ?? null,
         payment_method_name: (t as any).payment_methods?.name ?? null,
+        memo: (t as any).memo ?? null,
+        household_id: (t as any).household_id ?? null,
+        recurring_rule_id: (t as any).recurring_rule_id ?? null,
       });
     }
   }
