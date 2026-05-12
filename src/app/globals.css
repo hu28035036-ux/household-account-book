@@ -33,6 +33,26 @@
   --border-default: #F3D4E3;
   --border-soft: #FCE7F3;
   --divider: #F8E1EA;
+
+  /* === 상태색·거래색·warning bg/text — 라이트 기본 === */
+  --success: #10B981;
+  --success-soft: #D1FAE5;
+  --warning: #F59E0B;
+  --warning-soft: #FEF3C7;
+  --danger: #EF4444;
+  --danger-soft: #FEE2E2;
+  --info: #60A5FA;
+  --info-soft: #DBEAFE;
+  --income: #10B981;
+  --income-soft: #D1FAE5;
+  --expense: #EC4899;
+  --expense-soft: #FCE7F3;
+  --transfer: #60A5FA;
+  --transfer-soft: #DBEAFE;
+  --duplicate-warning-bg: #FEF3C7;
+  --duplicate-warning-text: #92400E;
+  --needs-review-bg: #FEE2E2;
+  --needs-review-text: #991B1B;
 }
 
 html[data-theme='lavender'] {
@@ -99,6 +119,57 @@ html[data-theme='mocha'] {
   --border-default: #DCC8AB;
   --border-soft: #EFE4D2;
   --divider: #E8DAC4;
+}
+
+/* =========================================================
+   다크 모드 — 미드나잇 블랙 톤. 글자는 화이트 톤.
+   상태색·거래색은 다크 배경에서 잘 보이도록 채도·명도 ↑.
+   - html.dark : 수동 선택 (themeMode='dark') 또는 themeMode='system' + OS 다크
+   - layout.tsx 의 themeInitScript 가 첫 페인트 전에 .dark 클래스 부착
+   ========================================================= */
+html.dark {
+  --app-bg: #0E0E12;
+  --page-bg: #16161B;
+  --soft-bg: #1F1A1F;
+  --card-bg: #1C1C22;
+  --section-bg: #1A1A1F;
+
+  --primary: #FA9CD0;
+  --primary-hover: #FFB3DA;
+  --primary-soft: #3A1F2D;
+  --primary-light: #4A2735;
+  --primary-border: #5A2F45;
+  --primary-dark: #FF7AB8;
+  --primary-strong: #FFB3DA;
+  --text-on-primary: #FFFFFF;
+
+  --text-primary: #F5F5F7;
+  --text-secondary: #C5C5CC;
+  --text-muted: #8A8A92;
+
+  --border-default: #2A2A32;
+  --border-soft: #1E1E24;
+  --divider: #22222A;
+
+  /* 상태·거래색 — 다크 배경에서 잘 보이도록 밝게 */
+  --success: #34D399;
+  --success-soft: #0F2A1F;
+  --warning: #FBBF24;
+  --warning-soft: #2E2412;
+  --danger: #F87171;
+  --danger-soft: #2F1719;
+  --info: #93C5FD;
+  --info-soft: #16243A;
+  --income: #34D399;
+  --income-soft: #0F2A1F;
+  --expense: #F87171;
+  --expense-soft: #2F1719;
+  --transfer: #93C5FD;
+  --transfer-soft: #16243A;
+  --duplicate-warning-bg: #2E2412;
+  --duplicate-warning-text: #FBBF24;
+  --needs-review-bg: #2F1719;
+  --needs-review-text: #F87171;
 }
 
 html, body {
