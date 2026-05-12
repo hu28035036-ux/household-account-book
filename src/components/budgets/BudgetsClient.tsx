@@ -251,13 +251,21 @@ export function BudgetsClient() {
             const expanded = expandedKey === b.id;
             return (
               <li key={b.id}>
-                <Card className="!p-2.5 sm:!p-3">
+                <Card
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => toggleExpand(b.id, b.category_id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleExpand(b.id, b.category_id);
+                    }
+                  }}
+                  aria-expanded={expanded}
+                  className="!p-2.5 sm:!p-3 cursor-pointer hover:bg-softPinkBackground/40 transition-colors"
+                >
                   <div className="flex items-start justify-between gap-2">
-                    <button
-                      type="button"
-                      onClick={() => toggleExpand(b.id, b.category_id)}
-                      className="min-w-0 text-left flex-1 hover:opacity-80 transition-opacity"
-                    >
+                    <div className="min-w-0 text-left flex-1">
                       <CardTitle className="!text-sm truncate inline-flex items-center gap-1">
                         {b.category_id ? b.categories?.name ?? '카테고리' : '전체'}
                         <ChevronDown
@@ -268,12 +276,15 @@ export function BudgetsClient() {
                       <CardSubtle className="!text-[11px] mt-0.5">
                         한도 {formatKRW(b.amount)} · 알림 {Math.round(b.alert_threshold * 100)}%
                       </CardSubtle>
-                    </button>
+                    </div>
                     <div className="flex items-center gap-0.5 shrink-0">
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => startEdit(b)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startEdit(b);
+                        }}
                         aria-label="수정"
                         className="!h-7 !w-7 !px-0"
                       >
@@ -282,7 +293,10 @@ export function BudgetsClient() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => remove(b)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          remove(b);
+                        }}
                         aria-label="삭제"
                         className="!h-7 !w-7 !px-0"
                       >

@@ -2,11 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
+import { Modal } from '@/components/common/Modal';
+import { TransactionEditor } from '@/components/transactions/TransactionEditor';
 import { cn } from '@/lib/utils/cn';
 import { formatKRW } from '@/lib/formatting/money';
+import { formatDateKST } from '@/lib/formatting/date';
 
 type DailyBucket = {
   date: string;
@@ -76,7 +80,33 @@ export function MonthCalendar({
   categoryBudgets,
 }: Props) {
   const today = todayKSTYMD();
+  const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null); // 한 줄 리스트 필터용
+  const [categoryFilter, setCategoryFilter] = useState<string>(''); // '' = 전체
+
+  // 상세 팝업 + 수정 모달 state
+  const [selectedTx, setSelectedTx] = useState<(Tx & { date: string }) | null>(null);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editorPending, setEditorPending] = useState(false);
+  const [categories, setCategories] = useState<{ id: string; name: string; type: string }[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<{ id: string; name: string }[]>([]);
+
+  // 거래 수정 모달용 categories / payment-methods — 마운트 시 1회 fetch
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const [catRes, pmRes] = await Promise.all([
+        fetch('/api/categories').then((r) => r.json()).catch(() => ({})),
+        fetch('/api/payment-methods').then((r) => r.json()).catch(() => ({})),
+      ]);
+      if (cancelled) return;
+      setCategories(catRes?.data ?? []);
+      setPaymentMethods(pmRes?.data ?? []);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const dailyMap = useMemo(() => {
     const m: Record<string, DailyBucket> = {};
@@ -107,10 +137,48 @@ export function MonthCalendar({
     return rows;
   }, [recentByDate]);
 
+  // 카테고리 필터 옵션 — flatRecent 의 unique categories (이름 기준)
+  const categoryOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of flatRecent) {
+      if (r.category_name) set.add(r.category_name);
+    }
+    return Array.from(set).sort();
+  }, [flatRecent]);
+
   const visibleRows = useMemo(() => {
-    if (!selected) return flatRecent.slice(0, 50);
-    return flatRecent.filter((r) => r.date === selected);
-  }, [flatRecent, selected]);
+    let rows = flatRecent;
+    if (selected) rows = rows.filter((r) => r.date === selected);
+    if (categoryFilter) rows = rows.filter((r) => (r.category_name ?? '') === categoryFilter);
+    if (!selected && !categoryFilter) return rows.slice(0, 50);
+    return rows;
+  }, [flatRecent, selected, categoryFilter]);
+
+  async function handleDelete() {
+    if (!selectedTx) return;
+    if (
+      !confirm(
+        `${selectedTx.merchant_name ?? ''} ${formatKRW(selectedTx.amount)} 거래를 삭제할까요? 되돌릴 수 없습니다.`,
+      )
+    )
+      return;
+    setEditorPending(true);
+    try {
+      const res = await fetch(`/api/transactions/${selectedTx.id}`, {
+        method: 'DELETE',
+        cache: 'no-store',
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        alert(`삭제 실패: ${j?.error?.message ?? res.statusText}`);
+        return;
+      }
+      setSelectedTx(null);
+      router.refresh();
+    } finally {
+      setEditorPending(false);
+    }
+  }
 
   const prevYM = ymOffset(yearMonth, -1);
   const nextYM = ymOffset(yearMonth, 1);
@@ -398,7 +466,20 @@ export function MonthCalendar({
               ? `${selected.slice(5).replace('-', '월 ')}일 거래`
               : '최근 거래내역'}
           </CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              aria-label="카테고리 필터"
+              className="h-8 min-w-0 max-w-[140px] px-2 rounded-md border border-borderDefault bg-pageBackground text-xs text-textPrimary"
+            >
+              <option value="">전체 카테고리</option>
+              {categoryOptions.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
             <span className="text-xs text-textMuted">
               {selected ? `${visibleRows.length}건` : `이번 달 최신 ${visibleRows.length}건`}
             </span>
@@ -417,51 +498,159 @@ export function MonthCalendar({
         ) : (
           <ul className="mt-3 divide-y divide-divider">
             {visibleRows.map((t) => (
-              <li
-                key={t.id}
-                className="py-2 flex items-center gap-2 sm:gap-3 min-w-0 text-sm"
-              >
-                {/* 날짜 */}
-                <span className="tabular text-xs text-textMuted w-10 shrink-0">
-                  {t.date.slice(5)}
-                </span>
-                {/* 카테고리 (점 + 이름) — 모바일도 표시 */}
-                <span className="flex items-center gap-1 shrink-0 max-w-[80px] sm:max-w-[110px]">
-                  <span
-                    className="inline-block h-2 w-2 rounded-full shrink-0"
-                    style={{ backgroundColor: t.category_color ?? '#9CA3AF' }}
-                  />
-                  <span className="text-xs text-textMuted truncate">
-                    {t.category_name ?? '미지정'}
-                  </span>
-                </span>
-                {/* 거래내역 (가맹점) */}
-                <span className="text-textPrimary truncate flex-1 min-w-0">
-                  {t.merchant_name || '(가맹점 없음)'}
-                </span>
-                {/* 결제수단 — 데스크톱만 */}
-                <span className="text-xs text-textMuted truncate hidden md:inline max-w-[100px]">
-                  {t.payment_method_name ?? ''}
-                </span>
-                {/* 금액 */}
-                <span
-                  className={cn(
-                    'tabular font-semibold whitespace-nowrap min-w-[80px] text-right',
-                    t.type === 'income'
-                      ? 'text-income'
-                      : t.type === 'transfer'
-                      ? 'text-transfer'
-                      : 'text-expense',
-                  )}
+              <li key={t.id}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTx(t)}
+                  aria-label="거래 상세 보기"
+                  className="w-full py-2 flex items-center gap-2 sm:gap-3 min-w-0 text-sm text-left hover:bg-softPinkBackground/40 -mx-2 px-2 rounded-md transition-colors"
                 >
-                  {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
-                  {formatKRW(t.amount)}
-                </span>
+                  {/* 날짜 */}
+                  <span className="tabular text-xs text-textMuted w-10 shrink-0">
+                    {t.date.slice(5)}
+                  </span>
+                  {/* 카테고리 (점 + 이름) — 모바일도 표시 */}
+                  <span className="flex items-center gap-1 shrink-0 max-w-[80px] sm:max-w-[110px]">
+                    <span
+                      className="inline-block h-2 w-2 rounded-full shrink-0"
+                      style={{ backgroundColor: t.category_color ?? '#9CA3AF' }}
+                    />
+                    <span className="text-xs text-textMuted truncate">
+                      {t.category_name ?? '미지정'}
+                    </span>
+                  </span>
+                  {/* 거래내역 (가맹점) */}
+                  <span className="text-textPrimary truncate flex-1 min-w-0">
+                    {t.merchant_name || '(가맹점 없음)'}
+                  </span>
+                  {/* 결제수단 — 데스크톱만 */}
+                  <span className="text-xs text-textMuted truncate hidden md:inline max-w-[100px]">
+                    {t.payment_method_name ?? ''}
+                  </span>
+                  {/* 금액 */}
+                  <span
+                    className={cn(
+                      'tabular font-semibold whitespace-nowrap min-w-[80px] text-right',
+                      t.type === 'income'
+                        ? 'text-income'
+                        : t.type === 'transfer'
+                        ? 'text-transfer'
+                        : 'text-expense',
+                    )}
+                  >
+                    {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
+                    {formatKRW(t.amount)}
+                  </span>
+                </button>
               </li>
             ))}
           </ul>
         )}
       </Card>
+
+      {/* 거래 상세 팝업 — 행 클릭 시 표시. 수정·삭제 액션 포함 */}
+      {selectedTx && !editorOpen && (
+        <Modal
+          open
+          onClose={() => setSelectedTx(null)}
+          title="거래 상세"
+        >
+          <div className="space-y-2 text-sm">
+            <Row label="날짜">{formatDateKST(selectedTx.date)}</Row>
+            <Row label="가맹점">{selectedTx.merchant_name || '(가맹점 없음)'}</Row>
+            <Row label="금액">
+              <span
+                className={cn(
+                  'tabular font-semibold',
+                  selectedTx.type === 'income'
+                    ? 'text-income'
+                    : selectedTx.type === 'transfer'
+                    ? 'text-transfer'
+                    : 'text-expense',
+                )}
+              >
+                {selectedTx.type === 'income'
+                  ? '+'
+                  : selectedTx.type === 'expense'
+                  ? '-'
+                  : ''}
+                {formatKRW(selectedTx.amount)}
+              </span>
+            </Row>
+            <Row label="카테고리">
+              <span className="inline-flex items-center gap-1.5">
+                <span
+                  className="inline-block h-2 w-2 rounded-full"
+                  style={{ backgroundColor: selectedTx.category_color ?? '#9CA3AF' }}
+                />
+                {selectedTx.category_name ?? '미지정'}
+              </span>
+            </Row>
+            <Row label="결제수단">{selectedTx.payment_method_name ?? '-'}</Row>
+          </div>
+          <div className="mt-4 flex items-center justify-end gap-1.5 flex-wrap">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setSelectedTx(null)}
+              disabled={editorPending}
+              className="!h-8 !px-2.5 !text-xs"
+            >
+              닫기
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleDelete}
+              disabled={editorPending}
+              className="!h-8 !px-2.5 !text-xs text-danger"
+            >
+              <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+              삭제
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setEditorOpen(true)}
+              disabled={editorPending}
+              className="!h-8 !px-2.5 !text-xs"
+            >
+              <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
+              수정
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {/* 거래 수정 — TransactionEditor 재사용. onSaved 후 SSR 페이지 갱신 */}
+      {selectedTx && (
+        <TransactionEditor
+          open={editorOpen}
+          onClose={() => setEditorOpen(false)}
+          initial={{
+            id: selectedTx.id,
+            transaction_date: selectedTx.date,
+            type: selectedTx.type,
+            amount: selectedTx.amount,
+            merchant_name: selectedTx.merchant_name,
+          }}
+          categories={categories}
+          paymentMethods={paymentMethods}
+          onSaved={() => {
+            setEditorOpen(false);
+            setSelectedTx(null);
+            router.refresh();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-3 py-0.5">
+      <span className="text-xs text-textSecondary shrink-0">{label}</span>
+      <span className="text-textPrimary text-right min-w-0 truncate">{children}</span>
     </div>
   );
 }
