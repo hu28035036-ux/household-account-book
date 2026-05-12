@@ -159,7 +159,7 @@ export function PaymentMethodsClient() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="예: 신한카드 The More"
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             />
           </label>
           <div className="grid grid-cols-2 gap-3">
@@ -168,7 +168,7 @@ export function PaymentMethodsClient() {
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as PM['type'])}
-                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
               >
                 <option value="card">카드</option>
                 <option value="bank">계좌</option>
@@ -184,7 +184,7 @@ export function PaymentMethodsClient() {
                 value={issuer}
                 onChange={(e) => setIssuer(e.target.value)}
                 placeholder="예: 신한"
-                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
               />
             </label>
           </div>
@@ -197,7 +197,7 @@ export function PaymentMethodsClient() {
               value={last4}
               onChange={(e) => setLast4(e.target.value.replace(/\D/g, ''))}
               placeholder="0000"
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary tabular"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary tabular"
             />
             <span className="block mt-1 text-xs text-textMuted">전체 카드/계좌번호는 입력하지 않습니다. 끝 4자리만 저장됩니다.</span>
           </label>

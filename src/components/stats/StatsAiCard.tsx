@@ -188,7 +188,7 @@ export function StatsAiCard() {
               'h-9 px-3 rounded-md text-sm border transition-colors',
               preset === p.id
                 ? 'bg-primaryPinkSoft text-textPinkStrong border-primaryPinkBorder'
-                : 'bg-white text-textSecondary border-borderDefault hover:bg-softPinkBackground',
+                : 'bg-pageBackground text-textSecondary border-borderDefault hover:bg-softPinkBackground',
             )}
           >
             {p.label}
@@ -208,7 +208,7 @@ export function StatsAiCard() {
             value={customFrom}
             max={customTo}
             onChange={(e) => setCustomFrom(e.target.value)}
-            className="h-9 px-3 rounded-md border border-borderDefault bg-white text-sm text-textPrimary"
+            className="h-9 px-3 rounded-md border border-borderDefault bg-pageBackground text-sm text-textPrimary"
           />
           <span className="text-xs text-textMuted">→</span>
           <input
@@ -216,7 +216,7 @@ export function StatsAiCard() {
             value={customTo}
             min={customFrom}
             onChange={(e) => setCustomTo(e.target.value)}
-            className="h-9 px-3 rounded-md border border-borderDefault bg-white text-sm text-textPrimary"
+            className="h-9 px-3 rounded-md border border-borderDefault bg-pageBackground text-sm text-textPrimary"
           />
         </div>
       )}

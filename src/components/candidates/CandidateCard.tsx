@@ -272,7 +272,7 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-white text-textPrimary text-sm"
+                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-pageBackground text-textPrimary text-sm"
                 />
               </label>
               <label className="flex items-center gap-2 min-w-0">
@@ -280,7 +280,7 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
                 <select
                   value={type}
                   onChange={(e) => setType(e.target.value as 'income' | 'expense' | 'transfer')}
-                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-white text-textPrimary text-sm"
+                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-pageBackground text-textPrimary text-sm"
                 >
                   <option value="expense">지출</option>
                   <option value="income">수입</option>
@@ -294,7 +294,7 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
                   value={amountStr}
                   onChange={(e) => setAmountStr(e.target.value)}
                   placeholder="예: 12000"
-                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-white text-textPrimary text-sm tabular"
+                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-pageBackground text-textPrimary text-sm tabular"
                 />
               </label>
               <label className="flex items-center gap-2 min-w-0">
@@ -303,7 +303,7 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
                   value={merchant}
                   onChange={(e) => setMerchant(e.target.value)}
                   placeholder="예: 스타벅스 강남점"
-                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-white text-textPrimary text-sm"
+                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-pageBackground text-textPrimary text-sm"
                 />
               </label>
               <label className="flex items-center gap-2 min-w-0">
@@ -312,7 +312,7 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   placeholder="예: 카페/간식"
-                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-white text-textPrimary text-sm"
+                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-pageBackground text-textPrimary text-sm"
                 />
               </label>
               <label className="flex items-center gap-2 min-w-0">
@@ -321,7 +321,7 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
                   value={payment}
                   onChange={(e) => setPayment(e.target.value)}
                   placeholder="예: 신용카드"
-                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-white text-textPrimary text-sm"
+                  className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-pageBackground text-textPrimary text-sm"
                 />
               </label>
             </div>

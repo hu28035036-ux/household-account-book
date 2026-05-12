@@ -395,7 +395,7 @@ export function RecurringClient() {
                   'h-9 px-3 rounded-md text-sm border ' +
                   (type === t
                     ? 'bg-primaryPinkSoft text-textPinkStrong border-primaryPinkBorder'
-                    : 'bg-white text-textSecondary border-borderDefault')
+                    : 'bg-pageBackground text-textSecondary border-borderDefault')
                 }
               >
                 {t === 'expense' ? '지출' : '수입'}
@@ -409,7 +409,7 @@ export function RecurringClient() {
               value={merchant}
               onChange={(e) => setMerchant(e.target.value)}
               placeholder="예: 넷플릭스"
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             />
           </label>
 
@@ -420,7 +420,7 @@ export function RecurringClient() {
               value={amountStr}
               onChange={(e) => setAmountStr(e.target.value)}
               placeholder="예: 17000"
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary tabular"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary tabular"
             />
           </label>
 
@@ -430,7 +430,7 @@ export function RecurringClient() {
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
-                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
               >
                 <option value="">미지정</option>
                 {categories
@@ -447,7 +447,7 @@ export function RecurringClient() {
               <select
                 value={paymentMethodId}
                 onChange={(e) => setPaymentMethodId(e.target.value)}
-                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
               >
                 <option value="">미지정</option>
                 {paymentMethods.map((p) => (
@@ -472,7 +472,7 @@ export function RecurringClient() {
                     'h-9 px-3 rounded-md text-sm border ' +
                     (frequency === f
                       ? 'bg-primaryPinkSoft text-textPinkStrong border-primaryPinkBorder'
-                      : 'bg-white text-textSecondary border-borderDefault')
+                      : 'bg-pageBackground text-textSecondary border-borderDefault')
                   }
                 >
                   {FREQ_LABEL[f]}
@@ -490,7 +490,7 @@ export function RecurringClient() {
                       'h-9 w-9 rounded-md text-sm border ' +
                       (dayOfWeek === i
                         ? 'bg-primaryPinkSoft text-textPinkStrong border-primaryPinkBorder'
-                        : 'bg-white text-textSecondary border-borderDefault')
+                        : 'bg-pageBackground text-textSecondary border-borderDefault')
                     }
                   >
                     {d}
@@ -507,7 +507,7 @@ export function RecurringClient() {
                   max={31}
                   value={dayOfMonth}
                   onChange={(e) => setDayOfMonth(Math.max(1, Math.min(31, Number(e.target.value))))}
-                  className="h-10 w-20 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary tabular"
+                  className="h-10 w-20 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary tabular"
                 />
                 <span className="text-sm">일</span>
                 <span className="text-xs text-textMuted">(31일이면 그 달 마지막 날로 자동 보정)</span>
@@ -523,7 +523,7 @@ export function RecurringClient() {
                   onChange={(e) =>
                     setMonthOfYear(Math.max(1, Math.min(12, Number(e.target.value))))
                   }
-                  className="h-10 w-20 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary tabular"
+                  className="h-10 w-20 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary tabular"
                 />
                 <span className="text-sm">월</span>
                 <input
@@ -532,7 +532,7 @@ export function RecurringClient() {
                   max={31}
                   value={dayOfMonth}
                   onChange={(e) => setDayOfMonth(Math.max(1, Math.min(31, Number(e.target.value))))}
-                  className="h-10 w-20 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary tabular"
+                  className="h-10 w-20 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary tabular"
                 />
                 <span className="text-sm">일</span>
               </div>
@@ -547,7 +547,7 @@ export function RecurringClient() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
               />
             </label>
             <label className="block">
@@ -556,7 +556,7 @@ export function RecurringClient() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
               />
             </label>
           </div>
@@ -580,7 +580,7 @@ export function RecurringClient() {
                 max={30}
                 value={notifyDays}
                 onChange={(e) => setNotifyDays(Math.max(0, Math.min(30, Number(e.target.value))))}
-                className="h-9 w-20 px-3 rounded-md border border-borderDefault bg-white text-textPrimary tabular text-sm"
+                className="h-9 w-20 px-3 rounded-md border border-borderDefault bg-pageBackground text-textPrimary tabular text-sm"
               />
               <span className="text-xs text-textMuted">일 전 (0이면 알림 없음)</span>
             </label>
@@ -601,7 +601,7 @@ export function RecurringClient() {
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
               rows={2}
-              className="mt-1 w-full px-3 py-2 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full px-3 py-2 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             />
           </label>
 

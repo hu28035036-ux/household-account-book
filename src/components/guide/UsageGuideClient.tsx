@@ -187,12 +187,12 @@ export function UsageGuideClient() {
         <CardSubtle className="mt-2 leading-relaxed">
           매일 적기가 부담될 때 가장 강력한 무기. 화면{' '}
           <b className="text-textPrimary">우상단의 ✨ 버튼</b> 또는 단축키{' '}
-          <kbd className="px-1 bg-white border border-borderSoft rounded text-[10px]">Ctrl</kbd> +{' '}
-          <kbd className="px-1 bg-white border border-borderSoft rounded text-[10px]">K</kbd>
+          <kbd className="px-1 bg-pageBackground border border-borderSoft rounded text-[10px]">Ctrl</kbd> +{' '}
+          <kbd className="px-1 bg-pageBackground border border-borderSoft rounded text-[10px]">K</kbd>
           {' '}로 어디서든 1초 만에 열립니다. 자연어로 한 줄만 적으면 자동으로 분석해요.
         </CardSubtle>
         <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-          <div className="rounded-md bg-white border border-borderSoft px-2.5 py-2">
+          <div className="rounded-md bg-pageBackground border border-borderSoft px-2.5 py-2">
             <div className="text-textPinkStrong font-medium mb-1">📝 거래 한 줄로</div>
             <div className="space-y-0.5 text-textSecondary">
               <div>
@@ -206,7 +206,7 @@ export function UsageGuideClient() {
               </div>
             </div>
           </div>
-          <div className="rounded-md bg-white border border-borderSoft px-2.5 py-2">
+          <div className="rounded-md bg-pageBackground border border-borderSoft px-2.5 py-2">
             <div className="text-textPinkStrong font-medium mb-1">🧭 페이지도 한 줄로</div>
             <div className="space-y-0.5 text-textSecondary">
               <div>
@@ -241,7 +241,7 @@ export function UsageGuideClient() {
           ].map((tip, i) => (
             <li
               key={i}
-              className="rounded-md bg-white border border-borderSoft px-3 py-2 text-textSecondary leading-relaxed"
+              className="rounded-md bg-pageBackground border border-borderSoft px-3 py-2 text-textSecondary leading-relaxed"
             >
               <span className="text-textPinkStrong font-semibold mr-1.5">·</span>
               {tip}
@@ -254,7 +254,7 @@ export function UsageGuideClient() {
         <CardTitle>더 짧게 보고 싶을 때</CardTitle>
         <CardSubtle className="mt-1 leading-relaxed">
           화면 우상단의{' '}
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-borderDefault bg-white align-middle">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-borderDefault bg-pageBackground align-middle">
             <HelpCircle className="h-3.5 w-3.5 text-textSecondary" strokeWidth={1.75} />
             <span className="text-xs">도움말</span>
           </span>{' '}

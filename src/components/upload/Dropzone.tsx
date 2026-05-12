@@ -58,7 +58,7 @@ export function Dropzone({ onFiles, disabled }: Props) {
             type="button"
             disabled={disabled}
             onClick={() => cameraRef.current?.click()}
-            className="h-11 px-4 rounded-lg bg-white text-textPinkStrong border border-primaryPinkBorder font-medium hover:bg-primaryPinkSoft disabled:opacity-50 inline-flex items-center justify-center gap-2"
+            className="h-11 px-4 rounded-lg bg-pageBackground text-textPinkStrong border border-primaryPinkBorder font-medium hover:bg-primaryPinkSoft disabled:opacity-50 inline-flex items-center justify-center gap-2"
           >
             <Camera className="h-4 w-4" strokeWidth={1.75} />
             카메라로 촬영

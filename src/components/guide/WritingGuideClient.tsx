@@ -119,7 +119,7 @@ export function WritingGuideClient({ showHeader = true }: { showHeader?: boolean
           툭 넣으면 됩니다.
         </CardSubtle>
         <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-          <div className="rounded-md bg-white border border-borderSoft px-2.5 py-2">
+          <div className="rounded-md bg-pageBackground border border-borderSoft px-2.5 py-2">
             <div className="text-textPinkStrong font-medium mb-1">📝 거래 한 줄로</div>
             <div className="space-y-0.5 text-textSecondary">
               <div>
@@ -133,7 +133,7 @@ export function WritingGuideClient({ showHeader = true }: { showHeader?: boolean
               </div>
             </div>
           </div>
-          <div className="rounded-md bg-white border border-borderSoft px-2.5 py-2">
+          <div className="rounded-md bg-pageBackground border border-borderSoft px-2.5 py-2">
             <div className="text-textPinkStrong font-medium mb-1">🧭 페이지도 한 줄로</div>
             <div className="space-y-0.5 text-textSecondary">
               <div>
@@ -150,8 +150,8 @@ export function WritingGuideClient({ showHeader = true }: { showHeader?: boolean
         </div>
         <p className="mt-3 text-[11px] text-textMuted leading-relaxed">
           단축키:{' '}
-          <kbd className="px-1 bg-white border border-borderSoft rounded text-[10px]">Ctrl</kbd> +{' '}
-          <kbd className="px-1 bg-white border border-borderSoft rounded text-[10px]">K</kbd>{' '}
+          <kbd className="px-1 bg-pageBackground border border-borderSoft rounded text-[10px]">Ctrl</kbd> +{' '}
+          <kbd className="px-1 bg-pageBackground border border-borderSoft rounded text-[10px]">K</kbd>{' '}
           어디서든 1초 만에 열림. 거래 추가는 미리보기 후 [✓ 추가] 눌러야 저장됩니다.
         </p>
       </Card>

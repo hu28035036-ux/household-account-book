@@ -248,7 +248,7 @@ export function ImportClient() {
                     onChange={(e) =>
                       setMapping((m) => ({ ...m, [field]: e.target.value || undefined }))
                     }
-                    className="mt-1 w-full h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
+                    className="mt-1 w-full h-10 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary text-sm"
                   >
                     <option value="">— 사용 안 함 —</option>
                     {data.headers.map((h) => (
@@ -444,7 +444,7 @@ export function ImportClient() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="비밀번호"
-            className="w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+            className="w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
           />
           {passwordError && (
             <p className="text-sm rounded-md bg-dangerSoft text-danger px-3 py-2">

@@ -147,7 +147,7 @@ export function CategoriesClient() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             />
           </label>
           <label className="block">
@@ -155,7 +155,7 @@ export function CategoriesClient() {
             <select
               value={type}
               onChange={(e) => setType(e.target.value as any)}
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             >
               <option value="expense">지출</option>
               <option value="income">수입</option>

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Pencil, Users, Copy, LogOut, Ticket, Eye } from 'lucide-react';
+import { Plus, Trash2, Pencil, Users, Copy, LogOut, Ticket, Eye, Crown } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Modal } from '@/components/common/Modal';
@@ -139,6 +139,33 @@ export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
     if (!confirm(`초대 코드 ${inv.code}를 폐기할까요?`)) return;
     const res = await fetch(`/api/households/${activeId}/invites/${inv.id}`, { method: 'DELETE' });
     if (res.ok) loadDetails(activeId);
+  }
+
+  async function transferOwner(m: Member) {
+    if (!activeId) return;
+    const displayName =
+      m.nickname?.trim() ||
+      m.full_name?.trim() ||
+      m.username?.trim() ||
+      `사용자 ${m.user_id.slice(0, 8)}`;
+    if (
+      !confirm(
+        `${displayName} 님에게 모임장 권한을 넘길까요?\n\n이후 본인은 일반 멤버가 되며, 모임 삭제·이름 변경·멤버 추방 권한이 사라집니다.`,
+      )
+    )
+      return;
+    const res = await fetch(
+      `/api/households/${activeId}/members/${m.user_id}/transfer-owner`,
+      { method: 'POST', cache: 'no-store' },
+    );
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      alert(`위임 실패 (HTTP ${res.status}): ${j?.error?.message ?? res.statusText}`);
+      return;
+    }
+    alert(`${displayName} 님을 새 모임장으로 임명했습니다.`);
+    await load();
+    await loadDetails(activeId);
   }
 
   async function removeMem(m: Member) {
@@ -330,16 +357,28 @@ export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
                               {m.role === 'owner' ? '총무' : '멤버'}
                             </Badge>
                             {active.is_owner && !isMe && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => removeMem(m)}
-                                title="멤버 추방"
-                                className="!h-7 !px-2 !text-xs text-danger"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
-                                추방
-                              </Button>
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => transferOwner(m)}
+                                  title="모임장 권한 위임"
+                                  className="!h-7 !px-2 !text-xs text-textPinkStrong"
+                                >
+                                  <Crown className="h-3.5 w-3.5" strokeWidth={1.75} />
+                                  위임
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => removeMem(m)}
+                                  title="멤버 추방"
+                                  className="!h-7 !px-2 !text-xs text-danger"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" strokeWidth={1.75} />
+                                  추방
+                                </Button>
+                              </>
                             )}
                           </div>
                         </li>
@@ -418,7 +457,7 @@ export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="예: 우리집"
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             />
           </label>
           {error && <p className="text-sm rounded-md bg-dangerSoft text-danger px-3 py-2">{error}</p>}
@@ -442,7 +481,7 @@ export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="예: AB23CDEF45"
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary font-mono uppercase"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary font-mono uppercase"
               maxLength={20}
             />
           </label>

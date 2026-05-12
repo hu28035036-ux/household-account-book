@@ -272,7 +272,7 @@ export function AdminClient({ currentEmail }: { currentEmail: string | null }) {
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
               placeholder="friend@example.com"
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             />
           </label>
           <label className="block">
@@ -282,7 +282,7 @@ export function AdminClient({ currentEmail }: { currentEmail: string | null }) {
               value={noteInput}
               onChange={(e) => setNoteInput(e.target.value)}
               placeholder="예: 친구 영희"
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             />
           </label>
           {error && <p className="text-sm rounded-md bg-dangerSoft text-danger px-3 py-2">{error}</p>}

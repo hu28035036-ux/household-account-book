@@ -224,12 +224,12 @@ export function TransactionsClient() {
             placeholder="가맹점/메모 검색"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            className="h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary flex-1 min-w-0"
+            className="h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary flex-1 min-w-0"
           />
           <select
             value={type}
             onChange={(e) => setType(e.target.value as any)}
-            className="h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+            className="h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
           >
             <option value="">전체 유형</option>
             <option value="expense">지출</option>

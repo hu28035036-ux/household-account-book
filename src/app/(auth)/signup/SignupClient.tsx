@@ -147,7 +147,7 @@ export default function SignupClient() {
                 onChange={(e) => setUsername(e.target.value)}
                 autoComplete="username"
                 required
-                className="w-full h-11 px-3 rounded-lg bg-white border border-borderDefault text-textPrimary"
+                className="w-full h-11 px-3 rounded-lg bg-pageBackground border border-borderDefault text-textPrimary"
               />
               {usernameMsg && (
                 <p
@@ -165,7 +165,7 @@ export default function SignupClient() {
                 onChange={(e) => setFullName(e.target.value)}
                 autoComplete="name"
                 required
-                className="w-full h-11 px-3 rounded-lg bg-white border border-borderDefault text-textPrimary"
+                className="w-full h-11 px-3 rounded-lg bg-pageBackground border border-borderDefault text-textPrimary"
               />
             </Field>
             <Field label="생년월일">
@@ -178,7 +178,7 @@ export default function SignupClient() {
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 required
-                className="w-full h-11 px-3 rounded-lg bg-white border border-borderDefault text-textPrimary"
+                className="w-full h-11 px-3 rounded-lg bg-pageBackground border border-borderDefault text-textPrimary"
               />
             </Field>
             <Field label="비밀번호 (8자 이상)">
@@ -189,7 +189,7 @@ export default function SignupClient() {
                 autoComplete="new-password"
                 required
                 minLength={8}
-                className="w-full h-11 px-3 rounded-lg bg-white border border-borderDefault text-textPrimary"
+                className="w-full h-11 px-3 rounded-lg bg-pageBackground border border-borderDefault text-textPrimary"
               />
             </Field>
             <Field label="비밀번호 확인">
@@ -200,7 +200,7 @@ export default function SignupClient() {
                 autoComplete="new-password"
                 required
                 minLength={8}
-                className="w-full h-11 px-3 rounded-lg bg-white border border-borderDefault text-textPrimary"
+                className="w-full h-11 px-3 rounded-lg bg-pageBackground border border-borderDefault text-textPrimary"
               />
               {pw && pw2 && pw !== pw2 && (
                 <p className="mt-1 text-xs text-danger">비밀번호 확인이 일치하지 않습니다.</p>

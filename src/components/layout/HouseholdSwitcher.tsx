@@ -47,7 +47,7 @@ export function HouseholdSwitcher() {
           'h-9 px-3 rounded-md text-sm inline-flex items-center gap-2 border transition-colors',
           active
             ? 'bg-primaryPinkSoft text-textPinkStrong border-primaryPinkBorder'
-            : 'bg-white text-textSecondary border-borderDefault hover:bg-softPinkBackground',
+            : 'bg-pageBackground text-textSecondary border-borderDefault hover:bg-softPinkBackground',
         )}
         aria-haspopup="listbox"
         aria-expanded={open}

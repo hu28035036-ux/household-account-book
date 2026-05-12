@@ -217,7 +217,7 @@ export function BudgetsClient() {
             type="month"
             value={ym}
             onChange={(e) => setYm(e.target.value)}
-            className="h-10 px-3 rounded-lg border border-borderDefault bg-white text-sm text-textPrimary"
+            className="h-10 px-3 rounded-lg border border-borderDefault bg-pageBackground text-sm text-textPrimary"
           />
           <Button onClick={startCreate}>
             <Plus className="h-4 w-4" strokeWidth={1.75} /> 예산 추가
@@ -336,7 +336,7 @@ export function BudgetsClient() {
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
                 disabled={!!editingId}
-                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+                className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
               >
                 {availableCategories.length === 0 ? (
                   <option value="">사용 가능한 카테고리 없음</option>
@@ -359,7 +359,7 @@ export function BudgetsClient() {
               value={amountStr}
               onChange={(e) => setAmountStr(e.target.value)}
               placeholder="예: 300,000"
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary tabular"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary tabular"
             />
           </label>
           <label className="block">
@@ -370,7 +370,7 @@ export function BudgetsClient() {
               max={100}
               value={thresholdPct}
               onChange={(e) => setThresholdPct(e.target.value)}
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary tabular"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary tabular"
             />
             <span className="block mt-1 text-xs text-textMuted">사용률이 이 값을 넘으면 ‘주의’로 표시됩니다.</span>
           </label>
@@ -380,7 +380,7 @@ export function BudgetsClient() {
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
               rows={2}
-              className="mt-1 w-full px-3 py-2 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full px-3 py-2 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             />
           </label>
 

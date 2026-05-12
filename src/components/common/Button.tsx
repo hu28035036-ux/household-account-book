@@ -12,7 +12,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const VARIANT: Record<Variant, string> = {
   primary: 'bg-primaryPink text-textOnPink hover:bg-primaryPinkHover focus-visible:ring-primaryPinkHover',
-  secondary: 'bg-white text-textPinkStrong border border-primaryPinkBorder hover:bg-primaryPinkSoft focus-visible:ring-primaryPinkBorder',
+  secondary: 'bg-pageBackground text-textPinkStrong border border-primaryPinkBorder hover:bg-primaryPinkSoft focus-visible:ring-primaryPinkBorder',
   ghost: 'bg-transparent text-textPrimary hover:bg-softPinkBackground focus-visible:ring-borderDefault',
   danger: 'bg-danger text-white hover:bg-red-600 focus-visible:ring-danger',
 };

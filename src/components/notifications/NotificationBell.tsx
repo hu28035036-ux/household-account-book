@@ -98,7 +98,7 @@ export function NotificationBell() {
           'relative h-9 w-9 inline-flex items-center justify-center rounded-md border transition-colors',
           unread > 0
             ? 'bg-primaryPinkSoft text-textPinkStrong border-primaryPinkBorder'
-            : 'bg-white text-textSecondary border-borderDefault hover:bg-softPinkBackground',
+            : 'bg-pageBackground text-textSecondary border-borderDefault hover:bg-softPinkBackground',
         )}
       >
         <Bell className="h-4 w-4" strokeWidth={1.75} />
