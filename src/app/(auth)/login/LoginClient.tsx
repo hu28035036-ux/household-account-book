@@ -96,7 +96,7 @@ export default function LoginClient() {
                 onChange={(e) => setUsername(e.target.value)}
                 autoComplete="username"
                 required
-                className="mt-1 w-full h-11 px-3 rounded-lg bg-white border border-borderDefault text-textPrimary"
+                className="mt-1 w-full h-11 px-3 rounded-lg bg-pageBackground border border-borderDefault text-textPrimary"
               />
             </label>
             <label className="block">
@@ -108,7 +108,7 @@ export default function LoginClient() {
                 autoComplete="current-password"
                 required
                 minLength={8}
-                className="mt-1 w-full h-11 px-3 rounded-lg bg-white border border-borderDefault text-textPrimary"
+                className="mt-1 w-full h-11 px-3 rounded-lg bg-pageBackground border border-borderDefault text-textPrimary"
               />
             </label>
 

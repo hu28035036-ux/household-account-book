@@ -175,7 +175,7 @@ export function MfaCard() {
               <img
                 src={qr}
                 alt="MFA QR 코드"
-                className="h-44 w-44 rounded-md bg-white p-2 border border-borderSoft"
+                className="h-44 w-44 rounded-md bg-pageBackground p-2 border border-borderSoft"
               />
             </div>
           )}
@@ -194,7 +194,7 @@ export function MfaCard() {
             onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
             placeholder="6자리 코드"
             autoFocus
-            className="w-full h-12 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-center tabular text-xl tracking-[0.4em]"
+            className="w-full h-12 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary text-center tabular text-xl tracking-[0.4em]"
           />
           {error && (
             <p className="text-xs rounded-md bg-dangerSoft text-danger px-3 py-2">{error}</p>

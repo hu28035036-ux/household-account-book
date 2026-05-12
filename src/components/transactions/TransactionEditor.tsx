@@ -134,7 +134,7 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             />
           </label>
           <label className="block">
@@ -142,7 +142,7 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
             <select
               value={type}
               onChange={(e) => setType(e.target.value as 'income' | 'expense' | 'transfer')}
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             >
               <option value="expense">지출</option>
               <option value="income">수입</option>
@@ -158,7 +158,7 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
             value={amountStr}
             onChange={(e) => setAmountStr(e.target.value)}
             placeholder="예: 5800"
-            className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary tabular"
+            className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary tabular"
           />
         </label>
         <label className="block">
@@ -168,7 +168,7 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
             value={merchant}
             onChange={(e) => setMerchant(e.target.value)}
             placeholder="예: 스타벅스 강남점"
-            className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+            className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
           />
         </label>
         <div className="grid grid-cols-2 gap-3">
@@ -177,7 +177,7 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             >
               <option value="">미지정</option>
               {categories.map((c) => (
@@ -192,7 +192,7 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
             <select
               value={paymentMethodId}
               onChange={(e) => setPaymentMethodId(e.target.value)}
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             >
               <option value="">미지정</option>
               {paymentMethods.map((p) => (
@@ -209,7 +209,7 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
             rows={2}
-            className="mt-1 w-full px-3 py-2 rounded-lg border border-borderDefault bg-white text-textPrimary"
+            className="mt-1 w-full px-3 py-2 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
           />
         </label>
         {households.length > 0 && (
@@ -218,7 +218,7 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
             <select
               value={householdId ?? ''}
               onChange={(e) => setHouseholdId(e.target.value || null)}
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             >
               <option value="">개인 (공유 안 함)</option>
               {households.map((h) => (

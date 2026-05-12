@@ -63,7 +63,7 @@ export function HelpSheet({ autoOnFirstVisit = true }: { autoOnFirstVisit?: bool
         onClick={() => setOpen(true)}
         aria-label="사용 가이드 열기"
         title="사용 가이드"
-        className="h-9 w-9 inline-flex items-center justify-center rounded-md border border-borderDefault bg-white hover:bg-softPinkBackground transition-colors"
+        className="h-9 w-9 inline-flex items-center justify-center rounded-md border border-borderDefault bg-pageBackground hover:bg-softPinkBackground transition-colors"
       >
         <HelpCircle className="h-4 w-4 text-textSecondary" strokeWidth={1.75} />
       </button>
@@ -115,23 +115,23 @@ export function HelpSheet({ autoOnFirstVisit = true }: { autoOnFirstVisit?: bool
                 </div>
                 <p className="mt-1.5 text-textSecondary">
                   헤더 우상단의 <b className="text-textPrimary">✨ 버튼</b> (또는 단축키{' '}
-                  <kbd className="px-1 bg-white border border-borderSoft rounded text-[10px]">
+                  <kbd className="px-1 bg-pageBackground border border-borderSoft rounded text-[10px]">
                     Ctrl
                   </kbd>{' '}
                   +{' '}
-                  <kbd className="px-1 bg-white border border-borderSoft rounded text-[10px]">
+                  <kbd className="px-1 bg-pageBackground border border-borderSoft rounded text-[10px]">
                     K
                   </kbd>
                   ) 을 누르고 자연어로 한 줄 입력하면 자동으로 분석합니다.
                 </p>
                 <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
-                  <div className="rounded-md bg-white border border-borderSoft px-2.5 py-1.5">
+                  <div className="rounded-md bg-pageBackground border border-borderSoft px-2.5 py-1.5">
                     <div className="text-textPinkStrong font-medium">📝 거래 추가</div>
                     <div className="text-textSecondary mt-0.5">
                       <code>스벅 5천</code> · <code>오늘 점심 8천</code> · <code>월급 350만</code>
                     </div>
                   </div>
-                  <div className="rounded-md bg-white border border-borderSoft px-2.5 py-1.5">
+                  <div className="rounded-md bg-pageBackground border border-borderSoft px-2.5 py-1.5">
                     <div className="text-textPinkStrong font-medium">🧭 페이지 이동</div>
                     <div className="text-textSecondary mt-0.5">
                       <code>통계</code> · <code>이번달 분석</code> · <code>예산</code> ·{' '}

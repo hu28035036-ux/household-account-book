@@ -288,7 +288,7 @@ export function AssistantSheet() {
         type="button"
         aria-label="AI 입력 (준비 중)"
         title="AI 입력"
-        className="h-9 w-9 inline-flex items-center justify-center rounded-md border border-borderDefault bg-white"
+        className="h-9 w-9 inline-flex items-center justify-center rounded-md border border-borderDefault bg-pageBackground"
       >
         <Sparkles className="h-4 w-4 text-textSecondary" strokeWidth={1.75} />
       </button>
@@ -302,7 +302,7 @@ export function AssistantSheet() {
         onClick={tryOpenSheet}
         aria-label="AI 입력"
         title="AI 입력 (Ctrl+K)"
-        className="h-9 w-9 inline-flex items-center justify-center rounded-md border border-borderDefault bg-white hover:bg-softPinkBackground transition-colors"
+        className="h-9 w-9 inline-flex items-center justify-center rounded-md border border-borderDefault bg-pageBackground hover:bg-softPinkBackground transition-colors"
       >
         <Sparkles className="h-4 w-4 text-textPinkStrong" strokeWidth={1.75} />
       </button>
@@ -447,7 +447,7 @@ export function AssistantSheet() {
                           onChange={(e) => setCommand(e.target.value)}
                           placeholder="예: 스벅 5천 / 통계 보여줘"
                           disabled={busy}
-                          className="w-full h-12 pr-10 px-3 rounded-md border border-borderDefault bg-white text-sm text-textPrimary placeholder:text-textMuted focus:outline-none focus:ring-2 focus:ring-primaryPinkSoft"
+                          className="w-full h-12 pr-10 px-3 rounded-md border border-borderDefault bg-pageBackground text-sm text-textPrimary placeholder:text-textMuted focus:outline-none focus:ring-2 focus:ring-primaryPinkSoft"
                         />
                         {busy && (
                           <Loader2
@@ -559,7 +559,7 @@ function AddTransactionPreview({
       <div className="text-xs text-textSecondary">
         AI 가 분석한 결과입니다. 틀린 항목은 바로 아래에서 직접 수정할 수 있어요.
       </div>
-      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-3">
+      <div className="rounded-modal border border-borderDefault bg-pageBackground p-4 space-y-3">
         {/* 타입 (수입/지출/이체) — 핑크 토글 */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-textSecondary w-16 shrink-0 inline-flex items-center gap-1.5">
@@ -591,7 +591,7 @@ function AddTransactionPreview({
             value={data.date}
             onChange={(e) => onChange({ date: e.target.value })}
             disabled={busy}
-            className="flex-1 h-8 rounded-md border border-borderDefault bg-white px-2 text-sm text-textPrimary"
+            className="flex-1 h-8 rounded-md border border-borderDefault bg-pageBackground px-2 text-sm text-textPrimary"
           />
         </EditableRow>
 
@@ -603,7 +603,7 @@ function AddTransactionPreview({
             onChange={(e) => onChange({ merchant_name: e.target.value || null })}
             disabled={busy}
             placeholder="가맹점 이름"
-            className="flex-1 h-8 rounded-md border border-borderDefault bg-white px-2 text-sm text-textPrimary"
+            className="flex-1 h-8 rounded-md border border-borderDefault bg-pageBackground px-2 text-sm text-textPrimary"
           />
         </EditableRow>
 
@@ -620,7 +620,7 @@ function AddTransactionPreview({
               onChange({ amount: n });
             }}
             disabled={busy}
-            className="flex-1 h-8 rounded-md border border-borderDefault bg-white px-2 text-sm text-textPrimary text-right font-semibold"
+            className="flex-1 h-8 rounded-md border border-borderDefault bg-pageBackground px-2 text-sm text-textPrimary text-right font-semibold"
           />
           <span className="text-xs text-textMuted shrink-0">원</span>
         </EditableRow>
@@ -637,7 +637,7 @@ function AddTransactionPreview({
             value={data.category_name ?? ''}
             onChange={(e) => onChange({ category_name: e.target.value || null })}
             disabled={busy}
-            className="flex-1 h-8 rounded-md border border-borderDefault bg-white px-2 text-sm text-textPrimary"
+            className="flex-1 h-8 rounded-md border border-borderDefault bg-pageBackground px-2 text-sm text-textPrimary"
           >
             <option value="">— 미정 —</option>
             {filteredCats.map((c) => (
@@ -660,7 +660,7 @@ function AddTransactionPreview({
             value={data.payment_method_name ?? ''}
             onChange={(e) => onChange({ payment_method_name: e.target.value || null })}
             disabled={busy}
-            className="flex-1 h-8 rounded-md border border-borderDefault bg-white px-2 text-sm text-textPrimary"
+            className="flex-1 h-8 rounded-md border border-borderDefault bg-pageBackground px-2 text-sm text-textPrimary"
           >
             <option value="">— 미정 —</option>
             {paymentMethods.map((p) => (
@@ -735,7 +735,7 @@ function CreateCategoryPreview({
   return (
     <div className="space-y-3">
       <div className="text-xs text-textSecondary">아래 카테고리를 새로 만들까요?</div>
-      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
+      <div className="rounded-modal border border-borderDefault bg-pageBackground p-4 space-y-2.5">
         <Row
           icon={<Tag className="h-4 w-4" strokeWidth={1.75} />}
           label="이름"
@@ -770,7 +770,7 @@ function CreatePaymentMethodPreview({
   return (
     <div className="space-y-3">
       <div className="text-xs text-textSecondary">아래 결제수단을 새로 만들까요?</div>
-      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
+      <div className="rounded-modal border border-borderDefault bg-pageBackground p-4 space-y-2.5">
         <Row
           icon={<CreditCard className="h-4 w-4" strokeWidth={1.75} />}
           label="이름"
@@ -821,7 +821,7 @@ function UpdateTransactionPreview({
   return (
     <div className="space-y-3">
       <div className="text-xs text-textSecondary">아래 거래를 수정할까요?</div>
-      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-3">
+      <div className="rounded-modal border border-borderDefault bg-pageBackground p-4 space-y-3">
         <div className="rounded-md bg-sectionBackground px-3 py-2 text-xs">
           <div className="text-textMuted">대상</div>
           <div className="text-textPrimary font-medium mt-0.5">{targetLabel(intent.target)}</div>
@@ -875,7 +875,7 @@ function DeleteTransactionPreview({
         <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" strokeWidth={1.75} />
         <span>이 거래를 삭제합니다. 되돌릴 수 없습니다.</span>
       </div>
-      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
+      <div className="rounded-modal border border-borderDefault bg-pageBackground p-4 space-y-2.5">
         <Row
           icon={<Trash2 className="h-4 w-4" strokeWidth={1.75} />}
           label="대상"
@@ -940,7 +940,7 @@ function SetBudgetPreview({
       <div className="text-xs text-textSecondary">
         아래 예산을 설정할까요? 같은 기간·카테고리에 이미 예산이 있으면 덮어씁니다.
       </div>
-      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
+      <div className="rounded-modal border border-borderDefault bg-pageBackground p-4 space-y-2.5">
         <Row
           icon={<Calendar className="h-4 w-4" strokeWidth={1.75} />}
           label="기간"
@@ -1000,7 +1000,7 @@ function DeleteCategoryPreview({
         <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" strokeWidth={1.75} />
         <span>이 카테고리를 삭제합니다. 사용 중인 거래의 카테고리는 비워집니다.</span>
       </div>
-      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
+      <div className="rounded-modal border border-borderDefault bg-pageBackground p-4 space-y-2.5">
         <Row icon={<Tag className="h-4 w-4" strokeWidth={1.75} />} label="이름" value={data.name} />
       </div>
       <div className="flex items-center justify-end gap-2 pt-1">
@@ -1052,7 +1052,7 @@ function DeletePaymentMethodPreview({
         <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" strokeWidth={1.75} />
         <span>이 결제수단을 삭제합니다. 사용 중인 거래의 결제수단은 비워집니다.</span>
       </div>
-      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
+      <div className="rounded-modal border border-borderDefault bg-pageBackground p-4 space-y-2.5">
         <Row
           icon={<CreditCard className="h-4 w-4" strokeWidth={1.75} />}
           label="이름"
@@ -1111,7 +1111,7 @@ function CreateRecurringPreview({
       <div className="text-xs text-textSecondary">
         아래 고정 거래를 등록할까요? 매월 동일 날에 자동/수동으로 거래에 들어갑니다.
       </div>
-      <div className="rounded-modal border border-borderDefault bg-white p-4 space-y-2.5">
+      <div className="rounded-modal border border-borderDefault bg-pageBackground p-4 space-y-2.5">
         <Row
           icon={<Coins className="h-4 w-4" strokeWidth={1.75} />}
           label="종류"

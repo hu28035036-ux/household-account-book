@@ -104,6 +104,63 @@ export async function removeMember(
   if (error) throw error;
 }
 
+/**
+ * 모임장(owner) 권한을 다른 멤버에게 위임.
+ * - 현재 user 가 owner 여야 한다 (households.owner_id = userId 조건이 update 에 들어감)
+ * - target 이 같은 모임 멤버여야 한다 (그렇지 않으면 update 실패)
+ * - 작업:
+ *   1) households.owner_id = newOwnerId 로 변경
+ *   2) household_members.role 갱신: 기존 owner → 'member', new owner → 'owner'
+ * RLS:
+ *   - households.update 는 owner 만 허용 (owner_id 셀프 체크)
+ *   - household_members.update 도 owner 또는 본인 만 허용해야 동작
+ */
+export async function transferOwner(
+  supabase: SupabaseClient,
+  userId: string,
+  householdId: string,
+  newOwnerId: string,
+) {
+  if (userId === newOwnerId) throw new Error('이미 모임장입니다.');
+
+  // 대상이 같은 모임의 멤버인지 확인
+  const { data: target } = await supabase
+    .from('household_members')
+    .select('user_id, role')
+    .eq('household_id', householdId)
+    .eq('user_id', newOwnerId)
+    .maybeSingle();
+  if (!target) throw new Error('대상이 이 모임의 멤버가 아닙니다.');
+
+  // 1) households.owner_id 변경 — owner_id=userId 조건으로 RLS+권한 동시 검증
+  const { data: hh, error: hErr } = await supabase
+    .from('households')
+    .update({ owner_id: newOwnerId })
+    .eq('id', householdId)
+    .eq('owner_id', userId)
+    .select('*')
+    .maybeSingle();
+  if (hErr) throw hErr;
+  if (!hh) throw new Error('권한이 없거나 모임을 찾을 수 없습니다.');
+
+  // 2) members.role 갱신 — 두 행 순차 update (단일 트랜잭션 보장은 RPC 사용 시 가능하나, 실패 시 1단계만 롤백 어려움)
+  const { error: oldErr } = await supabase
+    .from('household_members')
+    .update({ role: 'member' })
+    .eq('household_id', householdId)
+    .eq('user_id', userId);
+  if (oldErr) throw oldErr;
+
+  const { error: newErr } = await supabase
+    .from('household_members')
+    .update({ role: 'owner' })
+    .eq('household_id', householdId)
+    .eq('user_id', newOwnerId);
+  if (newErr) throw newErr;
+
+  return { household_id: householdId, new_owner_id: newOwnerId };
+}
+
 export async function createInvite(
   supabase: SupabaseClient,
   userId: string,

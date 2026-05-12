@@ -152,7 +152,7 @@ export function ProfileCard() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               maxLength={40}
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             />
           </label>
 
@@ -170,7 +170,7 @@ export function ProfileCard() {
               onChange={(e) => setNickname(e.target.value)}
               maxLength={40}
               placeholder="예: 달려라봉봉 / 재훈 / dev_kim"
-              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+              className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
             />
             <span className="block mt-1 text-xs text-textMuted">
               모임 멤버 목록에서 별명이 우선 표시됩니다. 비워두면 이름이 표시됩니다.

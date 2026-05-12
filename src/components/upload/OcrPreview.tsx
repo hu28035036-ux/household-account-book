@@ -79,7 +79,7 @@ export function OcrPreview({
             value={text}
             onChange={(e) => onChange(e.target.value)}
             rows={10}
-            className="mt-3 w-full px-3 py-2 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm font-mono"
+            className="mt-3 w-full px-3 py-2 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary text-sm font-mono"
             placeholder="추출된 텍스트가 여기에 표시됩니다. 잘못된 부분은 직접 수정한 뒤 분석하세요."
           />
           <p className="mt-2 text-xs text-textMuted">

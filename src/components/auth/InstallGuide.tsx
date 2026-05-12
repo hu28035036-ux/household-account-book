@@ -192,7 +192,7 @@ export function InstallGuide() {
                 'h-8 px-3 rounded-md text-xs border ' +
                 (tab === t.id
                   ? 'bg-primaryPinkSoft text-textPinkStrong border-primaryPinkBorder'
-                  : 'bg-white text-textSecondary border-borderDefault hover:bg-softPinkBackground')
+                  : 'bg-pageBackground text-textSecondary border-borderDefault hover:bg-softPinkBackground')
               }
             >
               {t.label}

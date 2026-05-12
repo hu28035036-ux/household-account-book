@@ -228,7 +228,7 @@ export function SettingsClient({ isAdmin = false }: Props) {
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             placeholder="DELETE"
-            className="w-full h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary"
+            className="w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary"
           />
           {error && <p className="text-sm rounded-md bg-dangerSoft text-danger px-3 py-2">{error}</p>}
           <div className="flex items-center justify-end gap-2 pt-2">

@@ -79,7 +79,7 @@ export function BirthdateSelect({ value, onChange }: Props) {
   }, [dayCount, d]);
 
   const baseClass =
-    'h-11 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm';
+    'h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary text-sm';
 
   return (
     <div className="grid grid-cols-3 gap-2">

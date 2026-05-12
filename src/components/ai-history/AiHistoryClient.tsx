@@ -96,7 +96,7 @@ export function AiHistoryClient() {
                 'h-9 px-3 rounded-md text-sm border transition-colors',
                 preset === p.id
                   ? 'bg-primaryPinkSoft text-textPinkStrong border-primaryPinkBorder'
-                  : 'bg-white text-textSecondary border-borderDefault hover:bg-softPinkBackground',
+                  : 'bg-pageBackground text-textSecondary border-borderDefault hover:bg-softPinkBackground',
               )}
             >
               {p.label}

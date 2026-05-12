@@ -139,7 +139,7 @@ export function NotificationsClient() {
           <select
             value={scope}
             onChange={(e) => setScope(e.target.value as any)}
-            className="h-10 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-sm"
+            className="h-10 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary text-sm"
           >
             <option value="all">전체</option>
             <option value="unread">안 읽음만</option>

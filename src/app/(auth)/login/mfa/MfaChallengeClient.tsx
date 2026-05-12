@@ -104,7 +104,7 @@ export default function MfaChallengeClient() {
               placeholder="000000"
               autoFocus
               required
-              className="w-full h-14 px-3 rounded-lg border border-borderDefault bg-white text-textPrimary text-center tabular text-2xl tracking-[0.5em]"
+              className="w-full h-14 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary text-center tabular text-2xl tracking-[0.5em]"
             />
             {error && (
               <p className="text-sm rounded-md bg-dangerSoft text-danger px-3 py-2">{error}</p>

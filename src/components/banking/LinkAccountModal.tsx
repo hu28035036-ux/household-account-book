@@ -254,7 +254,7 @@ function BankPicker({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="은행/카드 이름 검색"
-          className="flex-1 h-8 rounded-md border border-borderDefault bg-white px-2 text-sm"
+          className="flex-1 h-8 rounded-md border border-borderDefault bg-pageBackground px-2 text-sm"
         />
       </div>
 
@@ -391,7 +391,7 @@ function AuthForm({
             <input
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full h-9 rounded-md border border-borderDefault bg-white px-2 text-sm"
+              className="w-full h-9 rounded-md border border-borderDefault bg-pageBackground px-2 text-sm"
               placeholder="홍길동"
             />
           </Field>
@@ -399,7 +399,7 @@ function AuthForm({
             <input
               value={birth}
               onChange={(e) => setBirth(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              className="w-full h-9 rounded-md border border-borderDefault bg-white px-2 text-sm"
+              className="w-full h-9 rounded-md border border-borderDefault bg-pageBackground px-2 text-sm"
               placeholder="900101"
               inputMode="numeric"
             />
@@ -408,7 +408,7 @@ function AuthForm({
             <input
               value={phone}
               onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 11))}
-              className="w-full h-9 rounded-md border border-borderDefault bg-white px-2 text-sm"
+              className="w-full h-9 rounded-md border border-borderDefault bg-pageBackground px-2 text-sm"
               placeholder="01012345678"
               inputMode="numeric"
             />
@@ -423,7 +423,7 @@ function AuthForm({
               value={loginId}
               onChange={(e) => setLoginId(e.target.value)}
               autoComplete="username"
-              className="w-full h-9 rounded-md border border-borderDefault bg-white px-2 text-sm"
+              className="w-full h-9 rounded-md border border-borderDefault bg-pageBackground px-2 text-sm"
             />
           </Field>
           <Field label={authMethod.passwordLabel}>
@@ -432,7 +432,7 @@ function AuthForm({
               value={loginPw}
               onChange={(e) => setLoginPw(e.target.value)}
               autoComplete="current-password"
-              className="w-full h-9 rounded-md border border-borderDefault bg-white px-2 text-sm"
+              className="w-full h-9 rounded-md border border-borderDefault bg-pageBackground px-2 text-sm"
             />
           </Field>
         </div>
