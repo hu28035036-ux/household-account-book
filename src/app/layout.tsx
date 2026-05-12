@@ -37,14 +37,28 @@ export const viewport: Viewport = {
   maximumScale: 1,
   minimumScale: 1,
   userScalable: false,
-  themeColor: '#FFF7FA',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#FFF7FA' },
+    { media: '(prefers-color-scheme: dark)', color: '#0E0E12' },
+  ],
+  colorScheme: 'light dark',
   // iOS 풀스크린 시 노치/홈바 영역까지 활용
   viewportFit: 'cover',
 };
 
-// 사용자 테마를 첫 페인트 직전에 적용 — React hydration 전에 동기 실행되어
-// "기본 핑크 → 라벤더" 깜빡임을 막는다. localStorage 가 비어있거나 'pink' 면 아무것도 안 함.
-const themeInitScript = `try{var t=localStorage.getItem('theme');if(t&&t!=='pink'&&['lavender','mint','mocha'].indexOf(t)>=0){document.documentElement.setAttribute('data-theme',t);}}catch(e){}`;
+// 사용자 테마·다크모드를 첫 페인트 직전에 적용 — React hydration 전에 동기 실행되어 깜빡임 방지.
+// - localStorage('theme')  : 컬러 테마 (pink|lavender|mint|mocha)
+// - localStorage('themeMode'): 모드 (system|light|dark), 기본 'system' = OS 따라감
+const themeInitScript = `try{
+  var t=localStorage.getItem('theme');
+  if(t&&t!=='pink'&&['lavender','mint','mocha'].indexOf(t)>=0){
+    document.documentElement.setAttribute('data-theme',t);
+  }
+  var m=localStorage.getItem('themeMode')||'system';
+  var prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var isDark = m==='dark' || (m==='system' && prefersDark);
+  if(isDark) document.documentElement.classList.add('dark');
+}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
