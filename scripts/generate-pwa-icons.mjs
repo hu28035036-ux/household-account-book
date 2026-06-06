@@ -5,9 +5,9 @@ import { mkdirSync } from 'node:fs';
 // — rounded rect + 가운데 ₩ — Apple은 자동으로 라운드 마스크 씌우므로 padding 약간만.
 const SVG_NORMAL = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#F472B6"/>
+  <rect width="512" height="512" rx="96" fill="#A3E635"/>
   <text x="256" y="372"
-    font-size="340" font-weight="900" fill="#FFFFFF" text-anchor="middle"
+    font-size="340" font-weight="900" fill="#1F2937" text-anchor="middle"
     font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif">₩</text>
 </svg>
 `;
@@ -16,9 +16,9 @@ const SVG_NORMAL = `
 // 가장자리까지 단색 + 안전영역(80%)에 핵심 콘텐츠.
 const SVG_MASKABLE = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#F472B6"/>
+  <rect width="512" height="512" fill="#A3E635"/>
   <text x="256" y="332"
-    font-size="240" font-weight="900" fill="#FFFFFF" text-anchor="middle"
+    font-size="240" font-weight="900" fill="#1F2937" text-anchor="middle"
     font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif">₩</text>
 </svg>
 `;

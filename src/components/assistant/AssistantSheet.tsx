@@ -560,7 +560,7 @@ function AddTransactionPreview({
         AI 가 분석한 결과입니다. 틀린 항목은 바로 아래에서 직접 수정할 수 있어요.
       </div>
       <div className="rounded-modal border border-borderDefault bg-pageBackground p-4 space-y-3">
-        {/* 타입 (수입/지출/이체) — 핑크 토글 */}
+        {/* 타입 (수입/지출/이체) — 기본 컬러 토글 */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-textSecondary w-16 shrink-0 inline-flex items-center gap-1.5">
             <Coins className="h-4 w-4 text-textPinkStrong" strokeWidth={1.75} /> 종류

@@ -658,7 +658,7 @@ B) jsScan 을 multi-line 으로 강화하니 가계부 src/services 의 `from('t
 
 | 분기 | 누적 incident | 가장 흔한 단계 | 가장 흔한 원인 |
 |---|---|---|---|
-| 2026-Q2 | 14 + 1 followup | self-test / verify-citations 자기 검증 시 도구 결함 노출 + 단위화 3회 + 메타 격리 원칙 + 1차 배포 | 분기 순서 / 환경 의존 / multi-line / alternation / 수동 등록 누락 / 분산 정의 / 격리 원칙 / 단위화 자체의 새 결합 / 영역 작업 차단 |
+| 2026-Q2 | 17 + 1 followup | self-test / verify-citations 자기 검증 시 도구 결함 노출 + 단위화 3회 + 메타 격리 원칙 + 1차 배포 / 로컬 검증 환경 | 분기 순서 / 환경 의존 / multi-line / alternation / 수동 등록 누락 / 분산 정의 / 격리 원칙 / 단위화 자체의 새 결합 / 영역 작업 차단 / 샌드박스 파일 접근 제한 |
 
 ---
 
@@ -668,3 +668,25 @@ B) jsScan 을 multi-line 으로 강화하니 가계부 src/services 의 `from('t
 - 새 항목은 **하단 추가**, 기존 항목 수정 금지 (영구 기록)
 - 잘못 기록한 incident 는 새 항목 *"incident-NNNN-correction"* 으로 정정
 - 분기별 통계는 §5 갱신만 — 본 항목 자체는 보존
+
+### incident-0017 — Vitest config load blocked by managed sandbox
+- 발생 시점: 2026-06-06
+- 단계: 색상 변경 후 unit test 검증
+- 사용자 영향: no
+- 발견자: Codex
+
+**무엇이 일어났나**
+- `npm.cmd test`를 기본 샌드박스에서 실행하자 Vitest가 시작 전에 실패했다.
+- 에러는 `Cannot read directory "../../..": Access is denied.` 및 `Could not resolve "...\\vitest.config.ts"`였다.
+
+**원인 분석**
+- 코드 변경 회귀가 아니라 Codex managed sandbox의 상위 디렉터리 접근 제한으로 esbuild/Vitest config 로딩이 막힌 환경 문제였다.
+- 같은 작업 디렉터리에서 권한 실행으로 재시도하자 테스트가 정상 수행됐다.
+
+**대체/최종 검증**
+- `npm.cmd test` 권한 실행 결과: 23 test files / 167 tests 모두 통과.
+- 이 실패를 앱 코드 실패로 보고하지 않고, 샌드박스 제한으로 분리 기록했다.
+
+**재발 방지**
+- Vitest가 config load 단계에서 동일한 접근 제한을 내면 코드 수정 재시도 전에 권한 실행으로 검증한다.
+- 권한 실행으로도 실패할 때만 실제 테스트 실패로 분류한다.

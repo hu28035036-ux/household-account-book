@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
-  <rect width="375" height="650" fill="#FFF7FA"/>
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="375" height="650" fill="#F7FEE7"/>
   <text x="20" y="19" font-size="13" font-weight="600" fill="#1F2937">9:41</text>
   <rect x="0" y="28" width="375" height="56" fill="#FFFFFF"/>
   <line x1="0" y1="84" x2="375" y2="84" stroke="#F3D4E3"/>
@@ -11,15 +11,15 @@
 
     <!-- top spend card -->
     <g transform="translate(0,42)">
-      <rect width="335" height="120" rx="14" fill="#FFF1F5" stroke="#F472B6" stroke-width="1.5"/>
-      <text x="20" y="28" font-size="11" font-weight="600" fill="#BE185D" letter-spacing="1">가장 많이 쓴 카테고리</text>
+      <rect width="335" height="120" rx="14" fill="#ECFCCB" stroke="#A3E635" stroke-width="1.5"/>
+      <text x="20" y="28" font-size="11" font-weight="600" fill="#1F2937" letter-spacing="1">가장 많이 쓴 카테고리</text>
       <text x="20" y="60" font-size="22" font-weight="700" fill="#1F2937">🍚 식비  312,000원</text>
       <text x="20" y="82" font-size="11" fill="#6B7280">전체 지출의 38% · 지난달 대비 +18%</text>
 
       <!-- mini bar -->
       <g transform="translate(20,94)">
         <rect width="295" height="10" rx="5" fill="#FFFFFF"/>
-        <rect width="112" height="10" rx="5" fill="#F472B6"/>
+        <rect width="112" height="10" rx="5" fill="#A3E635"/>
       </g>
     </g>
 
@@ -30,26 +30,26 @@
       <rect width="335" height="140" rx="12" fill="#FFFFFF" stroke="#F3D4E3"/>
       <g transform="translate(20,108)" font-size="9" fill="#9CA3AF" text-anchor="middle">
         <!-- bars: 12, 14, 11, 9, 13, 16 (Dec-May; May highlighted) -->
-        <g transform="translate(20,0)"><rect x="-12" y="-60" width="24" height="60" rx="3" fill="#FCE7F3"/><text y="14">12월</text></g>
-        <g transform="translate(70,0)"><rect x="-12" y="-70" width="24" height="70" rx="3" fill="#FCE7F3"/><text y="14">1월</text></g>
-        <g transform="translate(120,0)"><rect x="-12" y="-55" width="24" height="55" rx="3" fill="#FCE7F3"/><text y="14">2월</text></g>
-        <g transform="translate(170,0)"><rect x="-12" y="-45" width="24" height="45" rx="3" fill="#FCE7F3"/><text y="14">3월</text></g>
-        <g transform="translate(220,0)"><rect x="-12" y="-65" width="24" height="65" rx="3" fill="#FCE7F3"/><text y="14">4월</text></g>
-        <g transform="translate(270,0)"><rect x="-12" y="-80" width="24" height="80" rx="3" fill="#F472B6"/><text y="14" fill="#BE185D" font-weight="600">5월</text></g>
+        <g transform="translate(20,0)"><rect x="-12" y="-60" width="24" height="60" rx="3" fill="#ECFCCB"/><text y="14">12월</text></g>
+        <g transform="translate(70,0)"><rect x="-12" y="-70" width="24" height="70" rx="3" fill="#ECFCCB"/><text y="14">1월</text></g>
+        <g transform="translate(120,0)"><rect x="-12" y="-55" width="24" height="55" rx="3" fill="#ECFCCB"/><text y="14">2월</text></g>
+        <g transform="translate(170,0)"><rect x="-12" y="-45" width="24" height="45" rx="3" fill="#ECFCCB"/><text y="14">3월</text></g>
+        <g transform="translate(220,0)"><rect x="-12" y="-65" width="24" height="65" rx="3" fill="#ECFCCB"/><text y="14">4월</text></g>
+        <g transform="translate(270,0)"><rect x="-12" y="-80" width="24" height="80" rx="3" fill="#A3E635"/><text y="14" fill="#1F2937" font-weight="600">5월</text></g>
       </g>
     </g>
 
     <!-- decision card -->
     <g transform="translate(0,360)">
-      <rect width="335" height="100" rx="14" fill="#FFFFFF" stroke="#F472B6" stroke-width="2" stroke-dasharray="6,4"/>
-      <text x="20" y="28" font-size="13" font-weight="700" fill="#BE185D">📌 다음 달 결심 1가지</text>
+      <rect width="335" height="100" rx="14" fill="#FFFFFF" stroke="#A3E635" stroke-width="2" stroke-dasharray="6,4"/>
+      <text x="20" y="28" font-size="13" font-weight="700" fill="#1F2937">📌 다음 달 결심 1가지</text>
       <text x="20" y="56" font-size="14" fill="#1F2937">외식 횟수를 주 3회 → 주 2회로</text>
       <text x="20" y="80" font-size="11" fill="#6B7280">예산 식비 350,000 → 280,000 으로 조정 예정</text>
     </g>
 
     <!-- next-month link -->
     <g transform="translate(0,476)">
-      <rect width="335" height="40" rx="8" fill="#F472B6"/>
+      <rect width="335" height="40" rx="8" fill="#A3E635"/>
       <text x="167" y="25" text-anchor="middle" font-size="13" font-weight="600" fill="#FFFFFF">다음 달 예산에 반영하기 →</text>
     </g>
   </g>

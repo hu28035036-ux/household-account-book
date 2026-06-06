@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
-  <rect width="375" height="650" fill="#FFF7FA"/>
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="375" height="650" fill="#F7FEE7"/>
   <text x="20" y="19" font-size="13" font-weight="600" fill="#1F2937">9:41</text>
   <rect x="0" y="28" width="375" height="56" fill="#FFFFFF"/>
   <line x1="0" y1="84" x2="375" y2="84" stroke="#F3D4E3"/>
@@ -57,15 +57,15 @@
 
     <!-- summary highlight -->
     <g transform="translate(0,338)">
-      <rect width="335" height="100" rx="14" fill="#FCE7F3" stroke="#F472B6" stroke-width="1.5"/>
-      <text x="20" y="28" font-size="11" font-weight="600" fill="#BE185D" letter-spacing="1">한 주 누적</text>
-      <text x="20" y="60" font-size="28" font-weight="700" fill="#BE185D">14,050원</text>
+      <rect width="335" height="100" rx="14" fill="#ECFCCB" stroke="#A3E635" stroke-width="1.5"/>
+      <text x="20" y="28" font-size="11" font-weight="600" fill="#1F2937" letter-spacing="1">한 주 누적</text>
+      <text x="20" y="60" font-size="28" font-weight="700" fill="#1F2937">14,050원</text>
       <text x="20" y="82" font-size="11" fill="#374151">한 달이면 약 56,000원 · 1년이면 약 68만원</text>
     </g>
 
     <g transform="translate(0,452)">
-      <rect width="335" height="48" rx="10" fill="#FFF1F5"/>
-      <text x="16" y="22" font-size="12" font-weight="600" fill="#BE185D">💡 영수증만 모아도 OK</text>
+      <rect width="335" height="48" rx="10" fill="#ECFCCB"/>
+      <text x="16" y="22" font-size="12" font-weight="600" fill="#1F2937">💡 영수증만 모아도 OK</text>
       <text x="16" y="40" font-size="11" fill="#374151">바로 적기 어려우면 일주일 모아서 일요일 저녁에</text>
     </g>
   </g>

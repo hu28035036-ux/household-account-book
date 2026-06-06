@@ -22,7 +22,7 @@ describe('categoryService — user_id 격리', () => {
 
   it('createCategory — insert payload 에 user_id + is_default=false 강제', async () => {
     const { client, chain } = makeMockSupabase({ data: { id: 'c1' }, error: null });
-    await createCategory(client, 'user-A', { name: '카페', type: 'expense', color: '#F472B6' } as never);
+    await createCategory(client, 'user-A', { name: '카페', type: 'expense', color: '#A3E635' } as never);
     const insertCall = chain._calls.find((c: { method: string }) => c.method === 'insert');
     expect(insertCall).toBeTruthy();
     const payload = insertCall!.args[0] as Record<string, unknown>;

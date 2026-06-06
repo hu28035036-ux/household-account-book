@@ -102,7 +102,7 @@ export function CardUsageCard({ report }: Props) {
                       >
                         <span
                           className="inline-block h-2 w-2 rounded-full shrink-0"
-                          style={{ backgroundColor: t.color ?? '#F472B6' }}
+                          style={{ backgroundColor: t.color ?? '#A3E635' }}
                         />
                         <span className="text-textPrimary">{t.name}</span>
                         <span className="text-textMuted tabular">{t.percent}%</span>

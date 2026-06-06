@@ -4,35 +4,35 @@
 
 /* =========================================================
    테마 토큰 — html[data-theme] 로 분기
-   기본은 핑크. data-theme 속성이 없으면 :root 가 적용된다.
+   기본은 연두. data-theme 속성이 없으면 :root 가 적용된다.
    각 테마는 동일한 변수 set 을 덮어쓰므로 화면 어느 곳에서도
    "primaryPink"/"appBackground" 같은 Tailwind 색상 이름은 그대로
    쓰되 실제 색은 테마에 따라 자동 전환된다.
    ========================================================= */
 :root {
-  /* === 핑크 (기본) === */
-  --app-bg: #FFF7FA;
+  /* === 연두 (기본) === */
+  --app-bg: #F7FEE7;
   --page-bg: #FFFFFF;
-  --soft-bg: #FFF1F5;
+  --soft-bg: #ECFCCB;
   --card-bg: #FFFFFF;
-  --section-bg: #FFF5F8;
+  --section-bg: #F7FEE7;
 
-  --primary: #F472B6;
-  --primary-hover: #EC4899;
-  --primary-soft: #FCE7F3;
-  --primary-light: #FBCFE8;
-  --primary-border: #F9A8D4;
-  --primary-dark: #DB2777;
-  --primary-strong: #BE185D;
-  --text-on-primary: #FFFFFF;
+  --primary: #A3E635;
+  --primary-hover: #84CC16;
+  --primary-soft: #ECFCCB;
+  --primary-light: #D9F99D;
+  --primary-border: #BEF264;
+  --primary-dark: #65A30D;
+  --primary-strong: #1F2937;
+  --text-on-primary: #1F2937;
 
   --text-primary: #1F2937;
   --text-secondary: #6B7280;
   --text-muted: #9CA3AF;
 
-  --border-default: #F3D4E3;
-  --border-soft: #FCE7F3;
-  --divider: #F8E1EA;
+  --border-default: #D9F99D;
+  --border-soft: #ECFCCB;
+  --divider: #D9F99D;
 
   /* === 상태색·거래색·warning bg/text — 라이트 기본 === */
   --success: #10B981;
@@ -45,8 +45,8 @@
   --info-soft: #DBEAFE;
   --income: #10B981;
   --income-soft: #D1FAE5;
-  --expense: #EC4899;
-  --expense-soft: #FCE7F3;
+  --expense: #EF4444;
+  --expense-soft: #FEE2E2;
   --transfer: #60A5FA;
   --transfer-soft: #DBEAFE;
   --duplicate-warning-bg: #FEF3C7;

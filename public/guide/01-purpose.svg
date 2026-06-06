@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
   <!-- bg -->
-  <rect width="375" height="650" fill="#FFF7FA"/>
+  <rect width="375" height="650" fill="#F7FEE7"/>
 
   <!-- status bar -->
   <rect width="375" height="28" fill="transparent"/>
@@ -20,8 +20,8 @@
     <text x="16" y="22" text-anchor="middle" font-size="13" fill="#6B7280">❓</text>
   </g>
   <g transform="translate(248,46)">
-    <rect width="32" height="32" rx="8" fill="#FCE7F3" stroke="#F9A8D4"/>
-    <text x="16" y="22" text-anchor="middle" font-size="14" fill="#BE185D">✨</text>
+    <rect width="32" height="32" rx="8" fill="#ECFCCB" stroke="#BEF264"/>
+    <text x="16" y="22" text-anchor="middle" font-size="14" fill="#1F2937">✨</text>
   </g>
   <g transform="translate(284,46)">
     <rect width="32" height="32" rx="8" fill="#FFFFFF" stroke="#F3D4E3"/>
@@ -40,8 +40,8 @@
 
     <!-- memo card -->
     <g transform="translate(0,52)">
-      <rect width="335" height="130" rx="14" fill="#FFF1F5" stroke="#F9A8D4" stroke-width="1.5"/>
-      <text x="20" y="32" font-size="11" font-weight="600" fill="#BE185D" letter-spacing="1">MY GOAL · 2026 MAY</text>
+      <rect width="335" height="130" rx="14" fill="#ECFCCB" stroke="#BEF264" stroke-width="1.5"/>
+      <text x="20" y="32" font-size="11" font-weight="600" fill="#1F2937" letter-spacing="1">MY GOAL · 2026 MAY</text>
       <text x="20" y="65" font-size="18" font-weight="700" fill="#1F2937">외식비를 30만원 안에서</text>
       <text x="20" y="90" font-size="14" fill="#374151">살아보기 — 작년 6월 대비 -40%</text>
       <text x="20" y="116" font-size="11" fill="#9CA3AF">설정 · 월초 1일에 다시 점검</text>
@@ -53,27 +53,27 @@
     <!-- 3 reasons -->
     <g transform="translate(0,232)">
       <rect width="335" height="38" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
-      <circle cx="22" cy="19" r="11" fill="#FCE7F3"/>
-      <text x="22" y="23" text-anchor="middle" font-size="12" fill="#BE185D" font-weight="700">1</text>
+      <circle cx="22" cy="19" r="11" fill="#ECFCCB"/>
+      <text x="22" y="23" text-anchor="middle" font-size="12" fill="#1F2937" font-weight="700">1</text>
       <text x="44" y="24" font-size="13" fill="#1F2937">매일 적기 자체보다 무엇을 보려 하는지가 중요</text>
     </g>
     <g transform="translate(0,278)">
       <rect width="335" height="38" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
-      <circle cx="22" cy="19" r="11" fill="#FCE7F3"/>
-      <text x="22" y="23" text-anchor="middle" font-size="12" fill="#BE185D" font-weight="700">2</text>
+      <circle cx="22" cy="19" r="11" fill="#ECFCCB"/>
+      <text x="22" y="23" text-anchor="middle" font-size="12" fill="#1F2937" font-weight="700">2</text>
       <text x="44" y="24" font-size="13" fill="#1F2937">목적 한 줄이 매일 입력의 동기를 만들어 줌</text>
     </g>
     <g transform="translate(0,324)">
       <rect width="335" height="38" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
-      <circle cx="22" cy="19" r="11" fill="#FCE7F3"/>
-      <text x="22" y="23" text-anchor="middle" font-size="12" fill="#BE185D" font-weight="700">3</text>
+      <circle cx="22" cy="19" r="11" fill="#ECFCCB"/>
+      <text x="22" y="23" text-anchor="middle" font-size="12" fill="#1F2937" font-weight="700">3</text>
       <text x="44" y="24" font-size="13" fill="#1F2937">월말 회고 때 잘했는지 판단할 기준이 됨</text>
     </g>
 
     <!-- footer hint -->
     <g transform="translate(0,388)">
-      <rect width="335" height="48" rx="10" fill="#FCE7F3"/>
-      <text x="20" y="22" font-size="12" font-weight="600" fill="#BE185D">💡 한 줄로 시작</text>
+      <rect width="335" height="48" rx="10" fill="#ECFCCB"/>
+      <text x="20" y="22" font-size="12" font-weight="600" fill="#1F2937">💡 한 줄로 시작</text>
       <text x="20" y="40" font-size="12" fill="#374151">"외식 줄이기" / "저축 +50만" / "구독 정리"</text>
     </g>
   </g>
@@ -82,9 +82,9 @@
   <rect x="0" y="586" width="375" height="64" fill="#FFFFFF"/>
   <line x1="0" y1="586" x2="375" y2="586" stroke="#F3D4E3"/>
   <g font-size="9" fill="#6B7280" text-anchor="middle">
-    <text x="46" y="612" font-size="16" fill="#BE185D">📅</text><text x="46" y="630" fill="#BE185D" font-weight="600">캘린더</text>
+    <text x="46" y="612" font-size="16" fill="#1F2937">📅</text><text x="46" y="630" fill="#1F2937" font-weight="600">캘린더</text>
     <text x="123" y="612" font-size="16">📋</text><text x="123" y="630">거래</text>
-    <circle cx="187" cy="616" r="22" fill="#F472B6"/>
+    <circle cx="187" cy="616" r="22" fill="#A3E635"/>
     <text x="187" y="622" font-size="18" fill="#FFFFFF">⬆</text>
     <text x="252" y="612" font-size="16">📊</text><text x="252" y="630">통계</text>
     <text x="328" y="612" font-size="16">⋯</text><text x="328" y="630">더보기</text>

@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
-  <rect width="375" height="650" fill="#FFF7FA"/>
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="375" height="650" fill="#F7FEE7"/>
   <text x="20" y="19" font-size="13" font-weight="600" fill="#1F2937">9:41</text>
   <rect x="0" y="28" width="375" height="56" fill="#FFFFFF"/>
   <line x1="0" y1="84" x2="375" y2="84" stroke="#F3D4E3"/>
@@ -7,7 +7,7 @@
 
   <!-- context switcher (top) -->
   <g transform="translate(180,46)">
-    <rect width="148" height="32" rx="8" fill="#FFFFFF" stroke="#F9A8D4"/>
+    <rect width="148" height="32" rx="8" fill="#FFFFFF" stroke="#BEF264"/>
     <text x="74" y="20" text-anchor="middle" font-size="11" fill="#1F2937" font-weight="700">우리집 ▾</text>
   </g>
 
@@ -24,7 +24,7 @@
 
       <!-- members -->
       <g transform="translate(20,56)">
-        <circle cx="16" cy="16" r="16" fill="#F472B6"/>
+        <circle cx="16" cy="16" r="16" fill="#A3E635"/>
         <text x="16" y="20" text-anchor="middle" font-size="13" fill="#FFFFFF" font-weight="700">민</text>
         <text x="42" y="14" font-size="12" font-weight="600" fill="#1F2937">민지 <tspan font-size="10" fill="#9CA3AF">(나)</tspan></text>
         <text x="42" y="28" font-size="10" fill="#9CA3AF">관리자</text>
@@ -44,8 +44,8 @@
 
       <!-- invite button -->
       <g transform="translate(20,140)">
-        <rect width="295" height="20" rx="10" fill="#FFF1F5" stroke="#F9A8D4"/>
-        <text x="147" y="14" text-anchor="middle" font-size="11" fill="#BE185D" font-weight="600">+ 초대 코드 만들기</text>
+        <rect width="295" height="20" rx="10" fill="#ECFCCB" stroke="#BEF264"/>
+        <text x="147" y="14" text-anchor="middle" font-size="11" fill="#1F2937" font-weight="600">+ 초대 코드 만들기</text>
       </g>
     </g>
 
@@ -59,7 +59,7 @@
         <text x="22" y="32" text-anchor="middle" font-size="11" fill="#FFFFFF" font-weight="700">준</text>
         <text x="46" y="22" font-size="12" font-weight="600" fill="#1F2937">이마트 트레이더스</text>
         <text x="46" y="40" font-size="10" fill="#9CA3AF">05/09 · 식비</text>
-        <text x="323" y="34" text-anchor="end" font-size="13" font-weight="700" fill="#BE185D">-128,400</text>
+        <text x="323" y="34" text-anchor="end" font-size="13" font-weight="700" fill="#1F2937">-128,400</text>
       </g>
 
       <g transform="translate(0,80)">
@@ -68,16 +68,16 @@
         <text x="22" y="32" text-anchor="middle" font-size="11" fill="#FFFFFF" font-weight="700">소</text>
         <text x="46" y="22" font-size="12" font-weight="600" fill="#1F2937">관리비</text>
         <text x="46" y="40" font-size="10" fill="#9CA3AF">05/08 · 주거</text>
-        <text x="323" y="34" text-anchor="end" font-size="13" font-weight="700" fill="#BE185D">-186,000</text>
+        <text x="323" y="34" text-anchor="end" font-size="13" font-weight="700" fill="#1F2937">-186,000</text>
       </g>
 
       <g transform="translate(0,144)">
         <rect width="335" height="56" rx="10" fill="#FFFFFF" stroke="#F3D4E3"/>
-        <circle cx="22" cy="28" r="14" fill="#F472B6"/>
+        <circle cx="22" cy="28" r="14" fill="#A3E635"/>
         <text x="22" y="32" text-anchor="middle" font-size="11" fill="#FFFFFF" font-weight="700">민</text>
         <text x="46" y="22" font-size="12" font-weight="600" fill="#1F2937">코스트코</text>
         <text x="46" y="40" font-size="10" fill="#9CA3AF">05/07 · 식비</text>
-        <text x="323" y="34" text-anchor="end" font-size="13" font-weight="700" fill="#BE185D">-72,300</text>
+        <text x="323" y="34" text-anchor="end" font-size="13" font-weight="700" fill="#1F2937">-72,300</text>
       </g>
     </g>
   </g>

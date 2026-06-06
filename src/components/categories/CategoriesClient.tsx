@@ -16,7 +16,7 @@ type Category = {
   is_default: boolean;
 };
 
-const COLOR_PRESETS = ['#F472B6','#FBCFE8','#F9A8D4','#60A5FA','#10B981','#F59E0B','#EF4444','#8B5CF6','#22D3EE','#9CA3AF'];
+const COLOR_PRESETS = ['#A3E635','#D9F99D','#BEF264','#60A5FA','#10B981','#F59E0B','#EF4444','#8B5CF6','#22D3EE','#9CA3AF'];
 
 export function CategoriesClient() {
   const [rows, setRows] = useState<Category[]>([]);
@@ -116,7 +116,7 @@ export function CategoriesClient() {
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span
                     className="inline-block h-2 w-2 rounded-full shrink-0"
-                    style={{ backgroundColor: c.color ?? '#F472B6' }}
+                    style={{ backgroundColor: c.color ?? '#A3E635' }}
                   />
                   <div className="text-sm font-semibold text-textPrimary truncate">{c.name}</div>
                 </div>

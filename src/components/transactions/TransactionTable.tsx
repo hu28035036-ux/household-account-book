@@ -96,7 +96,7 @@ export function TransactionTable({ rows, onEdit, onDelete, selectedIds, onToggle
                 <span className="inline-flex items-center gap-1.5">
                   <span
                     className="inline-block h-2 w-2 rounded-full"
-                    style={{ backgroundColor: r.categories?.color ?? '#F472B6' }}
+                    style={{ backgroundColor: r.categories?.color ?? '#A3E635' }}
                   />
                   <span>{r.categories?.name ?? '-'}</span>
                 </span>

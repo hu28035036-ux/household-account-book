@@ -126,7 +126,7 @@ function DeltaItem({ d }: { d: CategoryDelta }) {
   return (
     <li className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-2 min-w-0">
-        <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: d.category_color ?? '#F472B6' }} />
+        <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: d.category_color ?? '#A3E635' }} />
         <span className="text-sm truncate">{d.category_name}</span>
       </div>
       <div className="text-right">

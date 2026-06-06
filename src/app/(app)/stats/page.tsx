@@ -109,7 +109,7 @@ export default async function StatsPage() {
                   <div className="flex items-center gap-2 min-w-0">
                     <span
                       className="inline-block h-2.5 w-2.5 rounded-full"
-                      style={{ backgroundColor: c.color ?? '#F472B6' }}
+                      style={{ backgroundColor: c.color ?? '#A3E635' }}
                     />
                     <span className="text-sm truncate">{c.name}</span>
                   </div>

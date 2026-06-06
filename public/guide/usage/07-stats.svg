@@ -1,10 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
-  <rect width="375" height="650" fill="#FFF7FA"/>
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="375" height="650" fill="#F7FEE7"/>
   <text x="20" y="19" font-size="13" font-weight="600" fill="#1F2937">9:41</text>
   <rect x="0" y="28" width="375" height="56" fill="#FFFFFF"/>
   <line x1="0" y1="84" x2="375" y2="84" stroke="#F3D4E3"/>
   <text x="20" y="63" font-size="17" font-weight="600" fill="#1F2937">통계</text>
-  <g transform="translate(248,46)"><rect width="80" height="32" rx="8" fill="#FCE7F3" stroke="#F9A8D4"/><text x="40" y="22" text-anchor="middle" font-size="11" fill="#BE185D" font-weight="700">✨ AI 분석</text></g>
+  <g transform="translate(248,46)"><rect width="80" height="32" rx="8" fill="#ECFCCB" stroke="#BEF264"/><text x="40" y="22" text-anchor="middle" font-size="11" fill="#1F2937" font-weight="700">✨ AI 분석</text></g>
 
   <g transform="translate(20,108)">
     <text x="0" y="0" font-size="22" font-weight="700" fill="#1F2937">5월 회고</text>
@@ -17,29 +17,29 @@
 
       <!-- bars -->
       <g transform="translate(20,40)" font-size="9" fill="#9CA3AF" text-anchor="middle">
-        <rect x="0" y="50" width="36" height="40" rx="3" fill="#F9A8D4"/>
+        <rect x="0" y="50" width="36" height="40" rx="3" fill="#BEF264"/>
         <text x="18" y="100">12월</text>
         <text x="18" y="46" fill="#9CA3AF">62만</text>
 
-        <rect x="50" y="40" width="36" height="50" rx="3" fill="#F9A8D4"/>
+        <rect x="50" y="40" width="36" height="50" rx="3" fill="#BEF264"/>
         <text x="68" y="100">1월</text>
         <text x="68" y="36" fill="#9CA3AF">71만</text>
 
-        <rect x="100" y="20" width="36" height="70" rx="3" fill="#F9A8D4"/>
+        <rect x="100" y="20" width="36" height="70" rx="3" fill="#BEF264"/>
         <text x="118" y="100">2월</text>
         <text x="118" y="16" fill="#9CA3AF">85만</text>
 
-        <rect x="150" y="35" width="36" height="55" rx="3" fill="#F9A8D4"/>
+        <rect x="150" y="35" width="36" height="55" rx="3" fill="#BEF264"/>
         <text x="168" y="100">3월</text>
         <text x="168" y="31" fill="#9CA3AF">75만</text>
 
-        <rect x="200" y="55" width="36" height="35" rx="3" fill="#F9A8D4"/>
+        <rect x="200" y="55" width="36" height="35" rx="3" fill="#BEF264"/>
         <text x="218" y="100">4월</text>
         <text x="218" y="51" fill="#9CA3AF">58만</text>
 
-        <rect x="250" y="25" width="36" height="65" rx="3" fill="#F472B6"/>
-        <text x="268" y="100" fill="#BE185D" font-weight="700">5월</text>
-        <text x="268" y="21" fill="#BE185D" font-weight="700">63만</text>
+        <rect x="250" y="25" width="36" height="65" rx="3" fill="#A3E635"/>
+        <text x="268" y="100" fill="#1F2937" font-weight="700">5월</text>
+        <text x="268" y="21" fill="#1F2937" font-weight="700">63만</text>
       </g>
     </g>
 
@@ -51,7 +51,7 @@
       <!-- donut -->
       <g transform="translate(80,86)">
         <circle r="42" fill="none" stroke="#F3F4F6" stroke-width="14"/>
-        <circle r="42" fill="none" stroke="#F472B6" stroke-width="14"
+        <circle r="42" fill="none" stroke="#A3E635" stroke-width="14"
           stroke-dasharray="100 264" transform="rotate(-90)"/>
         <circle r="42" fill="none" stroke="#FB7185" stroke-width="14"
           stroke-dasharray="60 264" stroke-dashoffset="-100" transform="rotate(-90)"/>
@@ -64,7 +64,7 @@
 
       <!-- legend -->
       <g transform="translate(150,52)" font-size="11">
-        <circle cx="6" cy="6" r="5" fill="#F472B6"/>
+        <circle cx="6" cy="6" r="5" fill="#A3E635"/>
         <text x="18" y="10" fill="#1F2937">식비 38%</text>
         <text x="170" y="10" text-anchor="end" fill="#6B7280">240,000</text>
 
@@ -84,8 +84,8 @@
 
     <!-- insight card -->
     <g transform="translate(0,360)">
-      <rect width="335" height="68" rx="12" fill="#FFF1F5" stroke="#F9A8D4"/>
-      <text x="14" y="22" font-size="11" font-weight="700" fill="#BE185D">✨ 이번 달 인사이트</text>
+      <rect width="335" height="68" rx="12" fill="#ECFCCB" stroke="#BEF264"/>
+      <text x="14" y="22" font-size="11" font-weight="700" fill="#1F2937">✨ 이번 달 인사이트</text>
       <text x="14" y="42" font-size="11" fill="#374151">주말 카페 지출이 평일의 2.3배입니다.</text>
       <text x="14" y="58" font-size="11" fill="#374151">전월 대비 식비 -12% 줄였어요 👏</text>
     </g>

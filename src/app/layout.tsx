@@ -38,8 +38,8 @@ export const viewport: Viewport = {
   minimumScale: 1,
   userScalable: false,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#FFF7FA' },
-    { media: '(prefers-color-scheme: dark)', color: '#0E0E12' },
+    { media: '(prefers-color-scheme: light)', color: '#A3E635' },
+    { media: '(prefers-color-scheme: dark)', color: '#A3E635' },
   ],
   colorScheme: 'light dark',
   // iOS 풀스크린 시 노치/홈바 영역까지 활용
@@ -47,7 +47,7 @@ export const viewport: Viewport = {
 };
 
 // 사용자 테마·다크모드를 첫 페인트 직전에 적용 — React hydration 전에 동기 실행되어 깜빡임 방지.
-// - localStorage('theme')  : 컬러 테마 (pink|lavender|mint|mocha)
+// - localStorage('theme')  : 컬러 테마 (pink legacy 기본 연두|lavender|mint|mocha)
 // - localStorage('themeMode'): 모드 (system|light|dark), 기본 'system' = OS 따라감
 const themeInitScript = `try{
   var t=localStorage.getItem('theme');

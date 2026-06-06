@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
-  <rect width="375" height="650" fill="#FFF7FA"/>
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 650" width="375" height="650" font-family="-apple-system, system-ui, 'Pretendard', sans-serif">
+  <rect width="375" height="650" fill="#F7FEE7"/>
   <text x="20" y="19" font-size="13" font-weight="600" fill="#1F2937">9:41</text>
   <rect x="0" y="28" width="375" height="56" fill="#FFFFFF"/>
   <line x1="0" y1="84" x2="375" y2="84" stroke="#F3D4E3"/>
@@ -66,8 +66,8 @@
 
     <!-- bottom hint -->
     <g transform="translate(0,438)">
-      <rect width="335" height="44" rx="10" fill="#FFF1F5"/>
-      <text x="16" y="20" font-size="12" font-weight="600" fill="#BE185D">💡 처음엔 지난 두 달 평균의 0.9배</text>
+      <rect width="335" height="44" rx="10" fill="#ECFCCB"/>
+      <text x="16" y="20" font-size="12" font-weight="600" fill="#1F2937">💡 처음엔 지난 두 달 평균의 0.9배</text>
       <text x="16" y="36" font-size="10" fill="#374151">너무 빡빡하면 며칠 만에 포기</text>
     </g>
   </g>

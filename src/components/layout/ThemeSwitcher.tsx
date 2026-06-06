@@ -6,7 +6,7 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 const THEMES = [
-  { id: 'pink', label: '핑크 (기본)', desc: '연핑크 톤', dot: '#F472B6' },
+  { id: 'pink', label: '연두 (기본)', desc: '연두 톤', dot: '#A3E635' },
   { id: 'lavender', label: '라벤더', desc: '연보라 톤', dot: '#A78BFA' },
   { id: 'mint', label: '민트', desc: '청록 톤', dot: '#14B8A6' },
   { id: 'mocha', label: '모카', desc: '베이지·갈색 톤', dot: '#A78B6E' },
