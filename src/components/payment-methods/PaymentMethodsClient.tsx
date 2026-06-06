@@ -99,13 +99,14 @@ export function PaymentMethodsClient() {
   }
 
   async function remove(p: PM) {
-    if (p.is_default) {
-      alert('기본 결제수단은 삭제할 수 없습니다.');
-      return;
-    }
     if (!confirm(`'${p.name}'를 삭제할까요?`)) return;
     const res = await fetch(`/api/payment-methods/${p.id}`, { method: 'DELETE' });
-    if (res.ok) load();
+    if (res.ok) {
+      load();
+      return;
+    }
+    const json = await res.json().catch(() => null);
+    alert(json?.error?.message ?? '삭제 실패');
   }
 
   return (

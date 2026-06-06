@@ -592,6 +592,36 @@ B) jsScan 을 multi-line 으로 강화하니 가계부 src/services 의 `from('t
 - 룰의 inline 주석 — 새 ai-extraction 파일이 transactions insert 하면 excludePaths 외라 잡힘
 - **알려진 한계 (정직 기록)**: ripgrep CLI 분기는 multiline 적용 안 됨 — `-U` 옵션 추가 후속 작업 후보. 현재는 jsScan 폴백에서만 multi-line. ripgrep 환경에서 production grep 실행 시 multi-line 패턴 누락 위험 존재 — runbook 알림.
 
+### incident-0016 — Playwright Chromium 미설치 + 설치 타임아웃으로 로컬 e2e smoke 중단 [OPEN]
+- 발생 시점: 2026-06-06
+- 단계: 배포 전 로컬 e2e smoke / responsive 검증
+- 사용자 영향: no
+- 발견자: Codex
+
+**무엇이 일어났나**
+- `npx.cmd playwright test --project=mobile-390 --project=desktop-1280 e2e/smoke.spec.ts e2e/responsive.spec.ts` 실행 시 모든 테스트가 브라우저 launch 전에 실패했다.
+- 공통 원인은 `C:\Users\master\AppData\Local\ms-playwright\chromium_headless_shell-1217\...` 실행 파일 부재였다.
+- `npx.cmd playwright install chromium`을 권한 밖에서 실행했지만 180초 타임아웃으로 종료됐고, `chromium-1217` 폴더만 일부 생성된 채 headless shell 실행 파일은 생기지 않았다.
+
+**원인 분석**
+- 코드 변경 회귀가 아니라 현재 PC의 Playwright browser cache 미완성/다운로드 지연 문제다.
+- 이 작업의 실제 기능 변경은 카테고리/결제수단 삭제 UI 제한 제거라서, 앱 빌드와 관련 단위 테스트로 1차 회귀는 확인했다.
+
+**대체 검증**
+- `npm.cmd run typecheck` 통과.
+- `npm.cmd test` 전체 23 files / 167 tests 통과.
+- `npm.cmd run lint` exit 0. 기존 warning 4개 유지.
+- `npm.cmd run build` exit 0.
+- dummy Supabase env로 dev 서버를 띄운 뒤 HTTP smoke 수동 확인:
+  - `/login` 200
+  - `/` 307
+  - `/categories` 307 `Location: /login?redirect=%2Fcategories`
+  - `/payment-methods` 307 `Location: /login?redirect=%2Fpayment-methods`
+
+**다음 액션**
+- 별도 안정 네트워크에서 `npx.cmd playwright install chromium`을 완료한 뒤 같은 e2e 명령을 재실행한다.
+- 설치 완료 전까지 로컬 Playwright 결과를 "통과"로 보고하지 않는다.
+
 ## 3. 자만 / 가짜 통과 패턴 (자기 점검 체크리스트)
 
 검증 실행 후 다음 패턴 보이면 **결과를 의심**:

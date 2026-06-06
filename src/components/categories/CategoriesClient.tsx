@@ -84,13 +84,14 @@ export function CategoriesClient() {
   }
 
   async function remove(c: Category) {
-    if (c.is_default) {
-      alert('기본 카테고리는 삭제할 수 없습니다. 이름을 바꾸거나 새로 추가하세요.');
-      return;
-    }
     if (!confirm(`'${c.name}' 카테고리를 삭제할까요?`)) return;
     const res = await fetch(`/api/categories/${c.id}`, { method: 'DELETE' });
-    if (res.ok) load();
+    if (res.ok) {
+      load();
+      return;
+    }
+    const json = await res.json().catch(() => null);
+    alert(json?.error?.message ?? '삭제 실패');
   }
 
   return (

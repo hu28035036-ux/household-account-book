@@ -48,6 +48,7 @@ describe('categoryService — user_id 격리', () => {
       { method: 'eq', args: ['user_id', 'user-A'] },
       { method: 'eq', args: ['id', 'c1'] },
     ]);
+    expect(eqs.some((c: { args: unknown[] }) => c.args[0] === 'is_default')).toBe(false);
   });
 });
 
@@ -76,6 +77,7 @@ describe('paymentMethodService — user_id 격리', () => {
       { method: 'eq', args: ['user_id', 'user-A'] },
       { method: 'eq', args: ['id', 'p1'] },
     ]);
+    expect(eqs.some((c: { args: unknown[] }) => c.args[0] === 'is_default')).toBe(false);
   });
 
   it('updatePaymentMethod — user_id + id 둘 다 필터', async () => {
