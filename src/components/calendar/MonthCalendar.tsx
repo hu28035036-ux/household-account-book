@@ -350,7 +350,7 @@ export function MonthCalendar({
                     onKeyDown={handleCreateKeyDown}
                     aria-label={`${c.date} 거래 추가`}
                     title="거래 추가"
-                    className="h-4 w-4 sm:h-5 sm:w-5 inline-flex items-center justify-center rounded-md border border-primaryPinkBorder bg-primaryPinkSoft text-textPinkStrong hover:bg-primaryPink hover:text-textOnPink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaryPinkBorder shrink-0"
+                    className="inline-flex h-4 w-4 shrink-0 items-center justify-center bg-transparent p-0 text-textPinkStrong hover:text-primaryPink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaryPinkBorder sm:h-5 sm:w-5"
                   >
                     <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" strokeWidth={2} />
                   </button>
