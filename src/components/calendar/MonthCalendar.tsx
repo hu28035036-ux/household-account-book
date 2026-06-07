@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { Modal } from '@/components/common/Modal';
@@ -88,6 +88,7 @@ export function MonthCalendar({
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null); // 한 줄 리스트 필터용
   const [categoryFilter, setCategoryFilter] = useState<string>(''); // '' = 전체
+  const [createTxDate, setCreateTxDate] = useState<string | null>(null);
 
   // 상세 팝업 + 수정 모달 state
   const [selectedTx, setSelectedTx] = useState<(Tx & { date: string }) | null>(null);
@@ -183,6 +184,30 @@ export function MonthCalendar({
     } finally {
       setEditorPending(false);
     }
+  }
+
+  function openCreateTransaction(date: string) {
+    setSelected(date);
+    setSelectedTx(null);
+    setEditorOpen(false);
+    setCreateTxDate(date);
+  }
+
+  function handleDateKeyDown(date: string, e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setSelected((s) => (s === date ? null : date));
+    }
+  }
+
+  function handleCreateClick(date: string, e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    openCreateTransaction(date);
+  }
+
+  function handleCreateKeyDown(e: React.KeyboardEvent<HTMLButtonElement>) {
+    e.stopPropagation();
   }
 
   const prevYM = ymOffset(yearMonth, -1);
@@ -290,12 +315,16 @@ export function MonthCalendar({
             const smOverflow = Math.max(0, catList.length - smVisible.length);
 
             return (
-              <button
+              <div
                 key={c.date}
-                type="button"
+                data-calendar-date={c.date}
+                role="button"
+                tabIndex={0}
                 onClick={() => setSelected((s) => (s === c.date ? null : c.date!))}
+                onKeyDown={(e) => handleDateKeyDown(c.date!, e)}
+                aria-label={`${c.date} 거래 보기`}
                 className={cn(
-                  'h-20 sm:h-24 md:h-28 p-0.5 sm:p-1 md:p-1.5 rounded-md border text-left flex flex-col gap-0.5 transition-colors overflow-hidden',
+                  'h-20 sm:h-24 md:h-28 p-0.5 sm:p-1 md:p-1.5 rounded-md border text-left flex flex-col gap-0.5 transition-colors overflow-hidden cursor-pointer',
                   isSelected
                     ? 'border-primaryPink bg-primaryPinkSoft'
                     : isToday
@@ -305,7 +334,7 @@ export function MonthCalendar({
                 )}
               >
                 {/* 1행 — 날짜 (거래수 표시 제거) */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-0.5">
                   <span
                     className={cn(
                       'text-[11px] sm:text-xs font-semibold',
@@ -315,6 +344,16 @@ export function MonthCalendar({
                   >
                     {c.day}
                   </span>
+                  <button
+                    type="button"
+                    onClick={(e) => handleCreateClick(c.date!, e)}
+                    onKeyDown={handleCreateKeyDown}
+                    aria-label={`${c.date} 거래 추가`}
+                    title="거래 추가"
+                    className="h-4 w-4 sm:h-5 sm:w-5 inline-flex items-center justify-center rounded-md border border-primaryPinkBorder bg-primaryPinkSoft text-textPinkStrong hover:bg-primaryPink hover:text-textOnPink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaryPinkBorder shrink-0"
+                  >
+                    <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" strokeWidth={2} />
+                  </button>
                 </div>
                 {/* 2행 — 총 지출 (강조) */}
                 {bucket && bucket.expense > 0 ? (
@@ -368,7 +407,7 @@ export function MonthCalendar({
                     +{__numFmt(bucket.income)}
                   </div>
                 )}
-              </button>
+              </div>
             );
           })}
         </div>
@@ -593,6 +632,20 @@ export function MonthCalendar({
           onSaved={() => {
             setEditorOpen(false);
             setSelectedTx(null);
+            router.refresh();
+          }}
+        />
+      )}
+
+      {createTxDate && (
+        <TransactionEditor
+          open
+          onClose={() => setCreateTxDate(null)}
+          initial={{ transaction_date: createTxDate }}
+          categories={categories}
+          paymentMethods={paymentMethods}
+          onSaved={() => {
+            setCreateTxDate(null);
             router.refresh();
           }}
         />

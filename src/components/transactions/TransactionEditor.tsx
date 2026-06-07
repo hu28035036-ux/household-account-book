@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Modal } from '@/components/common/Modal';
 import { Button } from '@/components/common/Button';
 import { todayKSTISO } from '@/lib/formatting/date';
-import { parseKRWInput } from '@/lib/formatting/money';
+import { formatKRWInput, parseKRWInput } from '@/lib/formatting/money';
 import { useActiveHousehold } from '@/lib/active-household';
 
 type Category = { id: string; name: string; type: string };
@@ -42,7 +42,7 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
   const { activeId, households } = useActiveHousehold();
   const [date, setDate] = useState(initial?.transaction_date ?? todayKSTISO());
   const [type, setType] = useState<'income' | 'expense' | 'transfer'>(initial?.type ?? 'expense');
-  const [amountStr, setAmountStr] = useState(initial?.amount ? String(initial.amount) : '');
+  const [amountStr, setAmountStr] = useState(formatKRWInput(initial?.amount));
   const [merchant, setMerchant] = useState(initial?.merchant_name ?? '');
   const [categoryId, setCategoryId] = useState(initial?.category_id ?? '');
   const [paymentMethodId, setPaymentMethodId] = useState(initial?.payment_method_id ?? '');
@@ -60,7 +60,7 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
     if (!open) return;
     setDate(initial?.transaction_date ?? todayKSTISO());
     setType(initial?.type ?? 'expense');
-    setAmountStr(initial?.amount ? String(initial.amount) : '');
+    setAmountStr(formatKRWInput(initial?.amount));
     setMerchant(initial?.merchant_name ?? '');
     setCategoryId(initial?.category_id ?? '');
     setPaymentMethodId(initial?.payment_method_id ?? '');
@@ -156,8 +156,8 @@ export function TransactionEditor({ open, onClose, initial, categories, paymentM
             type="text"
             inputMode="numeric"
             value={amountStr}
-            onChange={(e) => setAmountStr(e.target.value)}
-            placeholder="예: 5800"
+            onChange={(e) => setAmountStr(formatKRWInput(e.target.value))}
+            placeholder="예: 5,800"
             className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary tabular"
           />
         </label>

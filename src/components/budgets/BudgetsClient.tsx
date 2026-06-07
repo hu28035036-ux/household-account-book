@@ -7,7 +7,7 @@ import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Modal } from '@/components/common/Modal';
 import { Badge } from '@/components/common/Badge';
 import { BudgetBar } from './BudgetBar';
-import { formatKRW, parseKRWInput } from '@/lib/formatting/money';
+import { formatKRW, formatKRWInput, parseKRWInput } from '@/lib/formatting/money';
 import { useActiveHousehold } from '@/lib/active-household';
 
 type Category = { id: string; name: string; color: string | null; type: string };
@@ -163,7 +163,7 @@ export function BudgetsClient() {
     setEditingId(b.id);
     setScope(b.category_id ? 'category' : 'total');
     setCategoryId(b.category_id ?? '');
-    setAmountStr(String(b.amount));
+    setAmountStr(formatKRWInput(b.amount));
     setThresholdPct(String(Math.round(b.alert_threshold * 100)));
     setMemo(b.memo ?? '');
     setSaveError(null);
@@ -371,7 +371,7 @@ export function BudgetsClient() {
               type="text"
               inputMode="numeric"
               value={amountStr}
-              onChange={(e) => setAmountStr(e.target.value)}
+              onChange={(e) => setAmountStr(formatKRWInput(e.target.value))}
               placeholder="예: 300,000"
               className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary tabular"
             />

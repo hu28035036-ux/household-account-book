@@ -658,7 +658,7 @@ B) jsScan 을 multi-line 으로 강화하니 가계부 src/services 의 `from('t
 
 | 분기 | 누적 incident | 가장 흔한 단계 | 가장 흔한 원인 |
 |---|---|---|---|
-| 2026-Q2 | 17 + 1 followup | self-test / verify-citations 자기 검증 시 도구 결함 노출 + 단위화 3회 + 메타 격리 원칙 + 1차 배포 / 로컬 검증 환경 | 분기 순서 / 환경 의존 / multi-line / alternation / 수동 등록 누락 / 분산 정의 / 격리 원칙 / 단위화 자체의 새 결합 / 영역 작업 차단 / 샌드박스 파일 접근 제한 |
+| 2026-Q2 | 17 + 2 followup | self-test / verify-citations 자기 검증 시 도구 결함 노출 + 단위화 3회 + 메타 격리 원칙 + 1차 배포 / 로컬 검증 환경 | 분기 순서 / 환경 의존 / multi-line / alternation / 수동 등록 누락 / 분산 정의 / 격리 원칙 / 단위화 자체의 새 결합 / 영역 작업 차단 / 샌드박스 파일 접근 제한 |
 
 ---
 
@@ -690,3 +690,20 @@ B) jsScan 을 multi-line 으로 강화하니 가계부 src/services 의 `from('t
 **재발 방지**
 - Vitest가 config load 단계에서 동일한 접근 제한을 내면 코드 수정 재시도 전에 권한 실행으로 검증한다.
 - 권한 실행으로도 실패할 때만 실제 테스트 실패로 분류한다.
+
+### incident-0017-followup-2026-06-07 — same Vitest sandbox config load block
+- 발생 시점: 2026-06-07
+- 단계: 캘린더 + 버튼/금액 콤마 UX 변경 후 `money.test` 검증
+- 사용자 영향: no
+- 발견자: Codex
+
+**무엇이 일어났나**
+- `npm.cmd test -- src/tests/unit/money.test.ts`를 기본 샌드박스에서 실행하자 incident-0017과 동일하게 Vitest config load 단계에서 실패했다.
+- 에러는 `Cannot read directory "../../..": Access is denied.` 및 `Could not resolve "...\\vitest.config.ts"`였다.
+
+**최종 검증**
+- 같은 명령을 권한 실행으로 재시도해 `src/tests/unit/money.test.ts` 1 file / 4 tests 통과.
+- 이어서 `npm.cmd test` 전체 권한 실행 결과 23 files / 168 tests 통과.
+
+**판정**
+- 새 코드 회귀가 아니라 기존 known environment issue의 재현이다.

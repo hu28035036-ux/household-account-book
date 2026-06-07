@@ -6,7 +6,7 @@ import { Card } from '@/components/common/Card';
 import { Badge } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
 import { Modal } from '@/components/common/Modal';
-import { formatKRW, parseKRWInput } from '@/lib/formatting/money';
+import { formatKRW, formatKRWInput, parseKRWInput } from '@/lib/formatting/money';
 import { formatDateKST } from '@/lib/formatting/date';
 
 export type CandidateFile = {
@@ -56,7 +56,7 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
   const [editing, setEditing] = useState(false);
   const [date, setDate] = useState(c.transaction_date ?? '');
   const [type, setType] = useState(c.type);
-  const [amountStr, setAmountStr] = useState(c.amount?.toString() ?? '');
+  const [amountStr, setAmountStr] = useState(formatKRWInput(c.amount));
   const [merchant, setMerchant] = useState(c.merchant_name ?? '');
   const [category, setCategory] = useState(c.category_suggestion ?? '');
   const [payment, setPayment] = useState(c.payment_method_suggestion ?? '');
@@ -67,7 +67,7 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
   useEffect(() => {
     setDate(c.transaction_date ?? '');
     setType(c.type);
-    setAmountStr(c.amount?.toString() ?? '');
+    setAmountStr(formatKRWInput(c.amount));
     setMerchant(c.merchant_name ?? '');
     setCategory(c.category_suggestion ?? '');
     setPayment(c.payment_method_suggestion ?? '');
@@ -292,8 +292,8 @@ export function CandidateCard({ c, selected, onSelect, onChange }: Props) {
                 <input
                   inputMode="numeric"
                   value={amountStr}
-                  onChange={(e) => setAmountStr(e.target.value)}
-                  placeholder="예: 12000"
+                  onChange={(e) => setAmountStr(formatKRWInput(e.target.value))}
+                  placeholder="예: 12,000"
                   className="flex-1 min-w-0 h-9 px-2.5 rounded-md border border-borderDefault bg-pageBackground text-textPrimary text-sm tabular"
                 />
               </label>

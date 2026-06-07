@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import type { Intent } from '@/lib/ai/assistantSchema';
 import { PrivacyConsentModal } from '@/components/common/PrivacyConsentModal';
+import { formatKRWInput, parseKRWInput } from '@/lib/formatting/money';
 
 const NAV_DESTINATIONS: Record<string, { path: string; label: string }> = {
   calendar: { path: '/dashboard', label: '월 캘린더' },
@@ -610,13 +611,11 @@ function AddTransactionPreview({
         {/* 금액 */}
         <EditableRow icon={<Coins className="h-4 w-4" strokeWidth={1.75} />} label="금액">
           <input
-            type="number"
+            type="text"
             inputMode="numeric"
-            min={0}
-            step={100}
-            value={data.amount}
+            value={formatKRWInput(data.amount)}
             onChange={(e) => {
-              const n = Math.max(0, Math.floor(Number(e.target.value) || 0));
+              const n = Math.max(0, Math.floor(parseKRWInput(e.target.value) ?? 0));
               onChange({ amount: n });
             }}
             disabled={busy}

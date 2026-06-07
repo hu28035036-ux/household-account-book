@@ -6,7 +6,7 @@ import { Card, CardSubtle, CardTitle } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
 import { Modal } from '@/components/common/Modal';
-import { formatKRW, parseKRWInput } from '@/lib/formatting/money';
+import { formatKRW, formatKRWInput, parseKRWInput } from '@/lib/formatting/money';
 import { formatDateKST } from '@/lib/formatting/date';
 import { useActiveHousehold } from '@/lib/active-household';
 
@@ -130,7 +130,7 @@ export function RecurringClient() {
   function startEdit(r: Rule) {
     setEditingId(r.id);
     setType(r.type);
-    setAmountStr(String(r.amount));
+    setAmountStr(formatKRWInput(r.amount));
     setMerchant(r.merchant_name ?? '');
     setMemo(r.memo ?? '');
     setCategoryId(r.category_id ?? '');
@@ -418,8 +418,8 @@ export function RecurringClient() {
             <input
               inputMode="numeric"
               value={amountStr}
-              onChange={(e) => setAmountStr(e.target.value)}
-              placeholder="예: 17000"
+              onChange={(e) => setAmountStr(formatKRWInput(e.target.value))}
+              placeholder="예: 17,000"
               className="mt-1 w-full h-11 px-3 rounded-lg border border-borderDefault bg-pageBackground text-textPrimary tabular"
             />
           </label>

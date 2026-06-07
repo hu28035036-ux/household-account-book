@@ -14,6 +14,17 @@ export function parseKRWInput(input: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+export function formatKRWInput(input: string | number | null | undefined): string {
+  if (input === null || input === undefined) return '';
+  const raw = String(input);
+  const negative = raw.trim().startsWith('-');
+  const digits = raw.replace(/\D/g, '');
+  if (!digits) return negative ? '-' : '';
+  const n = Number(digits);
+  if (!Number.isFinite(n)) return negative ? `-${digits}` : digits;
+  return `${negative ? '-' : ''}${n.toLocaleString('ko-KR')}`;
+}
+
 /**
  * 좁은 공간(캘린더 셀 등) 용 컴팩트 표기.
  *  - 1억 이상     → "1억", "12억"
