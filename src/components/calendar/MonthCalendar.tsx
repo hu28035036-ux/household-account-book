@@ -497,14 +497,27 @@ export function MonthCalendar({
           </CardSubtle>
         ) : (
           <div className="mt-3">
-            {groupedRows.map((g, gi) => (
+            {groupedRows.map((g, gi) => {
+              // 그날 총 사용금액 = 지출 합계 (수입/이체 제외)
+              const dayExpense = g.items.reduce(
+                (s, t) => s + (t.type === 'expense' ? Number(t.amount) || 0 : 0),
+                0,
+              );
+              return (
               <div
                 key={g.date}
                 className={cn(gi > 0 && 'mt-3 pt-3 border-t border-borderDefault')}
               >
-                {/* 날짜 헤더 — 같은 날은 한 번만 */}
-                <div className="text-xs font-medium text-textSecondary mb-0.5 px-0.5">
-                  {formatDateHeader(g.date)}
+                {/* 날짜 헤더 — 같은 날은 한 번만, 우측에 그날 총 사용금액 */}
+                <div className="flex items-center justify-between gap-2 mb-0.5 px-0.5">
+                  <span className="text-xs font-medium text-textSecondary">
+                    {formatDateHeader(g.date)}
+                  </span>
+                  {dayExpense > 0 && (
+                    <span className="text-xs font-semibold tabular text-expense whitespace-nowrap">
+                      -{formatKRW(dayExpense)}
+                    </span>
+                  )}
                 </div>
                 <ul>
                   {g.items.map((t) => (
@@ -552,7 +565,8 @@ export function MonthCalendar({
                   ))}
                 </ul>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </Card>
