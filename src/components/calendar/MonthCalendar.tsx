@@ -66,6 +66,14 @@ function __numFmt(n: number): string {
   return n.toLocaleString('ko-KR');
 }
 
+/** 거래내역 그룹 헤더용 — "6월 28일 (일)" */
+function formatDateHeader(date: string): string {
+  const [, m, d] = date.split('-').map(Number);
+  const dow = new Date(date + 'T00:00:00Z').getUTCDay();
+  const dowKr = ['일', '월', '화', '수', '목', '금', '토'][dow];
+  return `${m}월 ${d}일 (${dowKr})`;
+}
+
 function todayKSTYMD(): string {
   const fmt = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Seoul',
@@ -160,6 +168,17 @@ export function MonthCalendar({
     return rows;
   }, [flatRecent, selected, categoryFilter]);
 
+  // 같은 날짜끼리 묶어 날짜는 한 번만 표시 (visibleRows 는 날짜 내림차순)
+  const groupedRows = useMemo(() => {
+    const groups: Array<{ date: string; items: Array<Tx & { date: string }> }> = [];
+    for (const r of visibleRows) {
+      const last = groups[groups.length - 1];
+      if (last && last.date === r.date) last.items.push(r);
+      else groups.push({ date: r.date, items: [r] });
+    }
+    return groups;
+  }, [visibleRows]);
+
   async function handleDelete() {
     if (!selectedTx) return;
     if (
@@ -219,7 +238,7 @@ export function MonthCalendar({
     <div className="space-y-4">
       {/* ① 최상단: 남은 예산 강조 */}
       <Card>
-        <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
             <Link
               href={`?ym=${prevYM}`}
@@ -236,6 +255,33 @@ export function MonthCalendar({
             >
               <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
             </Link>
+          </div>
+          {/* 이번 달 합계 — 날짜 옆 우측 상단에 작게 */}
+          <div className="flex items-center gap-2.5 ml-auto">
+            <div className="text-right leading-tight">
+              <div className="text-[10px] text-textSecondary">수입</div>
+              <div className="text-xs font-semibold tabular text-income whitespace-nowrap">
+                +{formatKRW(totals.income)}
+              </div>
+            </div>
+            <div className="text-right leading-tight">
+              <div className="text-[10px] text-textSecondary">지출</div>
+              <div className="text-xs font-semibold tabular text-expense whitespace-nowrap">
+                -{formatKRW(totals.expense)}
+              </div>
+            </div>
+            <div className="text-right leading-tight">
+              <div className="text-[10px] text-textSecondary">잔액</div>
+              <div
+                className={cn(
+                  'text-xs font-semibold tabular whitespace-nowrap',
+                  totals.balance < 0 ? 'text-danger' : 'text-textPinkStrong',
+                )}
+              >
+                {totals.balance < 0 ? '-' : '+'}
+                {formatKRW(Math.abs(totals.balance))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -413,38 +459,8 @@ export function MonthCalendar({
         </div>
       </Card>
 
-      {/* (카테고리별 예산 카드는 상단 캐러셀로 이동 — 중복 제거) */}
-
-      {/* ③ 이번 달 수입/지출/잔액 합계 */}
-      <Card>
-        <CardSubtle className="m-0">이번 달 합계</CardSubtle>
-        <div className="mt-2 grid grid-cols-3 gap-2">
-          <div>
-            <div className="text-xs text-textSecondary">수입</div>
-            <div className="mt-0.5 text-base sm:text-lg font-semibold tabular text-income whitespace-nowrap">
-              +{formatKRW(totals.income)}
-            </div>
-          </div>
-          <div>
-            <div className="text-xs text-textSecondary">지출</div>
-            <div className="mt-0.5 text-base sm:text-lg font-semibold tabular text-expense whitespace-nowrap">
-              -{formatKRW(totals.expense)}
-            </div>
-          </div>
-          <div>
-            <div className="text-xs text-textSecondary">잔액</div>
-            <div
-              className={cn(
-                'mt-0.5 text-base sm:text-lg font-semibold tabular whitespace-nowrap',
-                totals.balance < 0 ? 'text-danger' : 'text-textPinkStrong',
-              )}
-            >
-              {totals.balance < 0 ? '-' : '+'}
-              {formatKRW(Math.abs(totals.balance))}
-            </div>
-          </div>
-        </div>
-      </Card>
+      {/* (카테고리별 예산 카드는 상단 캐러셀로 이동 — 중복 제거)
+          (이번 달 합계는 상단 월 카드 헤더 우측으로 이동 — 중복 제거) */}
 
       {/* ④ 최근 거래내역 한 줄 리스트 */}
       <Card>
@@ -484,55 +500,61 @@ export function MonthCalendar({
             {selected ? '이 날의 거래가 없습니다.' : '이번 달 거래가 없습니다.'}
           </CardSubtle>
         ) : (
-          <ul className="mt-3 divide-y divide-divider">
-            {visibleRows.map((t) => (
-              <li key={t.id}>
-                <button
-                  type="button"
-                  onClick={() => setSelectedTx(t)}
-                  aria-label="거래 상세 보기"
-                  className="w-full py-2 flex items-center gap-2 sm:gap-3 min-w-0 text-sm text-left hover:bg-softPinkBackground/40 -mx-2 px-2 rounded-md transition-colors"
-                >
-                  {/* 날짜 */}
-                  <span className="tabular text-xs text-textMuted w-10 shrink-0">
-                    {t.date.slice(5)}
-                  </span>
-                  {/* 카테고리 (점 + 이름) — 모바일도 표시 */}
-                  <span className="flex items-center gap-1 shrink-0 max-w-[80px] sm:max-w-[110px]">
-                    <span
-                      className="inline-block h-2 w-2 rounded-full shrink-0"
-                      style={{ backgroundColor: t.category_color ?? '#9CA3AF' }}
-                    />
-                    <span className="text-xs text-textMuted truncate">
-                      {t.category_name ?? '미지정'}
-                    </span>
-                  </span>
-                  {/* 거래내역 (가맹점) */}
-                  <span className="text-textPrimary truncate flex-1 min-w-0">
-                    {t.merchant_name || '(가맹점 없음)'}
-                  </span>
-                  {/* 결제수단 — 데스크톱만 */}
-                  <span className="text-xs text-textMuted truncate hidden md:inline max-w-[100px]">
-                    {t.payment_method_name ?? ''}
-                  </span>
-                  {/* 금액 */}
-                  <span
-                    className={cn(
-                      'tabular font-semibold whitespace-nowrap min-w-[80px] text-right',
-                      t.type === 'income'
-                        ? 'text-income'
-                        : t.type === 'transfer'
-                        ? 'text-transfer'
-                        : 'text-expense',
-                    )}
-                  >
-                    {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
-                    {formatKRW(t.amount)}
-                  </span>
-                </button>
-              </li>
+          <div className="mt-3 space-y-3">
+            {groupedRows.map((g) => (
+              <div key={g.date}>
+                {/* 날짜 헤더 — 같은 날은 한 번만 */}
+                <div className="text-xs font-medium text-textSecondary mb-0.5 px-0.5">
+                  {formatDateHeader(g.date)}
+                </div>
+                <ul className="divide-y divide-divider">
+                  {g.items.map((t) => (
+                    <li key={t.id}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTx(t)}
+                        aria-label="거래 상세 보기"
+                        className="w-full py-2 flex items-center gap-2 sm:gap-3 min-w-0 text-sm text-left hover:bg-softPinkBackground/40 -mx-2 px-2 rounded-md transition-colors"
+                      >
+                        {/* 카테고리 (점 + 이름) — 모바일도 표시 */}
+                        <span className="flex items-center gap-1 shrink-0 max-w-[80px] sm:max-w-[110px]">
+                          <span
+                            className="inline-block h-2 w-2 rounded-full shrink-0"
+                            style={{ backgroundColor: t.category_color ?? '#9CA3AF' }}
+                          />
+                          <span className="text-xs text-textMuted truncate">
+                            {t.category_name ?? '미지정'}
+                          </span>
+                        </span>
+                        {/* 거래내역 (가맹점) */}
+                        <span className="text-textPrimary truncate flex-1 min-w-0">
+                          {t.merchant_name || '(가맹점 없음)'}
+                        </span>
+                        {/* 결제수단 — 데스크톱만 */}
+                        <span className="text-xs text-textMuted truncate hidden md:inline max-w-[100px]">
+                          {t.payment_method_name ?? ''}
+                        </span>
+                        {/* 금액 */}
+                        <span
+                          className={cn(
+                            'tabular font-semibold whitespace-nowrap min-w-[80px] text-right',
+                            t.type === 'income'
+                              ? 'text-income'
+                              : t.type === 'transfer'
+                              ? 'text-transfer'
+                              : 'text-expense',
+                          )}
+                        >
+                          {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
+                          {formatKRW(t.amount)}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </Card>
 
@@ -688,9 +710,12 @@ function BudgetCarousel({
   function scrollToIdx(target: number) {
     const el = scrollerRef.current;
     if (!el) return;
-    const clamped = Math.max(0, Math.min(slideCount - 1, target));
+    // 양끝에서 넘기면 반대쪽 끝으로 순환 (wrap-around)
+    let wrapped = target;
+    if (target < 0) wrapped = slideCount - 1;
+    else if (target > slideCount - 1) wrapped = 0;
     const slideWidth = el.clientWidth;
-    el.scrollTo({ left: clamped * slideWidth, behavior: 'smooth' });
+    el.scrollTo({ left: wrapped * slideWidth, behavior: 'smooth' });
   }
 
   // 스크롤 위치에서 현재 idx 추적
@@ -711,8 +736,9 @@ function BudgetCarousel({
   return (
     <div className="mt-4">
       <div className="relative">
-        {/* 좌우 화살표 — 데스크톱·태블릿 보조. 모바일은 스와이프 우선 */}
-        {idx > 0 && (
+        {/* 좌우 화살표 — 데스크톱·태블릿 보조. 모바일은 스와이프 우선.
+            양끝에서도 표시 — 끝에서 누르면 반대쪽 끝으로 순환된다. */}
+        {slideCount > 1 && (
           <button
             type="button"
             onClick={() => scrollToIdx(idx - 1)}
@@ -722,7 +748,7 @@ function BudgetCarousel({
             <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
           </button>
         )}
-        {idx < slideCount - 1 && (
+        {slideCount > 1 && (
           <button
             type="button"
             onClick={() => scrollToIdx(idx + 1)}
@@ -859,6 +885,19 @@ function BudgetCarousel({
                     )}
                     style={{ width: `${catOver ? 100 : pct}%` }}
                   />
+                </div>
+                {/* 카테고리별 남은 예산 */}
+                <div className="mt-2 flex items-center justify-between gap-2 text-xs">
+                  <span className="text-textSecondary">{catOver ? '예산 초과' : '남은 예산'}</span>
+                  <span
+                    className={cn(
+                      'tabular font-semibold',
+                      catOver ? 'text-danger' : 'text-textPinkStrong',
+                    )}
+                  >
+                    {catOver ? '-' : ''}
+                    {formatKRW(Math.abs(cb.budget_amount - cb.spent_amount))}
+                  </span>
                 </div>
               </div>
             );
