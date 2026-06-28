@@ -256,31 +256,27 @@ export function MonthCalendar({
               <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
             </Link>
           </div>
-          {/* 이번 달 합계 — 날짜 옆 우측 상단에 작게 */}
-          <div className="flex items-center gap-2.5 ml-auto">
-            <div className="text-right leading-tight">
-              <div className="text-[10px] text-textSecondary">수입</div>
-              <div className="text-xs font-semibold tabular text-income whitespace-nowrap">
-                +{formatKRW(totals.income)}
-              </div>
+          {/* 이번 달 합계 — 날짜 옆 우측 상단에 한 줄씩 작게 */}
+          <div className="flex flex-col items-end gap-0.5 ml-auto text-[10px] leading-tight tabular">
+            <div className="whitespace-nowrap">
+              <span className="text-textSecondary">수입 </span>
+              <span className="font-semibold text-income">+{formatKRW(totals.income)}</span>
             </div>
-            <div className="text-right leading-tight">
-              <div className="text-[10px] text-textSecondary">지출</div>
-              <div className="text-xs font-semibold tabular text-expense whitespace-nowrap">
-                -{formatKRW(totals.expense)}
-              </div>
+            <div className="whitespace-nowrap">
+              <span className="text-textSecondary">지출 </span>
+              <span className="font-semibold text-expense">-{formatKRW(totals.expense)}</span>
             </div>
-            <div className="text-right leading-tight">
-              <div className="text-[10px] text-textSecondary">잔액</div>
-              <div
+            <div className="whitespace-nowrap">
+              <span className="text-textSecondary">잔액 </span>
+              <span
                 className={cn(
-                  'text-xs font-semibold tabular whitespace-nowrap',
+                  'font-semibold',
                   totals.balance < 0 ? 'text-danger' : 'text-textPinkStrong',
                 )}
               >
                 {totals.balance < 0 ? '-' : '+'}
                 {formatKRW(Math.abs(totals.balance))}
-              </div>
+              </span>
             </div>
           </div>
         </div>
@@ -500,9 +496,12 @@ export function MonthCalendar({
             {selected ? '이 날의 거래가 없습니다.' : '이번 달 거래가 없습니다.'}
           </CardSubtle>
         ) : (
-          <div className="mt-3 space-y-3">
-            {groupedRows.map((g) => (
-              <div key={g.date}>
+          <div className="mt-3">
+            {groupedRows.map((g, gi) => (
+              <div
+                key={g.date}
+                className={cn(gi > 0 && 'mt-3 pt-3 border-t border-borderDefault')}
+              >
                 {/* 날짜 헤더 — 같은 날은 한 번만 */}
                 <div className="text-xs font-medium text-textSecondary mb-0.5 px-0.5">
                   {formatDateHeader(g.date)}
@@ -743,7 +742,7 @@ function BudgetCarousel({
             type="button"
             onClick={() => scrollToIdx(idx - 1)}
             aria-label="이전 카테고리"
-            className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-pageBackground border border-borderDefault shadow-card hover:bg-softPinkBackground"
+            className="flex absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-pageBackground border border-borderDefault shadow-card hover:bg-softPinkBackground"
           >
             <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
           </button>
@@ -753,7 +752,7 @@ function BudgetCarousel({
             type="button"
             onClick={() => scrollToIdx(idx + 1)}
             aria-label="다음 카테고리"
-            className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-pageBackground border border-borderDefault shadow-card hover:bg-softPinkBackground"
+            className="flex absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-pageBackground border border-borderDefault shadow-card hover:bg-softPinkBackground"
           >
             <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
           </button>
@@ -837,9 +836,13 @@ function BudgetCarousel({
                       />
                       <CardSubtle className="truncate">{cb.category_name}</CardSubtle>
                     </div>
+                    {/* 카테고리 이름 아래 — 남은 예산 */}
+                    <div className="mt-1 text-[11px] text-textSecondary">
+                      {catOver ? '예산 초과' : '남은 예산'}
+                    </div>
                     <div
                       className={cn(
-                        'mt-1 text-xl sm:text-2xl font-semibold tabular',
+                        'mt-0.5 text-xl sm:text-2xl font-semibold tabular',
                         catOver
                           ? 'text-danger'
                           : catCaution
@@ -847,7 +850,8 @@ function BudgetCarousel({
                             : 'text-textPinkStrong',
                       )}
                     >
-                      {formatKRW(cb.spent_amount)}
+                      {catOver ? '-' : ''}
+                      {formatKRW(Math.abs(cb.budget_amount - cb.spent_amount))}
                     </div>
                   </div>
                   <div className="text-right">
@@ -885,19 +889,6 @@ function BudgetCarousel({
                     )}
                     style={{ width: `${catOver ? 100 : pct}%` }}
                   />
-                </div>
-                {/* 카테고리별 남은 예산 */}
-                <div className="mt-2 flex items-center justify-between gap-2 text-xs">
-                  <span className="text-textSecondary">{catOver ? '예산 초과' : '남은 예산'}</span>
-                  <span
-                    className={cn(
-                      'tabular font-semibold',
-                      catOver ? 'text-danger' : 'text-textPinkStrong',
-                    )}
-                  >
-                    {catOver ? '-' : ''}
-                    {formatKRW(Math.abs(cb.budget_amount - cb.spent_amount))}
-                  </span>
                 </div>
               </div>
             );
