@@ -534,7 +534,7 @@ export function MonthCalendar({
                               ? 'text-income'
                               : t.type === 'transfer'
                               ? 'text-transfer'
-                              : 'text-expense',
+                              : 'text-textPrimary',
                           )}
                         >
                           {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}
@@ -673,7 +673,7 @@ export function MonthCalendar({
         onClick={() => openCreateTransaction(selected ?? today)}
         aria-label={selected ? `${selected} 거래 추가` : '오늘 거래 추가'}
         title="거래 추가"
-        className="fixed right-4 bottom-20 md:right-6 md:bottom-6 z-40 h-14 w-14 rounded-full bg-primaryPink text-textOnPink shadow-lg flex items-center justify-center hover:bg-primaryPinkHover active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaryPinkHover focus-visible:ring-offset-2"
+        className="fixed right-4 bottom-[calc(env(safe-area-inset-bottom)+76px)] md:right-6 md:bottom-6 z-40 h-14 w-14 rounded-full bg-primaryPink text-textOnPink shadow-lg flex items-center justify-center hover:bg-primaryPinkHover active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaryPinkHover focus-visible:ring-offset-2"
       >
         <Plus className="h-6 w-6" strokeWidth={2.25} />
       </button>
