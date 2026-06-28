@@ -62,7 +62,7 @@ create policy "linked_accounts_select_own"
   on public.linked_accounts for select
   using (
     user_id = auth.uid()
-    or (household_id is not null and public.is_household_member(household_id))
+    or (household_id is not null and public.is_household_member(household_id, auth.uid()))
   );
 
 drop policy if exists "linked_accounts_insert_own" on public.linked_accounts;

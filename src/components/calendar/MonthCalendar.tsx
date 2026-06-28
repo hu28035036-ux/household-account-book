@@ -506,7 +506,7 @@ export function MonthCalendar({
                 <div className="text-xs font-medium text-textSecondary mb-0.5 px-0.5">
                   {formatDateHeader(g.date)}
                 </div>
-                <ul className="divide-y divide-divider">
+                <ul>
                   {g.items.map((t) => (
                     <li key={t.id}>
                       <button
