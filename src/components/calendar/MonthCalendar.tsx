@@ -219,16 +219,6 @@ export function MonthCalendar({
     }
   }
 
-  function handleCreateClick(date: string, e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
-    e.stopPropagation();
-    openCreateTransaction(date);
-  }
-
-  function handleCreateKeyDown(e: React.KeyboardEvent<HTMLButtonElement>) {
-    e.stopPropagation();
-  }
-
   const prevYM = ymOffset(yearMonth, -1);
   const nextYM = ymOffset(yearMonth, 1);
   const overBudget = budget.remaining < 0;
@@ -375,8 +365,8 @@ export function MonthCalendar({
                   (dow === 0 || dow === 6) && !isSelected && 'bg-sectionBackground',
                 )}
               >
-                {/* 1행 — 날짜 (거래수 표시 제거) */}
-                <div className="flex items-center justify-between gap-0.5">
+                {/* 1행 — 날짜 */}
+                <div className="flex items-center gap-0.5">
                   <span
                     className={cn(
                       'text-[11px] sm:text-xs font-semibold',
@@ -386,16 +376,6 @@ export function MonthCalendar({
                   >
                     {c.day}
                   </span>
-                  <button
-                    type="button"
-                    onClick={(e) => handleCreateClick(c.date!, e)}
-                    onKeyDown={handleCreateKeyDown}
-                    aria-label={`${c.date} 거래 추가`}
-                    title="거래 추가"
-                    className="inline-flex h-4 w-4 shrink-0 items-center justify-center bg-transparent p-0 text-textPinkStrong hover:text-primaryPink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaryPinkBorder sm:h-5 sm:w-5"
-                  >
-                    <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" strokeWidth={2} />
-                  </button>
                 </div>
                 {/* 2행 — 총 지출 (강조) */}
                 {bucket && bucket.expense > 0 ? (
@@ -685,6 +665,18 @@ export function MonthCalendar({
           }}
         />
       )}
+
+      {/* 거래 추가 FAB — 화면 우하단 고정(스크롤해도 유지).
+          선택한 날짜(없으면 오늘)에 거래 추가. 색상은 컬러 테마(--primary) 토큰. */}
+      <button
+        type="button"
+        onClick={() => openCreateTransaction(selected ?? today)}
+        aria-label={selected ? `${selected} 거래 추가` : '오늘 거래 추가'}
+        title="거래 추가"
+        className="fixed right-4 bottom-20 md:right-6 md:bottom-6 z-40 h-14 w-14 rounded-full bg-primaryPink text-textOnPink shadow-lg flex items-center justify-center hover:bg-primaryPinkHover active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaryPinkHover focus-visible:ring-offset-2"
+      >
+        <Plus className="h-6 w-6" strokeWidth={2.25} />
+      </button>
     </div>
   );
 }
