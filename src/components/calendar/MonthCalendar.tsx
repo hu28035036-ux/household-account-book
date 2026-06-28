@@ -803,7 +803,7 @@ function BudgetCarousel({
               className="snap-center snap-always shrink-0 w-full"
             >
               {s.kind === 'total'
-                ? renderTotalSlide({ budget, usedPct, overBudget })
+                ? renderTotalSlide({ budget, usedPct, overBudget, onSelect: onSelectCategory })
                 : renderCatSlide(s.cb, onSelectCategory)}
             </div>
           ))}
@@ -836,13 +836,27 @@ function renderTotalSlide({
   budget,
   usedPct,
   overBudget,
+  onSelect,
 }: {
   budget: { total: number; usedPct: number; remaining: number };
   usedPct: number;
   overBudget: boolean;
+  onSelect: (name: string) => void;
 }) {
   return (
-    <>
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onSelect('')}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect('');
+        }
+      }}
+      title="전체 카테고리 거래 보기"
+      className="cursor-pointer rounded-lg -m-1 p-1 transition-colors hover:bg-softPinkBackground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaryPinkBorder"
+    >
       <div className="flex items-end justify-between gap-3 flex-wrap">
         <div>
           <CardSubtle>{overBudget ? '예산 초과' : '남은 예산'}</CardSubtle>
@@ -882,7 +896,7 @@ function renderTotalSlide({
           style={{ width: `${overBudget ? 100 : usedPct}%` }}
         />
       </div>
-    </>
+    </div>
   );
 }
 
