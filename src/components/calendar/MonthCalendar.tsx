@@ -703,207 +703,99 @@ function BudgetCarousel({
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [idx, setIdx] = useState(0);
 
-  // 슬라이드 = [합산] + categoryBudgets
-  const slideCount = 1 + categoryBudgets.length;
+  // 슬라이드 데이터 = [합산] + 카테고리별
+  const slides = useMemo(
+    () => [{ kind: 'total' as const }, ...categoryBudgets.map((cb) => ({ kind: 'cat' as const, cb }))],
+    [categoryBudgets],
+  );
+  const slideCount = slides.length;
+  const loop = slideCount > 1;
 
-  function scrollToIdx(target: number) {
+  // 무한 순환: 루프면 양끝에 클론 1장씩 → [last, ...실제, first]
+  const display = loop ? [slides[slideCount - 1], ...slides, slides[0]] : slides;
+
+  // 초기 위치 = 첫 실제 슬라이드 (루프면 index 1)
+  useEffect(() => {
     const el = scrollerRef.current;
-    if (!el) return;
-    // 양끝에서 넘기면 반대쪽 끝으로 순환 (wrap-around)
-    let wrapped = target;
-    if (target < 0) wrapped = slideCount - 1;
-    else if (target > slideCount - 1) wrapped = 0;
-    const slideWidth = el.clientWidth;
-    el.scrollTo({ left: wrapped * slideWidth, behavior: 'smooth' });
-  }
+    if (!el || !loop) return;
+    el.scrollLeft = el.clientWidth;
+  }, [loop, slideCount]);
 
-  // 스크롤 위치에서 현재 idx 추적
+  // 스크롤 추적 + 클론 도달 시 반대편으로 순간이동(끊김 없는 순환)
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
+    let raf = 0;
     function onScroll() {
       if (!el) return;
-      const w = el.clientWidth;
-      if (w === 0) return;
-      const next = Math.round(el.scrollLeft / w);
-      setIdx(next);
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const w = el.clientWidth;
+        if (w === 0) return;
+        const pos = Math.round(el.scrollLeft / w); // display 기준 인덱스
+        if (!loop) {
+          setIdx(pos);
+          return;
+        }
+        // display: 0=last 클론, 1..slideCount=실제, slideCount+1=first 클론
+        if (pos === 0) {
+          el.scrollLeft = slideCount * w;
+          setIdx(slideCount - 1);
+        } else if (pos === slideCount + 1) {
+          el.scrollLeft = w;
+          setIdx(0);
+        } else {
+          setIdx(pos - 1);
+        }
+      });
     }
     el.addEventListener('scroll', onScroll, { passive: true });
-    return () => el.removeEventListener('scroll', onScroll);
-  }, []);
+    return () => {
+      el.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, [loop, slideCount]);
+
+  // 점 클릭 → 해당 실제 슬라이드로 (루프 보정)
+  function goTo(realIdx: number) {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const w = el.clientWidth;
+    el.scrollTo({ left: (loop ? realIdx + 1 : realIdx) * w, behavior: 'smooth' });
+  }
 
   return (
     <div className="mt-4">
       <div className="relative">
-        {/* 좌우 화살표 — 데스크톱·태블릿 보조. 모바일은 스와이프 우선.
-            양끝에서도 표시 — 끝에서 누르면 반대쪽 끝으로 순환된다. */}
-        {slideCount > 1 && (
-          <button
-            type="button"
-            onClick={() => scrollToIdx(idx - 1)}
-            aria-label="이전 카테고리"
-            className="flex absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-pageBackground border border-borderDefault shadow-card hover:bg-softPinkBackground"
-          >
-            <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
-          </button>
-        )}
-        {slideCount > 1 && (
-          <button
-            type="button"
-            onClick={() => scrollToIdx(idx + 1)}
-            aria-label="다음 카테고리"
-            className="flex absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-pageBackground border border-borderDefault shadow-card hover:bg-softPinkBackground"
-          >
-            <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
-          </button>
-        )}
-
         <div
           ref={scrollerRef}
-          className="overflow-x-auto overflow-y-hidden snap-x snap-mandatory flex scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="overflow-x-auto overflow-y-hidden snap-x snap-mandatory flex [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           style={{ overscrollBehaviorX: 'contain' }}
           aria-roledescription="carousel"
         >
-          {/* 슬라이드 1: 합산 */}
-          <div
-            role="group"
-            aria-roledescription="slide"
-            aria-label={`1 / ${slideCount} — 전체 합산`}
-            className="snap-center snap-always shrink-0 w-full"
-          >
-            <div className="flex items-end justify-between gap-3 flex-wrap">
-              <div>
-                <CardSubtle>{overBudget ? '예산 초과' : '남은 예산'}</CardSubtle>
-                <div
-                  className={cn(
-                    'mt-1 text-xl sm:text-2xl font-semibold tabular',
-                    overBudget ? 'text-danger' : 'text-textPinkStrong',
-                  )}
-                >
-                  {overBudget ? '-' : ''}
-                  {formatKRW(Math.abs(budget.remaining))}
-                </div>
-              </div>
-              <div className="text-right">
-                <CardSubtle>카테고리 사용 / 합산 예산</CardSubtle>
-                <div className="mt-1 text-sm text-textSecondary tabular">
-                  <span className="text-expense">
-                    {formatKRW(budget.total - budget.remaining)}
-                  </span>
-                  <span className="mx-1 text-textMuted">/</span>
-                  <span className="text-textPrimary">{formatKRW(budget.total)}</span>
-                </div>
-                <div
-                  className={cn(
-                    'mt-0.5 text-xs tabular',
-                    overBudget ? 'text-danger' : usedPct >= 80 ? 'text-warning' : 'text-success',
-                  )}
-                >
-                  {budget.usedPct}% 사용
-                </div>
-              </div>
+          {display.map((s, i) => (
+            <div
+              key={i}
+              role="group"
+              aria-roledescription="slide"
+              className="snap-center snap-always shrink-0 w-full"
+            >
+              {s.kind === 'total'
+                ? renderTotalSlide({ budget, usedPct, overBudget })
+                : renderCatSlide(s.cb)}
             </div>
-            <div className="mt-3 h-2.5 rounded-full bg-borderSoft overflow-hidden">
-              <div
-                className={cn(
-                  'h-full transition-[width]',
-                  overBudget ? 'bg-danger' : usedPct >= 80 ? 'bg-warning' : 'bg-primaryPink',
-                )}
-                style={{ width: `${overBudget ? 100 : usedPct}%` }}
-              />
-            </div>
-          </div>
-
-          {/* 슬라이드 2~N: 카테고리별 */}
-          {categoryBudgets.map((cb, i) => {
-            const catOver = cb.status === 'over';
-            const catCaution = cb.status === 'caution';
-            const pct = Math.min(100, Math.max(0, cb.percent));
-            return (
-              <div
-                key={cb.category_id ?? `cat-${i}`}
-                role="group"
-                aria-roledescription="slide"
-                aria-label={`${i + 2} / ${slideCount} — ${cb.category_name}`}
-                className="snap-center snap-always shrink-0 w-full"
-              >
-                <div className="flex items-end justify-between gap-3 flex-wrap">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="inline-block h-2.5 w-2.5 rounded-full shrink-0"
-                        style={{ backgroundColor: cb.category_color ?? '#9CA3AF' }}
-                      />
-                      <CardSubtle className="truncate">{cb.category_name}</CardSubtle>
-                    </div>
-                    {/* 카테고리 이름 아래 — 남은 예산 */}
-                    <div className="mt-1 text-[11px] text-textSecondary">
-                      {catOver ? '예산 초과' : '남은 예산'}
-                    </div>
-                    <div
-                      className={cn(
-                        'mt-0.5 text-xl sm:text-2xl font-semibold tabular',
-                        catOver
-                          ? 'text-danger'
-                          : catCaution
-                            ? 'text-warning'
-                            : 'text-textPinkStrong',
-                      )}
-                    >
-                      {catOver ? '-' : ''}
-                      {formatKRW(Math.abs(cb.budget_amount - cb.spent_amount))}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <CardSubtle>사용 / 한도</CardSubtle>
-                    <div className="mt-1 text-sm text-textSecondary tabular">
-                      <span
-                        className={cn(
-                          catOver
-                            ? 'text-danger'
-                            : catCaution
-                              ? 'text-warning'
-                              : 'text-expense',
-                        )}
-                      >
-                        {formatKRW(cb.spent_amount)}
-                      </span>
-                      <span className="mx-1 text-textMuted">/</span>
-                      <span className="text-textPrimary">{formatKRW(cb.budget_amount)}</span>
-                    </div>
-                    <div
-                      className={cn(
-                        'mt-0.5 text-xs tabular',
-                        catOver ? 'text-danger' : catCaution ? 'text-warning' : 'text-success',
-                      )}
-                    >
-                      {Math.round(cb.percent)}% 사용
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-3 h-2.5 rounded-full bg-borderSoft overflow-hidden">
-                  <div
-                    className={cn(
-                      'h-full transition-[width]',
-                      catOver ? 'bg-danger' : catCaution ? 'bg-warning' : 'bg-primaryPink',
-                    )}
-                    style={{ width: `${catOver ? 100 : pct}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
+          ))}
         </div>
       </div>
 
       {/* 페이지 점 — 슬라이드 2개 이상일 때만 표시 */}
       {slideCount > 1 && (
         <div className="mt-3 flex items-center justify-center gap-1.5">
-          {Array.from({ length: slideCount }).map((_, i) => (
+          {slides.map((_, i) => (
             <button
               key={i}
               type="button"
-              onClick={() => scrollToIdx(i)}
+              onClick={() => goTo(i)}
               aria-label={`슬라이드 ${i + 1} 로 이동`}
               aria-current={idx === i}
               className={cn(
@@ -915,5 +807,124 @@ function BudgetCarousel({
         </div>
       )}
     </div>
+  );
+}
+
+function renderTotalSlide({
+  budget,
+  usedPct,
+  overBudget,
+}: {
+  budget: { total: number; usedPct: number; remaining: number };
+  usedPct: number;
+  overBudget: boolean;
+}) {
+  return (
+    <>
+      <div className="flex items-end justify-between gap-3 flex-wrap">
+        <div>
+          <CardSubtle>{overBudget ? '예산 초과' : '남은 예산'}</CardSubtle>
+          <div
+            className={cn(
+              'mt-1 text-xl sm:text-2xl font-semibold tabular',
+              overBudget ? 'text-danger' : 'text-textPinkStrong',
+            )}
+          >
+            {overBudget ? '-' : ''}
+            {formatKRW(Math.abs(budget.remaining))}
+          </div>
+        </div>
+        <div className="text-right">
+          <CardSubtle>카테고리 사용 / 합산 예산</CardSubtle>
+          <div className="mt-1 text-sm text-textSecondary tabular">
+            <span className="text-expense">{formatKRW(budget.total - budget.remaining)}</span>
+            <span className="mx-1 text-textMuted">/</span>
+            <span className="text-textPrimary">{formatKRW(budget.total)}</span>
+          </div>
+          <div
+            className={cn(
+              'mt-0.5 text-xs tabular',
+              overBudget ? 'text-danger' : usedPct >= 80 ? 'text-warning' : 'text-success',
+            )}
+          >
+            {budget.usedPct}% 사용
+          </div>
+        </div>
+      </div>
+      <div className="mt-3 h-2.5 rounded-full bg-borderSoft overflow-hidden">
+        <div
+          className={cn(
+            'h-full transition-[width]',
+            overBudget ? 'bg-danger' : usedPct >= 80 ? 'bg-warning' : 'bg-primaryPink',
+          )}
+          style={{ width: `${overBudget ? 100 : usedPct}%` }}
+        />
+      </div>
+    </>
+  );
+}
+
+function renderCatSlide(cb: CategoryBudget) {
+  const catOver = cb.status === 'over';
+  const catCaution = cb.status === 'caution';
+  const pct = Math.min(100, Math.max(0, cb.percent));
+  return (
+    <>
+      <div className="flex items-end justify-between gap-3 flex-wrap">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span
+              className="inline-block h-2.5 w-2.5 rounded-full shrink-0"
+              style={{ backgroundColor: cb.category_color ?? '#9CA3AF' }}
+            />
+            <CardSubtle className="truncate">{cb.category_name}</CardSubtle>
+          </div>
+          {/* 카테고리 이름 아래 — 남은 예산 */}
+          <div className="mt-1 text-[11px] text-textSecondary">
+            {catOver ? '예산 초과' : '남은 예산'}
+          </div>
+          <div
+            className={cn(
+              'mt-0.5 text-xl sm:text-2xl font-semibold tabular',
+              catOver ? 'text-danger' : catCaution ? 'text-warning' : 'text-textPinkStrong',
+            )}
+          >
+            {catOver ? '-' : ''}
+            {formatKRW(Math.abs(cb.budget_amount - cb.spent_amount))}
+          </div>
+        </div>
+        <div className="text-right">
+          <CardSubtle>사용 / 한도</CardSubtle>
+          <div className="mt-1 text-sm text-textSecondary tabular">
+            <span
+              className={cn(
+                catOver ? 'text-danger' : catCaution ? 'text-warning' : 'text-expense',
+              )}
+            >
+              {formatKRW(cb.spent_amount)}
+            </span>
+            <span className="mx-1 text-textMuted">/</span>
+            <span className="text-textPrimary">{formatKRW(cb.budget_amount)}</span>
+          </div>
+          <div
+            className={cn(
+              'mt-0.5 text-xs tabular',
+              catOver ? 'text-danger' : catCaution ? 'text-warning' : 'text-success',
+            )}
+          >
+            {Math.round(cb.percent)}% 사용
+          </div>
+        </div>
+      </div>
+      <div className="mt-3 h-2.5 rounded-full bg-borderSoft overflow-hidden">
+        <div
+          className={cn(
+            'h-full transition-[width]',
+            catOver ? 'bg-danger' : catCaution ? 'bg-warning' : 'bg-primaryPink',
+          )}
+          style={{ width: `${catOver ? 100 : pct}%` }}
+        />
+      </div>
+    </>
   );
 }
