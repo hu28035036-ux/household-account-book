@@ -47,11 +47,12 @@ export const viewport: Viewport = {
 };
 
 // 사용자 테마·다크모드를 첫 페인트 직전에 적용 — React hydration 전에 동기 실행되어 깜빡임 방지.
-// - localStorage('theme')  : 컬러 테마 (pink legacy 기본 연두|lavender|mint|mocha)
+// - localStorage('theme')  : 컬러 테마 (green=기본 연두 | mint | beige | sky | ivory | butter)
+//   기본 연두(green)와 레거시 값(pink/lavender/mocha)은 data-theme 없이 :root(연두) 적용
 // - localStorage('themeMode'): 모드 (system|light|dark), 기본 'system' = OS 따라감
 const themeInitScript = `try{
   var t=localStorage.getItem('theme');
-  if(t&&t!=='pink'&&['lavender','mint','mocha'].indexOf(t)>=0){
+  if(t&&['mint','beige','sky','ivory','butter'].indexOf(t)>=0){
     document.documentElement.setAttribute('data-theme',t);
   }
   var m=localStorage.getItem('themeMode')||'system';

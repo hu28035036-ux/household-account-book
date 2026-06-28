@@ -6,10 +6,12 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 const THEMES = [
-  { id: 'pink', label: '연두 (기본)', desc: '연두 톤', dot: '#A3E635' },
-  { id: 'lavender', label: '라벤더', desc: '연보라 톤', dot: '#A78BFA' },
-  { id: 'mint', label: '민트', desc: '청록 톤', dot: '#14B8A6' },
-  { id: 'mocha', label: '모카', desc: '베이지·갈색 톤', dot: '#A78B6E' },
+  { id: 'green', label: '연두 (기본)', desc: '연두 톤', dot: '#A3E635' },
+  { id: 'mint', label: '민트', desc: '청록 파스텔', dot: '#5EEAD4' },
+  { id: 'beige', label: '베이지', desc: '베이지·갈색 톤', dot: '#D8C09A' },
+  { id: 'sky', label: '하늘색', desc: '하늘 파스텔', dot: '#7DD3FC' },
+  { id: 'ivory', label: '아이보리', desc: '크림 톤', dot: '#EBDDB4' },
+  { id: 'butter', label: '연한 노랑', desc: '버터 옐로', dot: '#FDE047' },
 ] as const;
 
 type ThemeId = (typeof THEMES)[number]['id'];
@@ -26,7 +28,7 @@ const MODE_KEY = 'themeMode';
 
 function applyTheme(t: ThemeId) {
   if (typeof document === 'undefined') return;
-  if (t === 'pink') {
+  if (t === 'green') {
     document.documentElement.removeAttribute('data-theme');
   } else {
     document.documentElement.setAttribute('data-theme', t);
@@ -48,7 +50,7 @@ function applyMode(m: ModeId) {
 export function ThemeSwitcher() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [active, setActive] = useState<ThemeId>('pink');
+  const [active, setActive] = useState<ThemeId>('green');
   const [mode, setMode] = useState<ModeId>('system');
   const ref = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);

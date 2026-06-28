@@ -55,70 +55,97 @@
   --needs-review-text: #991B1B;
 }
 
-html[data-theme='lavender'] {
-  --app-bg: #FAF8FF;
-  --page-bg: #FFFFFF;
-  --soft-bg: #F3EFFF;
-  --card-bg: #FFFFFF;
-  --section-bg: #F8F5FF;
-  --primary: #A78BFA;
-  --primary-hover: #8B5CF6;
-  --primary-soft: #EDE9FE;
-  --primary-light: #DDD6FE;
-  --primary-border: #C4B5FD;
-  --primary-dark: #7C3AED;
-  --primary-strong: #5B21B6;
-  --text-on-primary: #FFFFFF;
-  --text-primary: #1F2937;
-  --text-secondary: #6B7280;
-  --text-muted: #9CA3AF;
-  --border-default: #D8CCFD;
-  --border-soft: #EDE9FE;
-  --divider: #E4DAFF;
-}
-
+/* === 민트 === */
 html[data-theme='mint'] {
-  --app-bg: #F4FFF9;
-  --page-bg: #FFFFFF;
-  --soft-bg: #ECFDF5;
-  --card-bg: #FFFFFF;
-  --section-bg: #F0FDF7;
-  --primary: #14B8A6;
-  --primary-hover: #0D9488;
+  --app-bg: #F0FDFA;
+  --soft-bg: #CCFBF1;
+  --section-bg: #ECFDF5;
+  --primary: #5EEAD4;
+  --primary-hover: #2DD4BF;
   --primary-soft: #CCFBF1;
   --primary-light: #99F6E4;
-  --primary-border: #5EEAD4;
-  --primary-dark: #0F766E;
+  --primary-border: #99F6E4;
+  --primary-dark: #0D9488;
   --primary-strong: #115E59;
-  --text-on-primary: #FFFFFF;
-  --text-primary: #1F2937;
-  --text-secondary: #6B7280;
-  --text-muted: #9CA3AF;
-  --border-default: #A7F3D0;
-  --border-soft: #D1FAE5;
-  --divider: #BBF7D0;
+  --text-on-primary: #134E4A;
+  --border-default: #99F6E4;
+  --border-soft: #CCFBF1;
+  --divider: #A7F3D0;
 }
 
-html[data-theme='mocha'] {
-  --app-bg: #FAF6F0;
-  --page-bg: #FFFFFF;
-  --soft-bg: #F2EAD9;
-  --card-bg: #FFFFFF;
-  --section-bg: #F6EFE0;
-  --primary: #A78B6E;
-  --primary-hover: #8B6F50;
-  --primary-soft: #F0E5D6;
-  --primary-light: #E5D5BE;
-  --primary-border: #C9B59A;
-  --primary-dark: #6B4F35;
-  --primary-strong: #4A3520;
-  --text-on-primary: #FFFFFF;
+/* === 베이지 === */
+html[data-theme='beige'] {
+  --app-bg: #FAF6EF;
+  --soft-bg: #F0E6D2;
+  --section-bg: #F6EFE2;
+  --primary: #D8C09A;
+  --primary-hover: #C4A878;
+  --primary-soft: #F0E6D2;
+  --primary-light: #E8D8BE;
+  --primary-border: #DECBA8;
+  --primary-dark: #9C7E50;
+  --primary-strong: #6B5335;
+  --text-on-primary: #4A3520;
   --text-primary: #2D2418;
   --text-secondary: #6B5D4A;
   --text-muted: #97876F;
-  --border-default: #DCC8AB;
-  --border-soft: #EFE4D2;
+  --border-default: #E0CEAC;
+  --border-soft: #F0E6D2;
   --divider: #E8DAC4;
+}
+
+/* === 하늘색 === */
+html[data-theme='sky'] {
+  --app-bg: #F0F9FF;
+  --soft-bg: #E0F2FE;
+  --section-bg: #F0F9FF;
+  --primary: #7DD3FC;
+  --primary-hover: #38BDF8;
+  --primary-soft: #E0F2FE;
+  --primary-light: #BAE6FD;
+  --primary-border: #BAE6FD;
+  --primary-dark: #0284C7;
+  --primary-strong: #075985;
+  --text-on-primary: #0C4A6E;
+  --border-default: #BAE6FD;
+  --border-soft: #E0F2FE;
+  --divider: #BAE6FD;
+}
+
+/* === 아이보리 === */
+html[data-theme='ivory'] {
+  --app-bg: #FEFDF8;
+  --soft-bg: #FAF6E9;
+  --section-bg: #FDFBF0;
+  --primary: #EBDDB4;
+  --primary-hover: #DCC98F;
+  --primary-soft: #FAF6E9;
+  --primary-light: #F2E9CC;
+  --primary-border: #E5D8B2;
+  --primary-dark: #B8A875;
+  --primary-strong: #6B5E35;
+  --text-on-primary: #574A24;
+  --border-default: #E5D8B2;
+  --border-soft: #FAF6E9;
+  --divider: #EFE7CE;
+}
+
+/* === 연한 노랑 === */
+html[data-theme='butter'] {
+  --app-bg: #FEFCE8;
+  --soft-bg: #FEF9C3;
+  --section-bg: #FEFCE8;
+  --primary: #FDE047;
+  --primary-hover: #FACC15;
+  --primary-soft: #FEF9C3;
+  --primary-light: #FEF08A;
+  --primary-border: #FDE68A;
+  --primary-dark: #CA8A04;
+  --primary-strong: #854D0E;
+  --text-on-primary: #713F12;
+  --border-default: #FDE68A;
+  --border-soft: #FEF9C3;
+  --divider: #FDE68A;
 }
 
 /* =========================================================
@@ -134,14 +161,14 @@ html.dark {
   --card-bg: #1C1C22;
   --section-bg: #1A1A1F;
 
-  --primary: #EA85C4;
-  --primary-hover: #F299CE;
-  --primary-soft: #3A1F2D;
-  --primary-light: #4A2735;
-  --primary-border: #5A2F45;
-  --primary-dark: #F299CE;
-  --primary-strong: #F2A4CC;
-  --text-on-primary: #FFFFFF;
+  --primary: #A3E635;
+  --primary-hover: #BEF264;
+  --primary-soft: #29330F;
+  --primary-light: #3A4718;
+  --primary-border: #4A5A20;
+  --primary-dark: #BEF264;
+  --primary-strong: #D9F99D;
+  --text-on-primary: #15200A;
 
   /* 너무 밝아 눈 부담 가던 순백 톤(#F5F5F7) → 회색 톤으로 차분하게 */
   --text-primary: #DCDCE0;
@@ -179,21 +206,6 @@ html.dark {
    더 높아(class+attr) lavender/mint/mocha 의 다크 톤을 자동 적용한다.
    배경 계층은 동일(미드나잇)하게 두고, primary/border/strong 만 컬러 테마 색으로 덮어씀.
    ========================================================= */
-html.dark[data-theme='lavender'] {
-  --primary: #9F7AEA;
-  --primary-hover: #B197FC;
-  --primary-soft: #2A1F3A;
-  --primary-light: #3A2F4A;
-  --primary-border: #3F2D5A;
-  --primary-dark: #B197FC;
-  --primary-strong: #C4B5FD;
-  --soft-bg: #1B1822;
-  --section-bg: #1A1820;
-  --border-default: #2E2A35;
-  --border-soft: #1F1C25;
-  --divider: #25222C;
-}
-
 html.dark[data-theme='mint'] {
   --primary: #5EEAD4;
   --primary-hover: #8DEFE2;
@@ -202,6 +214,7 @@ html.dark[data-theme='mint'] {
   --primary-border: #2F4A42;
   --primary-dark: #8DEFE2;
   --primary-strong: #6DE9D6;
+  --text-on-primary: #06241F;
   --soft-bg: #14201C;
   --section-bg: #131D1A;
   --border-default: #2A332E;
@@ -209,19 +222,68 @@ html.dark[data-theme='mint'] {
   --divider: #222A26;
 }
 
-html.dark[data-theme='mocha'] {
-  --primary: #C9B59A;
-  --primary-hover: #D8C5A8;
+html.dark[data-theme='beige'] {
+  --primary: #D8C5A8;
+  --primary-hover: #E5D5BC;
   --primary-soft: #2A241D;
   --primary-light: #36302A;
   --primary-border: #4A3F32;
-  --primary-dark: #D8C5A8;
-  --primary-strong: #D8C5A8;
+  --primary-dark: #E5D5BC;
+  --primary-strong: #E5D5BC;
+  --text-on-primary: #2A2018;
   --soft-bg: #1F1C16;
   --section-bg: #1D1A14;
   --border-default: #2E2A24;
   --border-soft: #221F1A;
   --divider: #28241E;
+}
+
+html.dark[data-theme='sky'] {
+  --primary: #7DD3FC;
+  --primary-hover: #A5DEFD;
+  --primary-soft: #11283A;
+  --primary-light: #16344A;
+  --primary-border: #244A5A;
+  --primary-dark: #A5DEFD;
+  --primary-strong: #BAE6FD;
+  --text-on-primary: #08283A;
+  --soft-bg: #141E26;
+  --section-bg: #131B22;
+  --border-default: #283440;
+  --border-soft: #1C242C;
+  --divider: #222C34;
+}
+
+html.dark[data-theme='ivory'] {
+  --primary: #EADFBF;
+  --primary-hover: #F0E8CE;
+  --primary-soft: #2A271C;
+  --primary-light: #363226;
+  --primary-border: #4A4536;
+  --primary-dark: #F0E8CE;
+  --primary-strong: #F0E8CE;
+  --text-on-primary: #2A2618;
+  --soft-bg: #1F1D16;
+  --section-bg: #1D1B14;
+  --border-default: #2E2C24;
+  --border-soft: #22201A;
+  --divider: #28261E;
+}
+
+html.dark[data-theme='butter'] {
+  --primary: #FDE047;
+  --primary-hover: #FEE869;
+  --primary-soft: #2E2A0F;
+  --primary-light: #3A3514;
+  --primary-border: #4A4420;
+  --primary-dark: #FEE869;
+  --primary-strong: #FEF08A;
+  --text-on-primary: #2A2606;
+  --soft-bg: #201E12;
+  --section-bg: #1D1B10;
+  --border-default: #2E2C1E;
+  --border-soft: #222018;
+  --divider: #28261A;
 }
 
 html, body {
