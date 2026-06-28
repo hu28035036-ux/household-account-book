@@ -157,8 +157,10 @@ export function MonthCalendar({
     for (const r of flatRecent) {
       if (r.category_name) set.add(r.category_name);
     }
+    // 거래가 없는 카테고리를 상단 카드에서 선택해도 드롭다운 표시가 일치하도록 포함
+    if (categoryFilter) set.add(categoryFilter);
     return Array.from(set).sort();
-  }, [flatRecent]);
+  }, [flatRecent, categoryFilter]);
 
   const visibleRows = useMemo(() => {
     let rows = flatRecent;
@@ -210,6 +212,17 @@ export function MonthCalendar({
     setSelectedTx(null);
     setEditorOpen(false);
     setCreateTxDate(date);
+  }
+
+  // 상단 예산 카드(카테고리)를 누르면 해당 카테고리로 필터 + 거래내역으로 스크롤
+  function focusCategory(name: string) {
+    setSelected(null); // 날짜 필터 해제 → 이번 달 전체에서 카테고리 필터
+    setCategoryFilter(name);
+    requestAnimationFrame(() => {
+      document
+        .getElementById('recent-transactions')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   }
 
   function handleDateKeyDown(date: string, e: React.KeyboardEvent<HTMLDivElement>) {
@@ -277,6 +290,7 @@ export function MonthCalendar({
             usedPct={usedPct}
             overBudget={overBudget}
             categoryBudgets={categoryBudgets}
+            onSelectCategory={focusCategory}
           />
         ) : (
           <div className="mt-4">
@@ -439,7 +453,7 @@ export function MonthCalendar({
           (이번 달 합계는 상단 월 카드 헤더 우측으로 이동 — 중복 제거) */}
 
       {/* ④ 최근 거래내역 한 줄 리스트 */}
-      <Card>
+      <Card id="recent-transactions" className="scroll-mt-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <CardTitle>
             {selected
@@ -700,11 +714,13 @@ function BudgetCarousel({
   usedPct,
   overBudget,
   categoryBudgets,
+  onSelectCategory,
 }: {
   budget: { total: number; usedPct: number; remaining: number };
   usedPct: number;
   overBudget: boolean;
   categoryBudgets: CategoryBudget[];
+  onSelectCategory: (categoryName: string) => void;
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [idx, setIdx] = useState(0);
@@ -788,7 +804,7 @@ function BudgetCarousel({
             >
               {s.kind === 'total'
                 ? renderTotalSlide({ budget, usedPct, overBudget })
-                : renderCatSlide(s.cb)}
+                : renderCatSlide(s.cb, onSelectCategory)}
             </div>
           ))}
         </div>
@@ -870,12 +886,24 @@ function renderTotalSlide({
   );
 }
 
-function renderCatSlide(cb: CategoryBudget) {
+function renderCatSlide(cb: CategoryBudget, onSelect: (name: string) => void) {
   const catOver = cb.status === 'over';
   const catCaution = cb.status === 'caution';
   const pct = Math.min(100, Math.max(0, cb.percent));
   return (
-    <>
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onSelect(cb.category_name)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect(cb.category_name);
+        }
+      }}
+      title={`${cb.category_name} 거래 보기`}
+      className="cursor-pointer rounded-lg -m-1 p-1 transition-colors hover:bg-softPinkBackground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primaryPinkBorder"
+    >
       <div className="flex items-end justify-between gap-3 flex-wrap">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -931,6 +959,6 @@ function renderCatSlide(cb: CategoryBudget) {
           style={{ width: `${catOver ? 100 : pct}%` }}
         />
       </div>
-    </>
+    </div>
   );
 }
