@@ -204,33 +204,15 @@ export async function revokeInvite(supabase: SupabaseClient, householdId: string
 
 /**
  * 초대 코드로 가족에 합류.
- * - 코드가 유효(not used, not expired)해야 함
- * - household_members에 본인 등록 (own user_id) — RLS의 with_check에 의해 본인만 추가 가능
- * - 코드 사용 처리(used_at/used_by) — 본인은 update 권한이 없으므로 admin client 또는 RPC 함수가 필요.
- *   여기서는 used_at만 기록하지 못해도 expires로 제한되므로 일단 1회 사용 후 코드 자체를 폐기하지는 않음.
- *   대신 멤버십 unique 제약으로 같은 사용자가 같은 household에 두 번 들어갈 수는 없음.
+ * - 합류하려는 사용자는 아직 멤버가 아니므로 household_invites 를 직접 SELECT 할 수 없다
+ *   (invites_select RLS 는 owner/멤버만 허용). 따라서 SECURITY DEFINER RPC 로 처리한다.
+ * - RPC(join_household_by_code) 내부에서 코드 검증 + 멤버 추가 + 사용 처리(used_at/used_by)를
+ *   원자적으로 수행한다. 코드는 unique 이므로 정확한 코드를 아는 사람만 합류 가능.
  */
-export async function joinByInviteCode(supabase: SupabaseClient, userId: string, code: string) {
-  const { data: invite, error } = await supabase
-    .from('household_invites')
-    .select('*')
-    .eq('code', code.trim().toUpperCase())
-    .maybeSingle();
-  if (error) throw error;
-  if (!invite) throw new Error('초대 코드가 유효하지 않습니다.');
-  if (invite.used_at) throw new Error('이미 사용된 코드입니다.');
-  if (new Date(invite.expires_at).getTime() < Date.now()) throw new Error('만료된 코드입니다.');
-
-  const { error: mErr } = await supabase.from('household_members').insert({
-    household_id: invite.household_id,
-    user_id: userId,
-    role: 'member',
-    invited_by: invite.invited_by,
+export async function joinByInviteCode(supabase: SupabaseClient, _userId: string, code: string) {
+  const { data, error } = await supabase.rpc('join_household_by_code', {
+    p_code: code.trim().toUpperCase(),
   });
-  if (mErr) {
-    // unique 위반 → 이미 멤버
-    if ((mErr as any).code === '23505') throw new Error('이미 가족 구성원입니다.');
-    throw mErr;
-  }
-  return { household_id: invite.household_id };
+  if (error) throw new Error(error.message || '합류에 실패했습니다.');
+  return { household_id: data as string };
 }
