@@ -73,7 +73,7 @@ export async function listMembers(supabase: SupabaseClient, householdId: string)
   const userIds = members.map((m: any) => m.user_id as string);
   const { data: profiles } = await supabase
     .from('profiles')
-    .select('user_id, nickname, full_name, username')
+    .select('user_id, nickname, display_name, full_name, username')
     .in('user_id', userIds);
   const map = new Map<string, any>();
   for (const p of profiles ?? []) map.set((p as any).user_id, p);
@@ -83,6 +83,7 @@ export async function listMembers(supabase: SupabaseClient, householdId: string)
     return {
       ...m,
       nickname: p?.nickname ?? null,
+      display_name: p?.display_name ?? null,
       full_name: p?.full_name ?? null,
       username: p?.username ?? null,
     };

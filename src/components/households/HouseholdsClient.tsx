@@ -24,6 +24,7 @@ type Member = {
   role: 'owner' | 'member';
   joined_at: string;
   nickname: string | null;
+  display_name: string | null;
   full_name: string | null;
   username: string | null;
 };
@@ -145,6 +146,7 @@ export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
     if (!activeId) return;
     const displayName =
       m.nickname?.trim() ||
+      m.display_name?.trim() ||
       m.full_name?.trim() ||
       m.username?.trim() ||
       `사용자 ${m.user_id.slice(0, 8)}`;
@@ -172,6 +174,7 @@ export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
     if (!activeId) return;
     const displayName =
       m.nickname?.trim() ||
+      m.display_name?.trim() ||
       m.full_name?.trim() ||
       m.username?.trim() ||
       `사용자 ${m.user_id.slice(0, 8)}`;
@@ -331,6 +334,7 @@ export function HouseholdsClient({ currentUserId }: { currentUserId: string }) {
                       // 표시 우선순위: 별명 > 이름 > 아이디 > UUID 앞 8자
                       const displayName =
                         m.nickname?.trim() ||
+                        m.display_name?.trim() ||
                         m.full_name?.trim() ||
                         m.username?.trim() ||
                         `사용자 ${m.user_id.slice(0, 8)}`;
